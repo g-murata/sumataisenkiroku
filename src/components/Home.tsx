@@ -8,6 +8,7 @@ export const Home = () => {
   return (
     <>
       {/* <Header /> */}
+      <h2>使用キャラ</h2>
       <Charactar />
       <Footer />
     </>

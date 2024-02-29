@@ -4,7 +4,7 @@ export const Footer = () => {
   return (
     <>
       <div className="flex flex-col">
-        <h2>やるしかない！！</h2>
+        <p>© 2024 yarushikanai!! all rights untara kantara</p>
       </div>
     </>
   )
