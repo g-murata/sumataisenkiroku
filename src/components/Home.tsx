@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Header } from '../components/Header';
+// import { useState } from 'react';
+// import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 import { Footer } from '../components/Footer';
 
