@@ -1,10 +1,15 @@
 // import { useState } from 'react';
 
-export const Result = () => {
+interface ResultProps {
+  myWinCount: number;
+  myLoseCount: number;
+}
+
+export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount}) => {
   return (
     <>
       <div className="">
-        <h1>今日の戦績 3勝1敗</h1>
+        <h1>今日の戦績 {myWinCount}勝{myLoseCount}敗</h1>
         <div className="bg-white border border-neutral-800 max-h-32 w-60 overflow-y-auto hide-scrollbar"
         >
           <div className="bg-white border border-neutral-400 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 ">

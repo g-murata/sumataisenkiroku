@@ -10,17 +10,20 @@ export const Home = () => {
   const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
   const bothCharactersSelected = selectedMyChara && selectedOpponentChara;
 
-  const versusWinResult = (selectedMyChara : any, selectedOpponentChara  : any) => {
+  const [myWinCount, setMyWinCount] = useState(0);
+  const [myLoseCount, setMyLoseCount] = useState(0);
 
-    alert(`${selectedMyChara.name} VS ${selectedOpponentChara.name} あんたの勝ちィ！！`)    
+  const versusWinResult = () => {
+    setMyWinCount(prevCount => prevCount + 1)   
     setSelectedOpponentChara(null);
   };
 
-  const versusLoseResult = (selectedMyChara : any, selectedOpponentChara  : any) => {
-
-    alert(`${selectedMyChara.name} VS ${selectedOpponentChara.name} 君の負けぇ～～`)    
+  const versusLoseResult = () => {
+    setMyLoseCount(prevCount => prevCount + 1)   
     setSelectedOpponentChara(null);
   };
+
+
 
   return (
     <>
@@ -47,17 +50,16 @@ export const Home = () => {
             </div>
           </div>
         </div>
-
         <div className="py-5"> 
           <div className="flex">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-5 py-4 px-8 rounded"
-              onClick={() => versusWinResult(selectedMyChara, selectedOpponentChara)}
+              onClick={() => versusWinResult()}
               disabled={!bothCharactersSelected}
             >
               勝ち
             </button>
             <button className="bg-red-500 hover:bg-red-700 text-white font-bold mx-5 py-4 px-8 rounded"
-              onClick={() => versusLoseResult(selectedMyChara, selectedOpponentChara)}
+              onClick={() => versusLoseResult()}
               disabled={!bothCharactersSelected}
             >
               負け
@@ -66,7 +68,10 @@ export const Home = () => {
         </div>
 
         <div className="py-5"> 
-          <Result />
+          <Result 
+            myWinCount={myWinCount}
+            myLoseCount={myLoseCount}
+          />
         </div>
 
         <div className="py-5"> 
