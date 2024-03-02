@@ -3,17 +3,17 @@
   "name": "対戦結果を記録しよう。",
   "icons": [
     {
-      "src": "A.png",
+      "src": "A",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "A.png",
+      "src": "A",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "A.png",
+      "src": "A",
       "type": "image/png",
       "sizes": "512x512"
     }
