@@ -33,16 +33,16 @@ export const Home = () => {
     setAnimateFirstItem(false);
     setMyWinCount(prevCount => prevCount + 1)   
     kekka(selectedMyChara, selectedOpponentChara, "勝ち")
-    // 連戦することもあるし一旦OFF
-    // setSelectedOpponentChara(null);
+    
+    setSelectedOpponentChara(null);
   };
 
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
     setMyLoseCount(prevCount => prevCount + 1)   
     kekka(selectedMyChara, selectedOpponentChara, "負け")
-    // 連戦することもあるし一旦OFF
-    // setSelectedOpponentChara(null);
+
+    setSelectedOpponentChara(null);
   };
 
   // 最初の要素にのみアニメーションを適用するためのフラグを設定
