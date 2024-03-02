@@ -50,6 +50,7 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelect, selectCha
         <div className="flex flex-wrap">
         {charactarList.map(character => (
           <img 
+            className= "cursor-pointer"
             onClick={() => onSelect(character.name)} 
             src={character.imageUrl} 
             alt={character.name} 

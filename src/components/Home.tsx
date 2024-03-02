@@ -8,6 +8,7 @@ import { Footer } from '../components/Footer';
 export const Home = () => {
   const [selectedMyChara, setSelectedMyChara] = useState<number | null>(null);
   const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
+  const bothCharactersSelected = selectedMyChara && selectedOpponentChara;
 
   return (
     <>
@@ -39,11 +40,13 @@ export const Home = () => {
           <div className="flex">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-5 py-4 px-8 rounded"
               onClick={() => alert(`${selectedMyChara} VS ${selectedOpponentChara} あんたの勝ちィ！`)}
+              disabled={!bothCharactersSelected}
             >
               勝ち
             </button>
             <button className="bg-red-500 hover:bg-red-700 text-white font-bold mx-5 py-4 px-8 rounded"
               onClick={() => alert(`${selectedMyChara} VS ${selectedOpponentChara} 君の負けぇ～～`)}
+              disabled={!bothCharactersSelected}
             >
               負け
             </button>
