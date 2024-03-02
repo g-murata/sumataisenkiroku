@@ -56,7 +56,7 @@ export const Home = () => {
     <>
       {/* <Header /> */}
       <div className="flex flex-col justify-center items-center h-screen">
-        <div className="w-7/12"> 
+        <div className="w-3/5"> 
           <div className="flex">
             <div>  
               <label>使用キャラ</label>
