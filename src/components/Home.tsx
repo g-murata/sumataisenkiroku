@@ -10,6 +10,18 @@ export const Home = () => {
   const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
   const bothCharactersSelected = selectedMyChara && selectedOpponentChara;
 
+  const versusWinResult = (selectedMyChara : any, selectedOpponentChara  : any) => {
+
+    alert(`${selectedMyChara.name} VS ${selectedOpponentChara.name} あんたの勝ちィ！！`)    
+    setSelectedOpponentChara(null);
+  };
+
+  const versusLoseResult = (selectedMyChara : any, selectedOpponentChara  : any) => {
+
+    alert(`${selectedMyChara.name} VS ${selectedOpponentChara.name} 君の負けぇ～～`)    
+    setSelectedOpponentChara(null);
+  };
+
   return (
     <>
       {/* <Header /> */}
@@ -39,13 +51,13 @@ export const Home = () => {
         <div className="py-5"> 
           <div className="flex">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-5 py-4 px-8 rounded"
-              onClick={() => alert(`${selectedMyChara} VS ${selectedOpponentChara} あんたの勝ちィ！`)}
+              onClick={() => versusWinResult(selectedMyChara, selectedOpponentChara)}
               disabled={!bothCharactersSelected}
             >
               勝ち
             </button>
             <button className="bg-red-500 hover:bg-red-700 text-white font-bold mx-5 py-4 px-8 rounded"
-              onClick={() => alert(`${selectedMyChara} VS ${selectedOpponentChara} 君の負けぇ～～`)}
+              onClick={() => versusLoseResult(selectedMyChara, selectedOpponentChara)}
               disabled={!bothCharactersSelected}
             >
               負け

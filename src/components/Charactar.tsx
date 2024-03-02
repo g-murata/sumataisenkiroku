@@ -43,7 +43,7 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelect, selectCha
     <>
       <div className="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
       {selectChara ?
-        <span>{`${player}が使用したキャラは${selectChara}です`}</span>
+        <span>{`${player}が使用したキャラは${selectChara.name}です`}</span>
         :
         <span>キャラクターを選んでね</span>
       }        
@@ -51,7 +51,7 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelect, selectCha
         {charactarList.map(character => (
           <img 
             className= "cursor-pointer"
-            onClick={() => onSelect(character.name)} 
+            onClick={() => onSelect(character)} 
             src={character.imageUrl} 
             alt={character.name} 
           />
