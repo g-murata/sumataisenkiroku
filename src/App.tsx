@@ -1,5 +1,6 @@
-// import React from 'react';
-// import logo from './logo.svg';
+// 使用していない変数があってもエラーにならないよう。
+/* eslint-disable no-unused-vars */
+
 import './App.css';
 
 import { Home } from './components/Home';

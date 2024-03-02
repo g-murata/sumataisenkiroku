@@ -10,16 +10,20 @@ export const Home = () => {
     <>
       {/* <Header /> */}
       <div className="flex flex-col justify-center items-center h-screen">
-        <div className="py-5"> 
+        <div className="w-7/12"> 
           <div className="flex">
             <div>  
               <label>使用キャラ</label>
-              <Charactar />
+              <Charactar
+                dotti = "あなた" 
+              />
             </div>
 
             <div>
               <label>相手キャラ</label>
-              <Charactar />
+              <Charactar 
+                dotti = "相手" 
+              />
             </div>
           </div>
         </div>
