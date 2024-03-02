@@ -1,7 +1,9 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 
 interface CharacterProps {
-  dotti: string;
+  player: string;
+  onSelect: any;
+  selectChara: any;
 }
 
 const charactarList = [
@@ -35,27 +37,20 @@ const charactarList = [
   { id: 28, name: 'ゲッチ', imageUrl: `${process.env.PUBLIC_URL}/fighter/gamewatch.png` },
 ]
 
-export const Charactar: React.FC<CharacterProps> = ({dotti}) => {
-  const [selectedMyChara, setSelectedMyChara] = useState<number | null>(null);
-
-  const handleSelectCharacter = (id: number) => {
-    setSelectedMyChara(id);
-  };
-
-  const selectedCharacterInfo = charactarList.find(c => c.id === selectedMyChara);
-
+export const Charactar: React.FC<CharacterProps> = ({player, onSelect, selectChara}) => {
+  
   return (
     <>
       <div className="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        {selectedCharacterInfo ?
-          <span>{`${dotti}が使用したキャラは${selectedCharacterInfo.name}です`}</span>
-          :
-          <span>キャラクターを選んでね</span>
-        }
+      {selectChara ?
+        <span>{`${player}が使用したキャラは${selectChara}です`}</span>
+        :
+        <span>キャラクターを選んでね</span>
+      }        
         <div className="flex flex-wrap">
         {charactarList.map(character => (
           <img 
-            onClick={() => handleSelectCharacter(character.id)} 
+            onClick={() => onSelect(character.name)} 
             src={character.imageUrl} 
             alt={character.name} 
           />

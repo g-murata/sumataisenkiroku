@@ -1,4 +1,4 @@
-// import { useState } from 'react';
+import { useState } from 'react';
 // import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 import {Result} from './Result'
@@ -6,6 +6,9 @@ import { Footer } from '../components/Footer';
 
 
 export const Home = () => {
+  const [selectedMyChara, setSelectedMyChara] = useState<number | null>(null);
+  const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
+
   return (
     <>
       {/* <Header /> */}
@@ -15,14 +18,18 @@ export const Home = () => {
             <div>  
               <label>使用キャラ</label>
               <Charactar
-                dotti = "あなた" 
+                player={"あなた"}
+                onSelect={setSelectedMyChara} 
+                selectChara={selectedMyChara}
               />
             </div>
 
             <div>
               <label>相手キャラ</label>
               <Charactar 
-                dotti = "相手" 
+                player={"相手"}
+                onSelect={setSelectedOpponentChara}  
+                selectChara={selectedOpponentChara}                
               />
             </div>
           </div>
@@ -31,12 +38,12 @@ export const Home = () => {
         <div className="py-5"> 
           <div className="flex">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-5 py-4 px-8 rounded"
-              onClick={() => alert("勝ちィ！")}
+              onClick={() => alert(`${selectedMyChara} VS ${selectedOpponentChara} あんたの勝ちィ！`)}
             >
               勝ち
             </button>
             <button className="bg-red-500 hover:bg-red-700 text-white font-bold mx-5 py-4 px-8 rounded"
-              onClick={() => alert("負けぇ～")}
+              onClick={() => alert(`${selectedMyChara} VS ${selectedOpponentChara} 君の負けぇ～～`)}
             >
               負け
             </button>
