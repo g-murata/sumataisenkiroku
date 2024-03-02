@@ -5,7 +5,7 @@ export const Result = () => {
     <>
       <div className="">
         <h1>今日の戦績 3勝1敗</h1>
-        <div className="bg-white border border-neutral-800 max-h-32 w-80 overflow-y-auto"
+        <div className="bg-white border border-neutral-800 max-h-32 w-60 overflow-y-auto hide-scrollbar"
         >
           <div className="bg-white border border-neutral-400 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 ">
             <div className="flex p-3 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
