@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
+
 // import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 import {Result} from './Result'
@@ -13,17 +15,42 @@ export const Home = () => {
   const [myWinCount, setMyWinCount] = useState(0);
   const [myLoseCount, setMyLoseCount] = useState(0);
 
+  interface MatchResult {
+    player: any;
+    opponentPlayer: any;
+    shouhai: any;
+  }
+  
+  const [results, setResults] = useState<MatchResult[]>([]);
+  const [animateFirstItem, setAnimateFirstItem] = useState(false);
+
+  const kekka = (player: any, opponentPlayer:any, shouhai:any) => {
+    setResults(prevResults => [{ player, opponentPlayer, shouhai }, ...prevResults]);
+  }
+
+
   const versusWinResult = () => {
+    setAnimateFirstItem(false);
     setMyWinCount(prevCount => prevCount + 1)   
-    setSelectedOpponentChara(null);
+    kekka(selectedMyChara, selectedOpponentChara, "勝ち")
+    // 連戦することもあるし一旦OFF
+    // setSelectedOpponentChara(null);
   };
 
-  const versusLoseResult = () => {
+  const versusopponentPlayeresult = () => {
+    setAnimateFirstItem(false);
     setMyLoseCount(prevCount => prevCount + 1)   
-    setSelectedOpponentChara(null);
+    kekka(selectedMyChara, selectedOpponentChara, "負け")
+    // 連戦することもあるし一旦OFF
+    // setSelectedOpponentChara(null);
   };
 
-
+  // 最初の要素にのみアニメーションを適用するためのフラグを設定
+  useEffect(() => {
+    if (results.length > 0) {
+      setAnimateFirstItem(true);
+    }
+  }, [results]);
 
   return (
     <>
@@ -59,7 +86,7 @@ export const Home = () => {
               勝ち
             </button>
             <button className="bg-red-500 hover:bg-red-700 text-white font-bold mx-5 py-4 px-8 rounded"
-              onClick={() => versusLoseResult()}
+              onClick={() => versusopponentPlayeresult()}
               disabled={!bothCharactersSelected}
             >
               負け
@@ -71,6 +98,8 @@ export const Home = () => {
           <Result 
             myWinCount={myWinCount}
             myLoseCount={myLoseCount}
+            results={results}
+            animateFirstItem={animateFirstItem}
           />
         </div>
 
