@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
 
-// import { Header } from '../components/Header';
+import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 import {Result} from './Result'
 import { Footer } from '../components/Footer';
@@ -54,21 +54,18 @@ export const Home = () => {
 
   return (
     <>
-      {/* <Header /> */}
-      <div className="flex flex-col justify-center items-center h-screen">
-        <div className="w-3/5"> 
-          <div className="flex">
+      <Header />
+      <div className="flex flex-col justify-center items-center">
+        <div className="py-5 w-3/5"> 
+          <div className="md:flex">
             <div>  
-              <label>使用キャラ</label>
               <Charactar
                 player={"あなた"}
                 onSelect={setSelectedMyChara} 
                 selectChara={selectedMyChara}
               />
             </div>
-
             <div>
-              <label>相手キャラ</label>
               <Charactar 
                 player={"相手"}
                 onSelect={setSelectedOpponentChara}  
@@ -77,6 +74,7 @@ export const Home = () => {
             </div>
           </div>
         </div>
+        
         <div className="py-5"> 
           <div className="flex">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-5 py-4 px-8 rounded"

@@ -99,12 +99,15 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelect, selectCha
   
   return (
     <>
-      <div className="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-      {selectChara ?
-        <span>{`${player}が使用したキャラは${selectChara.name}です`}</span>
-        :
-        <span>キャラクターを選んでね</span>
-      }        
+      <div>
+        <h1>{player}の使用ファイター：</h1>
+        {selectChara ?
+          <span>{`${selectChara.name}が選択されました。`}</span>
+          :
+          <span>キャラクターを選んでね。</span>
+        }    
+      </div>    
+      <div className="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto hide-scrollbar h-20vh md:h-35vh">
         <div className="flex flex-wrap">
         {charactarList.map(character => (
           <img 

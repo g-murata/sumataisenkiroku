@@ -1,11 +1,13 @@
-import { useState } from 'react';
+// import { useState } from 'react';
 // import { Link } from 'react-router-dom';
 
 
 export const Header = () => {
   return (
     <>
-      <div className="flex gap-4 justify-end">
+      {/* <div className="h-5vh bg-green-600 text-white flex gap-4 justify-end"> */}
+      <div className="bg-green-600 text-white">        
+        <h1 className="p-1 text-center text-xl md:text-lg">スマ対戦ツール</h1>
         {/* <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>Home</Link>
         <Link to="/blog" style={{ textDecoration: 'none', color: 'inherit' }}>Blog</Link> */}
       </div>
