@@ -27,7 +27,7 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
                   <td className="px-5 py-1">
                     <img src={`${process.env.PUBLIC_URL}${result.opponentPlayer.imageUrl}`} alt={result.opponentPlayer.name} />
                   </td>                
-                  <td className={`${result.shouhai == "勝ち" ? "text-blue-600 " : "text-red-600 "} text-center p-1`}>{result.shouhai}</td>                
+                  <td className={`${result.shouhai === "勝ち" ? "text-blue-600 " : "text-red-600 "} text-center p-1`}>{result.shouhai}</td>                
                 </tr>
               ))}
             </tbody>
