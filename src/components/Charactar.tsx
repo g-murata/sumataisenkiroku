@@ -11,7 +11,7 @@ const charactarList = [
   { id: 2, name: 'ドンキー', imageUrl: `${process.env.PUBLIC_URL}/fighter/donkey.png` },
   { id: 3, name: 'リンク', imageUrl: `${process.env.PUBLIC_URL}/fighter/link.png` },
   { id: 4, name: 'サムス', imageUrl: `${process.env.PUBLIC_URL}/fighter/samus.png` },
-  { id: 5, name: 'ダムス', imageUrl: `${process.env.PUBLIC_URL}/fighter/samusd.png` },
+  { id: 5, name: 'ダークサムス', imageUrl: `${process.env.PUBLIC_URL}/fighter/samusd.png` },
   { id: 6, name: 'ヨッシー', imageUrl: `${process.env.PUBLIC_URL}/fighter/yoshi.png` },
   { id: 7, name: 'カービィ', imageUrl: `${process.env.PUBLIC_URL}/fighter/kirby.png` },
   { id: 8, name: 'フォックス', imageUrl: `${process.env.PUBLIC_URL}/fighter/fox.png` },
@@ -23,10 +23,10 @@ const charactarList = [
   { id: 14, name: 'ピーチ', imageUrl: `${process.env.PUBLIC_URL}/fighter/peach.png` },
   { id: 15, name: 'デイジー', imageUrl: `${process.env.PUBLIC_URL}/fighter/daisy.png` },
   { id: 16, name: 'クッパ', imageUrl: `${process.env.PUBLIC_URL}/fighter/koopa.png` },
-  { id: 17, name: 'アイクラ', imageUrl: `${process.env.PUBLIC_URL}/fighter/ice_climber.png` },
+  { id: 17, name: 'アイスクライマー', imageUrl: `${process.env.PUBLIC_URL}/fighter/ice_climber.png` },
   { id: 18, name: 'シーク', imageUrl: `${process.env.PUBLIC_URL}/fighter/sheik.png` },
   { id: 19, name: 'ゼルダ', imageUrl: `${process.env.PUBLIC_URL}/fighter/zelda.png` },
-  { id: 20, name: 'ドクマリ', imageUrl: `${process.env.PUBLIC_URL}/fighter/mariod.png` },
+  { id: 20, name: 'ドクターマリオ', imageUrl: `${process.env.PUBLIC_URL}/fighter/mariod.png` },
   { id: 21, name: 'ピチュー', imageUrl: `${process.env.PUBLIC_URL}/fighter/pichu.png` },
   { id: 22, name: 'ファルコ', imageUrl: `${process.env.PUBLIC_URL}/fighter/falco.png` },
   { id: 23, name: 'マルス', imageUrl: `${process.env.PUBLIC_URL}/fighter/marth.png` },
@@ -49,7 +49,7 @@ const charactarList = [
   { id: 40, name: 'リュカ', imageUrl: `${process.env.PUBLIC_URL}/fighter/lucas.png` },
   { id: 41, name: 'ソニック', imageUrl: `${process.env.PUBLIC_URL}/fighter/sonic.png` },
   { id: 42, name: 'デデデ', imageUrl: `${process.env.PUBLIC_URL}/fighter/dedede.png` },
-  { id: 43, name: 'ピクオリ', imageUrl: `${process.env.PUBLIC_URL}/fighter/pikmin.png` },
+  { id: 43, name: 'ピクミン＆オリマー', imageUrl: `${process.env.PUBLIC_URL}/fighter/pikmin.png` },
   { id: 44, name: 'ルカリオ', imageUrl: `${process.env.PUBLIC_URL}/fighter/lucario.png` },
   { id: 45, name: 'ロボット', imageUrl: `${process.env.PUBLIC_URL}/fighter/robot.png` },
   { id: 46, name: 'トゥーンリンク', imageUrl: `${process.env.PUBLIC_URL}/fighter/toonlink.png` },
@@ -57,7 +57,7 @@ const charactarList = [
   { id: 48, name: 'むらびと', imageUrl: `${process.env.PUBLIC_URL}/fighter/murabito.png` },
   { id: 49, name: 'ロックマン', imageUrl: `${process.env.PUBLIC_URL}/fighter/rockman.png` },
   { id: 50, name: 'WiiFitトレーナー', imageUrl: `${process.env.PUBLIC_URL}/fighter/wiifit.png` },
-  { id: 51, name: 'ロゼチコ', imageUrl: `${process.env.PUBLIC_URL}/fighter/rosetta.png` },
+  { id: 51, name: 'ロゼッタ＆チコ', imageUrl: `${process.env.PUBLIC_URL}/fighter/rosetta.png` },
   { id: 52, name: 'リトルマック', imageUrl: `${process.env.PUBLIC_URL}/fighter/littlemac.png` },
   { id: 53, name: 'ゲッコウガ', imageUrl: `${process.env.PUBLIC_URL}/fighter/gekkouga.png` },
   { id: 54, name: 'パルテナ', imageUrl: `${process.env.PUBLIC_URL}/fighter/palutena.png` },
@@ -96,13 +96,22 @@ const charactarList = [
 ]
 
 export const Charactar: React.FC<CharacterProps> = ({player, onSelect, selectChara}) => {
-  
+
   return (
     <>
-      <div>
+      <div className="h-20">
         <h1>{player}の使用ファイター：</h1>
         {selectChara ?
-          <span>{`${selectChara.name}が選択されました。`}</span>
+          <>
+            <div className="flex">
+              <img 
+                className= "cursor-pointer"
+                src={selectChara.imageUrl} 
+                alt={selectChara.name} 
+              />
+              <h1>{`${selectChara.name}`}</h1>
+            </div>                      
+          </>
           :
           <span>キャラクターを選んでね。</span>
         }    
@@ -111,7 +120,7 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelect, selectCha
         <div className="flex flex-wrap">
         {charactarList.map(character => (
           <img 
-            className= "cursor-pointer"
+            className= {`${selectChara?.id === character?.id ? "bg-blue-500" : ""} cursor-pointer`}
             onClick={() => onSelect(character)} 
             src={character.imageUrl} 
             alt={character.name} 
