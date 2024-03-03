@@ -87,7 +87,7 @@ const charactarList = [
   { id: 78, name: 'ミェンミェン', imageUrl: `${process.env.PUBLIC_URL}/fighter/tantan.png` },
   { id: 79, name: 'スティーブ', imageUrl: `${process.env.PUBLIC_URL}/fighter/pickel.png` },
   { id: 80, name: 'セフィロス', imageUrl: `${process.env.PUBLIC_URL}/fighter/edge.png` },
-  { id: 81, name: 'ホムヒカ', imageUrl: `${process.env.PUBLIC_URL}/fighter/eflame.png` },
+  { id: 81, name: 'ホムラ/ヒカリ', imageUrl: `${process.env.PUBLIC_URL}/fighter/eflame.png` },
   { id: 82, name: 'カズヤ', imageUrl: `${process.env.PUBLIC_URL}/fighter/demon.png` },
   { id: 83, name: 'ソラ', imageUrl: `${process.env.PUBLIC_URL}/fighter/trail.png` },
   { id: 84, name: '格闘mii', imageUrl: `${process.env.PUBLIC_URL}/fighter/miifighter.png` },
