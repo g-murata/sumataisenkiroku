@@ -56,7 +56,7 @@ export const Home = () => {
     <>
       <Header />
       <div className="flex flex-col justify-center items-center">
-        <div className="py-5 w-10/12 md:w-3/5"> 
+        <div className="py-5 w-4/5 md:w-3/5"> 
           <div className="md:flex">
             <div>  
               <Charactar
