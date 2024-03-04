@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface ResultProps {
   myWinCount: number;
   myLoseCount: number;
@@ -7,6 +9,12 @@ interface ResultProps {
 
 
 export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, animateFirstItem}) => {
+
+  const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
+
+  const deleteItem = (index :number) => {
+    console.log(`${index}を削除したい。`)
+  };
 
   return (
     <>
@@ -20,7 +28,13 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
             </thead>
             <tbody>
               {results.map((result, index) => (
-                <tr className={`${index === 0 && animateFirstItem ? "fadeIn" : ""}`} key={index}>                  
+                <tr className={`cursor-pointer 
+                    ${index === 0 && animateFirstItem ? "fadeIn" : ""} ${hoverRowIndex === index ? 'bg-gray-200' : ''}`} 
+                    key={index}
+                    onMouseEnter={() => setHoverRowIndex(index)}
+                    onMouseLeave={() => setHoverRowIndex(null)}
+                    onClick={() => deleteItem(index)}
+                >                  
                   <td className="px-5 py-1">
                     <img src={`${process.env.PUBLIC_URL}${result.player.imageUrl}`} alt={result.player.name} />
                   </td>                  
