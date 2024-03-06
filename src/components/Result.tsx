@@ -9,10 +9,11 @@ interface ResultProps {
   setMyLoseCount: any;
   animateFirstItem: boolean;
   deleteMode: boolean;   
+  setdeleteMode: any;
 }
 
 
-export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode}) => {
+export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode, setdeleteMode}) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
   const hoverColor = deleteMode ? 'hover:bg-red-400' : 'hover:bg-gray-200';
@@ -29,6 +30,7 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
     }
 
     setResults(results.filter(result => result !== results[index]));
+    setdeleteMode(false)
   };
 
   return (

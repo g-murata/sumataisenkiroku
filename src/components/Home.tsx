@@ -103,6 +103,7 @@ export const Home = () => {
             setMyLoseCount={setMyLoseCount}            
             animateFirstItem={animateFirstItem}
             deleteMode={deleteMode} 
+            setdeleteMode={setdeleteMode}
           />
         </div>
 
