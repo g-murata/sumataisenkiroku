@@ -1,6 +1,11 @@
 // import { useState } from 'react';
 
-export const Footer = () => {
+interface MyComponentProps {
+  deleteMode: boolean;
+  setdeleteMode: any;
+}
+
+export const Footer: React.FC<MyComponentProps> = ({ deleteMode, setdeleteMode }) => {
   return (
     <>
       <div className="flex flex-col">
@@ -8,6 +13,9 @@ export const Footer = () => {
           <i className="fab fa-youtube"></i> やるしかない！！
         </a>
         <p>© 2024 yarushikanai!! all rights untara kantara</p>
+        <button className={`${deleteMode === true ? 'text-red-500' : 'text-gray-500'}`} onClick={() => setdeleteMode(!deleteMode)}>
+          {deleteMode === true ? 'delete mode on': 'delete mode off'}
+        </button>
       </div>
     </>
   )

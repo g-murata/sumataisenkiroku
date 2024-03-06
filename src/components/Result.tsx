@@ -4,16 +4,32 @@ interface ResultProps {
   myWinCount: number;
   myLoseCount: number;
   results: any[];
+  setResults: any;
+  setMyWinCount: any;
+  setMyLoseCount: any;
   animateFirstItem: boolean;
+  deleteMode: boolean;   
 }
 
 
-export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, animateFirstItem}) => {
+export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode}) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
+  const hoverColor = deleteMode ? 'hover:bg-red-400' : 'hover:bg-gray-200';
 
   const deleteItem = (index :number) => {
-    console.log(`${index}を削除したい。`)
+    if (!deleteMode){
+      return
+    }
+
+    // 勝敗カウントリセット
+    if (results[index].shouhai === "勝ち"){
+      setMyWinCount((myWinCount :number) => myWinCount - 1) 
+    }else{
+      setMyLoseCount((myLoseCount :number) => myLoseCount - 1)       
+    }
+
+    setResults(results.filter(result => result !== results[index]));
   };
 
   return (
@@ -29,7 +45,7 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
             <tbody>
               {results.map((result, index) => (
                 <tr className={`cursor-pointer 
-                    ${index === 0 && animateFirstItem ? "fadeIn" : ""} ${hoverRowIndex === index ? 'bg-gray-200' : ''}`} 
+                    ${index === 0 && animateFirstItem ? "fadeIn" : ""} ${(hoverRowIndex === index) ? hoverColor : ''}`} 
                     key={index}
                     onMouseEnter={() => setHoverRowIndex(index)}
                     onMouseLeave={() => setHoverRowIndex(null)}
