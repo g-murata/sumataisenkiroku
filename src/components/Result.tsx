@@ -15,6 +15,7 @@ interface ResultProps {
 export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode}) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
+  const hoverColor = deleteMode ? 'hover:bg-red-400' : 'hover:bg-gray-200';
 
   const deleteItem = (index :number) => {
     if (!deleteMode){
@@ -44,7 +45,7 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
             <tbody>
               {results.map((result, index) => (
                 <tr className={`cursor-pointer 
-                    ${index === 0 && animateFirstItem ? "fadeIn" : ""} ${hoverRowIndex === index ? 'bg-gray-200' : ''}`} 
+                    ${index === 0 && animateFirstItem ? "fadeIn" : ""} ${(hoverRowIndex === index) ? hoverColor : ''}`} 
                     key={index}
                     onMouseEnter={() => setHoverRowIndex(index)}
                     onMouseLeave={() => setHoverRowIndex(null)}
