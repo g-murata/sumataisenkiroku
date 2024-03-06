@@ -8,14 +8,18 @@ interface ResultProps {
   setMyWinCount: any;
   setMyLoseCount: any;
   animateFirstItem: boolean;
+  deleteMode: boolean;   
 }
 
 
-export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem}) => {
+export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode}) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
 
   const deleteItem = (index :number) => {
+    if (!deleteMode){
+      return
+    }
 
     // 勝敗カウントリセット
     if (results[index].shouhai === "勝ち"){

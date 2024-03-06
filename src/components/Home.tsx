@@ -14,6 +14,7 @@ export const Home = () => {
 
   const [myWinCount, setMyWinCount] = useState(0);
   const [myLoseCount, setMyLoseCount] = useState(0);
+  const [deleteMode, setdeleteMode] = useState<boolean>(false)
 
   interface MatchResult {
     player: any;
@@ -101,11 +102,15 @@ export const Home = () => {
             setMyWinCount={setMyWinCount}
             setMyLoseCount={setMyLoseCount}            
             animateFirstItem={animateFirstItem}
+            deleteMode={deleteMode} 
           />
         </div>
 
         <div className="py-5"> 
-          <Footer />
+          <Footer
+            deleteMode={deleteMode} 
+            setdeleteMode={setdeleteMode}
+          />
         </div>
       </div>
     </>
