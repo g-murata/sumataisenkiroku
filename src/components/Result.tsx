@@ -18,7 +18,7 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
   const deleteItem = (index :number) => {
 
     // 勝敗カウントリセット
-    if (results[index].shouhai == "勝ち"){
+    if (results[index].shouhai === "勝ち"){
       setMyWinCount((myWinCount :number) => myWinCount - 1) 
     }else{
       setMyLoseCount((myLoseCount :number) => myLoseCount - 1)       
