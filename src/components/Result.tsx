@@ -18,9 +18,8 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
   const hoverColor = deleteMode ? 'hover:bg-red-400' : 'hover:bg-gray-200';
 
   const deleteItem = (index :number) => {
-    if (!deleteMode){
-      return
-    }
+    const isConfirmed = window.confirm('本当に削除しますか？');
+    if (!isConfirmed) { return }
 
     // 勝敗カウントリセット
     if (results[index].shouhai === "勝ち"){
@@ -49,7 +48,7 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
                     key={index}
                     onMouseEnter={() => setHoverRowIndex(index)}
                     onMouseLeave={() => setHoverRowIndex(null)}
-                    onClick={() => deleteItem(index)}
+                    onClick={() => deleteMode && deleteItem(index)}
                 >                  
                   <td className="px-5 py-1">
                     <img src={`${process.env.PUBLIC_URL}${result.player.imageUrl}`} alt={result.player.name} />
