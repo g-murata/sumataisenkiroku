@@ -4,16 +4,27 @@ interface ResultProps {
   myWinCount: number;
   myLoseCount: number;
   results: any[];
+  setResults: any;
+  setMyWinCount: any;
+  setMyLoseCount: any;
   animateFirstItem: boolean;
 }
 
 
-export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, animateFirstItem}) => {
+export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem}) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
 
   const deleteItem = (index :number) => {
-    console.log(`${index}を削除したい。`)
+
+    // 勝敗カウントリセット
+    if (results[index].shouhai == "勝ち"){
+      setMyWinCount((myWinCount :number) => myWinCount - 1) 
+    }else{
+      setMyLoseCount((myLoseCount :number) => myLoseCount - 1)       
+    }
+
+    setResults(results.filter(result => result !== results[index]));
   };
 
   return (

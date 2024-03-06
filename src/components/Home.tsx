@@ -97,6 +97,9 @@ export const Home = () => {
             myWinCount={myWinCount}
             myLoseCount={myLoseCount}
             results={results}
+            setResults={setResults}
+            setMyWinCount={setMyWinCount}
+            setMyLoseCount={setMyLoseCount}            
             animateFirstItem={animateFirstItem}
           />
         </div>
