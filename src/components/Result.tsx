@@ -34,7 +34,8 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
   return (
     <>
       <h1>今日の戦績 {myWinCount}勝{myLoseCount}敗</h1>
-        <div className="h-32 w-60 bg-gray-100 border border-neutral-800 overflow-y-auto hide-scrollbar">
+        {/* h-32：2枠 h-44：3枠 */}
+        <div className="h-44 w-60 bg-gray-100 border border-neutral-800 overflow-y-auto hide-scrollbar">
           <table className="w-full ">
             <thead className="bg-gray-400 text-white">
               <th className="px-5">自分</th>
