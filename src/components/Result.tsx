@@ -7,12 +7,15 @@ interface ResultProps {
   setResults: any;
   setMyWinCount: any;
   setMyLoseCount: any;
+  renshouCount: number;
+  setRenshouCount: any;
   animateFirstItem: boolean;
   deleteMode: boolean;   
 }
 
 
-export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode}) => {
+export const Result: React.FC<ResultProps> = ({
+  myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, renshouCount, setRenshouCount, animateFirstItem, deleteMode}) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
   const hoverColor = deleteMode ? 'hover:bg-red-400' : 'hover:bg-gray-200';
@@ -24,6 +27,8 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
     // 勝敗カウントリセット
     if (results[index].shouhai === "勝ち"){
       setMyWinCount((myWinCount :number) => myWinCount - 1) 
+      // 連勝カウントのリセット（renshouCountがindexより大きい時のみ連勝カウントを-1する。 ■勝敗レコードの要素は最新が0からスタートしている。）
+      renshouCount > index && setRenshouCount((renshouCount :number) => renshouCount - 1)
     }else{
       setMyLoseCount((myLoseCount :number) => myLoseCount - 1)       
     }
@@ -33,8 +38,10 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
 
   return (
     <>
-      <h1>今日の戦績 {myWinCount}勝{myLoseCount}敗</h1>
-        {/* h-32：2枠 h-44：3枠 */}
+      <div className="flex justify-between">
+        <h1>今日の戦績 {myWinCount}勝{myLoseCount}敗</h1>
+        <h1 className={`${renshouCount > 1 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{renshouCount}連勝中！</h1>
+      </div>
         <div className="h-44 w-60 bg-gray-100 border border-neutral-800 overflow-y-auto hide-scrollbar">
           <table className="w-full ">
             <thead className="bg-gray-400 text-white">
@@ -57,7 +64,7 @@ export const Result: React.FC<ResultProps> = ({myWinCount, myLoseCount, results,
                   <td className="px-5 py-1">
                     <img src={`${process.env.PUBLIC_URL}${result.opponentPlayer.imageUrl}`} alt={result.opponentPlayer.name} />
                   </td>                
-                  <td className={`${result.shouhai === "勝ち" ? "text-blue-600 " : "text-red-600 "} text-center p-1`}>{result.shouhai}</td>                
+                  <td className={`${result.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{result.shouhai}</td>                
                 </tr>
               ))}
             </tbody>

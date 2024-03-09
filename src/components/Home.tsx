@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 
 import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
+import { Setting } from './Setting';
 import {Result} from './Result'
 import { Footer } from '../components/Footer';
 
@@ -14,6 +15,8 @@ export const Home = () => {
 
   const [myWinCount, setMyWinCount] = useState(0);
   const [myLoseCount, setMyLoseCount] = useState(0);
+  const [renshouCount, setRenshouCount] = useState(0);
+
   const [deleteMode, setdeleteMode] = useState<boolean>(false)
 
   interface MatchResult {
@@ -33,6 +36,7 @@ export const Home = () => {
   const versusWinResult = () => {
     setAnimateFirstItem(false);
     setMyWinCount(prevCount => prevCount + 1)   
+    setRenshouCount(renshouCount => renshouCount + 1)
     kekka(selectedMyChara, selectedOpponentChara, "勝ち")
     
     setSelectedOpponentChara(null);
@@ -41,6 +45,7 @@ export const Home = () => {
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
     setMyLoseCount(prevCount => prevCount + 1)   
+    setRenshouCount(0)
     kekka(selectedMyChara, selectedOpponentChara, "負け")
 
     setSelectedOpponentChara(null);
@@ -78,13 +83,13 @@ export const Home = () => {
         
         <div className="py-5"> 
           <div className="flex">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-5 py-4 px-8 rounded"
+            <button className="bg-red-500 hover:bg-red-700 text-white font-bold mx-5 py-4 px-8 rounded"
               onClick={() => versusWinResult()}
               disabled={!bothCharactersSelected}
             >
               勝ち
             </button>
-            <button className="bg-red-500 hover:bg-red-700 text-white font-bold mx-5 py-4 px-8 rounded"
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-5 py-4 px-8 rounded"
               onClick={() => versusopponentPlayeresult()}
               disabled={!bothCharactersSelected}
             >
@@ -92,15 +97,22 @@ export const Home = () => {
             </button>
           </div>
         </div>
+        
+        {/* <Setting
+          deleteMode={deleteMode} 
+          setdeleteMode={setdeleteMode}         
+        /> */}
 
-        <div className="py-5"> 
+        <div className="py-5">
           <Result 
             myWinCount={myWinCount}
             myLoseCount={myLoseCount}
             results={results}
             setResults={setResults}
             setMyWinCount={setMyWinCount}
-            setMyLoseCount={setMyLoseCount}            
+            setMyLoseCount={setMyLoseCount}      
+            renshouCount={renshouCount}
+            setRenshouCount ={setRenshouCount}     
             animateFirstItem={animateFirstItem}
             deleteMode={deleteMode} 
           />
