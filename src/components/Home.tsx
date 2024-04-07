@@ -105,12 +105,14 @@ export const Home = () => {
             <button
               className={`${backgroundColorClass(winOrLose, "red")} text-white font-bold mx-5 py-4 px-8 rounded`}
               onClick={() => setWinOrLose(true)}
+              disabled={!bothCharactersSelected}
             >
               勝ち
             </button>
             <button
               className={`${backgroundColorClass(!winOrLose, "blue")} text-white font-bold mx-5 py-4 px-8 rounded`}
               onClick={() => setWinOrLose(false)}
+              disabled={!bothCharactersSelected}
             >
               負け
             </button>
