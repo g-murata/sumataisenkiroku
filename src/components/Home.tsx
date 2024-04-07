@@ -53,11 +53,20 @@ export const Home = () => {
     setWinOrLose(true);
   };
 
-  const backgroundColorClass = (event: any, color: any, enable_hover: boolean = false, disable_hover: boolean = true) => {
+  const backgroundColorClass = (event: any, color: any) => {
     if (event === true) {
-      return `bg-${color}-500 ${enable_hover === true && `hover:bg-${color}-700`} text-white font-bold mx-5 py-4 px-8 rounded`;
+      switch (color){
+        case "red":
+          return "bg-red-500"
+        case "blue":
+          return "bg-blue-500"
+        case "green":
+          return "bg-green-500 hover:bg-green-600"
+        default:
+          return "bg-gray-500"
+      }
     } else {
-      return `bg-gray-400 ${disable_hover === true && `hover:bg-gray-500`} text-white font-bold mx-5 py-4 px-8 rounded`;
+      return `bg-gray-400 hover:bg-gray-500`;
     }
   };
 
@@ -94,20 +103,20 @@ export const Home = () => {
         <div className="py-5">
           <div className="flex">
             <button
-              className={backgroundColorClass(winOrLose, "red")}
+              className={`${backgroundColorClass(winOrLose, "red")} text-white font-bold mx-5 py-4 px-8 rounded`}
               onClick={() => setWinOrLose(true)}
             >
               勝ち
             </button>
             <button
-              className={backgroundColorClass(!winOrLose, "blue")}
+              className={`${backgroundColorClass(!winOrLose, "blue")} text-white font-bold mx-5 py-4 px-8 rounded`}
               onClick={() => setWinOrLose(false)}
             >
               負け
             </button>
           </div>
         </div>
-        <button className={backgroundColorClass((bothCharactersSelected), "green", true, false)}
+        <button className={`${backgroundColorClass((bothCharactersSelected), "green")} text-white font-bold mx-5 py-4 px-8 rounded`}
           onClick={() => winOrLose ? versusWinResult() : versusopponentPlayeresult()}
           disabled={!bothCharactersSelected}
         >
