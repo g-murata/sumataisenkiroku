@@ -86,15 +86,15 @@ export const Home = () => {
             <div>
               <Charactar
                 player={"あなた"}
-                onSelect={setSelectedMyChara}
-                selectChara={selectedMyChara}
+                onSelectChara={setSelectedMyChara}
+                selectedChara={selectedMyChara}
               />
             </div>
             <div>
               <Charactar
                 player={"相手"}
-                onSelect={setSelectedOpponentChara}
-                selectChara={selectedOpponentChara}
+                onSelectChara={setSelectedOpponentChara}
+                selectedChara={selectedOpponentChara}
               />
             </div>
           </div>

@@ -13,8 +13,8 @@ export const Footer: React.FC<MyComponentProps> = ({ deleteMode, setdeleteMode }
           <i className="fab fa-youtube"></i> やるしかない！！
         </a>
         <p>© 2024 yarushikanai!! all rights untara kantara</p>
-        <button className={`${deleteMode === true ? 'text-red-500' : 'text-gray-500'}`} onClick={() => setdeleteMode(!deleteMode)}>
-          {deleteMode === true ? 'delete mode on': 'delete mode off'}
+        <button className={`${deleteMode === true ? 'text-red-500' : 'text-blue-500'}`} onClick={() => setdeleteMode(!deleteMode)}>          
+          {deleteMode === true ? '対戦結果削除モード ON': '対戦結果削除モード OFF'}
         </button>
       </div>
     </>
