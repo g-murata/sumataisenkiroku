@@ -7,15 +7,13 @@ interface ResultProps {
   setResults: any;
   setMyWinCount: any;
   setMyLoseCount: any;
-  renshouCount: number;
-  setRenshouCount: any;
   animateFirstItem: boolean;
   deleteMode: boolean;
 }
 
 
 export const Result: React.FC<ResultProps> = ({
-  myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, renshouCount, setRenshouCount, animateFirstItem, deleteMode }) => {
+  myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
   const hoverColor = deleteMode ? 'md:hover:bg-red-400' : 'md:hover:bg-gray-200';
@@ -27,8 +25,6 @@ export const Result: React.FC<ResultProps> = ({
     // 勝敗カウントリセット
     if (results[index].shouhai === "勝ち") {
       setMyWinCount((myWinCount: number) => myWinCount - 1)
-      // 連勝カウントのリセット（renshouCountがindexより大きい時のみ連勝カウントを-1する。 ■勝敗レコードの要素は最新が0からスタートしている。）
-      renshouCount > index && setRenshouCount((renshouCount: number) => renshouCount - 1)
     } else {
       setMyLoseCount((myLoseCount: number) => myLoseCount - 1)
     }
@@ -36,11 +32,26 @@ export const Result: React.FC<ResultProps> = ({
     setResults(results.filter(result => result !== results[index]));
   };
 
+  // 連勝数を計算する関数
+  const calculateStreak = () => {
+    let streak = 0;
+    for (let i = 0; i < results.length; i++) {
+      console.log(results[i])
+      if (results[i].shouhai === '勝ち') {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+
   return (
     <>
       <div className="flex justify-between">
         <h1>今日の戦績 {myWinCount}勝{myLoseCount}敗</h1>
-        <h1 className={`${renshouCount > 1 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{renshouCount}連勝中！</h1>
+        <h1 className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{calculateStreak()}連勝中！</h1>
       </div>
       <div className="h-44 w-60 bg-gray-100 border border-neutral-800 overflow-y-auto hide-scrollbar">
         <table className="w-full ">

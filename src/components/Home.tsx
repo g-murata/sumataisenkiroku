@@ -15,7 +15,6 @@ export const Home = () => {
 
   const [myWinCount, setMyWinCount] = useState(0);
   const [myLoseCount, setMyLoseCount] = useState(0);
-  const [renshouCount, setRenshouCount] = useState(0);
 
   const [deleteMode, setdeleteMode] = useState<boolean>(false)
 
@@ -37,7 +36,6 @@ export const Home = () => {
   const versusWinResult = () => {
     setAnimateFirstItem(false);
     setMyWinCount(prevCount => prevCount + 1)
-    setRenshouCount(renshouCount => renshouCount + 1)
     kekka(selectedMyChara, selectedOpponentChara, "勝ち")
 
     setSelectedOpponentChara(null);
@@ -46,7 +44,6 @@ export const Home = () => {
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
     setMyLoseCount(prevCount => prevCount + 1)
-    setRenshouCount(0)
     kekka(selectedMyChara, selectedOpponentChara, "負け")
 
     setSelectedOpponentChara(null);
@@ -55,7 +52,7 @@ export const Home = () => {
 
   const backgroundColorClass = (event: any, color: any) => {
     if (event === true) {
-      switch (color){
+      switch (color) {
         case "red":
           return "bg-red-500"
         case "blue":
@@ -138,8 +135,6 @@ export const Home = () => {
             setResults={setResults}
             setMyWinCount={setMyWinCount}
             setMyLoseCount={setMyLoseCount}
-            renshouCount={renshouCount}
-            setRenshouCount={setRenshouCount}
             animateFirstItem={animateFirstItem}
             deleteMode={deleteMode}
           />

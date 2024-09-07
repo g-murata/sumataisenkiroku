@@ -14,8 +14,8 @@ export const Footer: React.FC<MyComponentProps> = ({ deleteMode, setdeleteMode }
         </a>
         <p className="text-gray-500">hon tool ha "maningen" ga sakusei shitayo.</p>
         <p className="text-gray-500">© 2024 yarushikanai!! all rights untara kantara</p> */}
-        <button className={`${deleteMode === true ? 'text-red-500' : 'text-blue-500'}`} onClick={() => setdeleteMode(!deleteMode)}>          
-          {deleteMode === true ? '対戦結果削除モード ON': '対戦結果削除モード OFF'}
+        <button className={`${deleteMode === true ? 'text-red-500' : 'text-blue-500'}`} onClick={() => setdeleteMode(!deleteMode)}>
+          {deleteMode === true ? '対戦結果削除モード ON' : '対戦結果削除モード OFF'}
         </button>
       </div>
     </>
