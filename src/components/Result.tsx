@@ -46,7 +46,6 @@ export const Result: React.FC<ResultProps> = ({
     return streak;
   };
 
-
   return (
     <>
       <div className="flex justify-between">

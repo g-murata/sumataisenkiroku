@@ -18,36 +18,47 @@ export const Home = () => {
 
   const [deleteMode, setdeleteMode] = useState<boolean>(false)
 
+  // 🏆 個々の試合の記録
   interface MatchResult {
     player: any;
     opponentPlayer: any;
     shouhai: any;
   }
 
+// 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト
+  interface MatchHistory {
+    matches: MatchResult[];
+    winCount: number;
+    loseCount: number;
+  }
+
   const STORAGE_KEY = "gameResults";
-  const [results, setResults] = useState<MatchResult[]>(() => { 
+  const [history, setHistory] = useState<MatchHistory>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : {matches: [], winCount: 0, loseCount: 0 };
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
-    console.log("useEffect後")
-    console.log(results)
-  }, [results]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  }, [history]);
+
+  console.log(history)
 
   const clearResults = () => {
     localStorage.removeItem(STORAGE_KEY);
-    setResults([]); // ステートもクリア
+    setHistory({matches: [], winCount: 0, loseCount: 0}); // ステートもクリア
   }
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
   const kekka = (player: any, opponentPlayer: any, shouhai: any) => {
-    setResults(prevResults => [{ player, opponentPlayer, shouhai }, ...prevResults]);
-  }
-
+    setHistory(prevResults => ({
+      matches: [{ player, opponentPlayer, shouhai }, ...prevResults.matches],  // 試合履歴を追加
+      winCount: shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,  // 勝ち数更新
+      loseCount: shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,  // 負け数更新
+    }));    
+  };
 
   const versusWinResult = () => {
     setAnimateFirstItem(false);
@@ -85,10 +96,10 @@ export const Home = () => {
 
   // 最初の要素にのみアニメーションを適用するためのフラグを設定
   useEffect(() => {
-    if (results.length > 0) {
+    if (history.matches.length > 0) {
       setAnimateFirstItem(true);
     }
-  }, [results]);
+  }, [history.matches]);
 
   return (
     <>
@@ -140,10 +151,10 @@ export const Home = () => {
         
         <div className="py-5">
           <Result
-            myWinCount={myWinCount}
-            myLoseCount={myLoseCount}
-            results={results}
-            setResults={setResults}
+            myWinCount={history.winCount}
+            myLoseCount={history.loseCount}
+            results={history.matches}
+            setResults={setHistory}
             setMyWinCount={setMyWinCount}
             setMyLoseCount={setMyLoseCount}
             animateFirstItem={animateFirstItem}
