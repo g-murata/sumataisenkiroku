@@ -45,6 +45,9 @@ export const Home = () => {
   console.log(history)
 
   const clearResults = () => {
+    const isConfirmed = window.confirm('本当にリセットしますか？');
+    if (!isConfirmed) { return } 
+
     localStorage.removeItem(STORAGE_KEY);
     setHistory({matches: [], winCount: 0, loseCount: 0}); // ステートもクリア
   }
@@ -162,12 +165,13 @@ export const Home = () => {
           />
         </div>
 
-        <div className="py-5">
+        {/* 一旦廃止 */}
+        {/* <div className="py-5">
           <Footer
             deleteMode={deleteMode}
             setdeleteMode={setdeleteMode}
           />
-        </div>
+        </div> */}
 
         <button onClick={clearResults}>勝敗記録リセット</button>
 
