@@ -36,7 +36,6 @@ export const Result: React.FC<ResultProps> = ({
   const calculateStreak = () => {
     let streak = 0;
     for (let i = 0; i < results.length; i++) {
-      console.log(results[i])
       if (results[i].shouhai === '勝ち') {
         streak++;
       } else {

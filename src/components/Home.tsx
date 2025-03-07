@@ -45,7 +45,7 @@ export const Home = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   }, [history]);
 
-  console.log(history)
+  // console.log(history)
 
   const clearResults = () => {
     const isConfirmed = window.confirm('本当にリセットしますか？');
