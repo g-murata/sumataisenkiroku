@@ -24,7 +24,23 @@ export const Home = () => {
     shouhai: any;
   }
 
-  const [results, setResults] = useState<MatchResult[]>([]);
+  const STORAGE_KEY = "gameResults";
+  const [results, setResults] = useState<MatchResult[]>(() => { 
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+    console.log("useEffect後")
+    console.log(results)
+  }, [results]);
+
+  const clearResults = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setResults([]); // ステートもクリア
+  }
+
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
@@ -121,12 +137,7 @@ export const Home = () => {
         >
           結果送信
         </button>
-
-        {/* <Setting
-          deleteMode={deleteMode} 
-          setdeleteMode={setdeleteMode}         
-        /> */}
-
+        
         <div className="py-5">
           <Result
             myWinCount={myWinCount}
@@ -146,6 +157,9 @@ export const Home = () => {
             setdeleteMode={setdeleteMode}
           />
         </div>
+
+        <button onClick={clearResults}>勝敗記録リセット</button>
+
       </div>
     </>
   )
