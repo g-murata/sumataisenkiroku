@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState } from 'react';
 import { useEffect } from 'react';
 
@@ -5,7 +6,7 @@ import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 // import { Setting } from './Setting';
 import { Result } from './Result'
-import { Footer } from '../components/Footer';
+// import { Footer } from '../components/Footer';
 
 
 export const Home = () => {
@@ -13,29 +14,55 @@ export const Home = () => {
   const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
   const bothCharactersSelected = (selectedMyChara !== null && selectedOpponentChara !== null);
 
-  const [myWinCount, setMyWinCount] = useState(0);
-  const [myLoseCount, setMyLoseCount] = useState(0);
-
   const [deleteMode, setdeleteMode] = useState<boolean>(false)
 
+  // 🏆 個々の試合の記録
   interface MatchResult {
     player: any;
     opponentPlayer: any;
     shouhai: any;
   }
 
-  const [results, setResults] = useState<MatchResult[]>([]);
+// 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト
+  interface MatchHistory {
+    matches: MatchResult[];
+    winCount: number;
+    loseCount: number;
+  }
+
+  const STORAGE_KEY = "gameResults";
+  const [history, setHistory] = useState<MatchHistory>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {matches: [], winCount: 0, loseCount: 0 };
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  }, [history]);
+
+  // console.log(history)
+
+  const clearResults = () => {
+    const isConfirmed = window.confirm('本当にリセットしますか？');
+    if (!isConfirmed) { return } 
+
+    localStorage.removeItem(STORAGE_KEY);
+    setHistory({matches: [], winCount: 0, loseCount: 0}); // ステートもクリア
+  }
+
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
   const kekka = (player: any, opponentPlayer: any, shouhai: any) => {
-    setResults(prevResults => [{ player, opponentPlayer, shouhai }, ...prevResults]);
-  }
-
+    setHistory(prevResults => ({
+      matches: [{ player, opponentPlayer, shouhai }, ...prevResults.matches],  // 試合履歴を追加
+      winCount: shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,  // 勝ち数更新
+      loseCount: shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,  // 負け数更新
+    }));    
+  };
 
   const versusWinResult = () => {
     setAnimateFirstItem(false);
-    setMyWinCount(prevCount => prevCount + 1)
     kekka(selectedMyChara, selectedOpponentChara, "勝ち")
 
     setSelectedOpponentChara(null);
@@ -43,7 +70,6 @@ export const Home = () => {
 
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
-    setMyLoseCount(prevCount => prevCount + 1)
     kekka(selectedMyChara, selectedOpponentChara, "負け")
 
     setSelectedOpponentChara(null);
@@ -69,10 +95,10 @@ export const Home = () => {
 
   // 最初の要素にのみアニメーションを適用するためのフラグを設定
   useEffect(() => {
-    if (results.length > 0) {
+    if (history.matches.length > 0) {
       setAnimateFirstItem(true);
     }
-  }, [results]);
+  }, [history.matches]);
 
   return (
     <>
@@ -121,31 +147,28 @@ export const Home = () => {
         >
           結果送信
         </button>
-
-        {/* <Setting
-          deleteMode={deleteMode} 
-          setdeleteMode={setdeleteMode}         
-        /> */}
-
+        
         <div className="py-5">
           <Result
-            myWinCount={myWinCount}
-            myLoseCount={myLoseCount}
-            results={results}
-            setResults={setResults}
-            setMyWinCount={setMyWinCount}
-            setMyLoseCount={setMyLoseCount}
+            myWinCount={history.winCount}
+            myLoseCount={history.loseCount}
+            results={history.matches}
+            kekka={kekka}
             animateFirstItem={animateFirstItem}
             deleteMode={deleteMode}
           />
         </div>
 
-        <div className="py-5">
+        {/* 一旦廃止 */}
+        {/* <div className="py-5">
           <Footer
             deleteMode={deleteMode}
             setdeleteMode={setdeleteMode}
           />
-        </div>
+        </div> */}
+
+        <button onClick={clearResults}>勝敗記録リセット</button>
+
       </div>
     </>
   )

@@ -4,16 +4,14 @@ interface ResultProps {
   myWinCount: number;
   myLoseCount: number;
   results: any[];
-  setResults: any;
-  setMyWinCount: any;
-  setMyLoseCount: any;
+  kekka: any;
   animateFirstItem: boolean;
   deleteMode: boolean;
 }
 
 
 export const Result: React.FC<ResultProps> = ({
-  myWinCount, myLoseCount, results, setResults, setMyWinCount, setMyLoseCount, animateFirstItem, deleteMode }) => {
+  myWinCount, myLoseCount, results, kekka, animateFirstItem, deleteMode }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
   const hoverColor = deleteMode ? 'md:hover:bg-red-400' : 'md:hover:bg-gray-200';
@@ -22,21 +20,14 @@ export const Result: React.FC<ResultProps> = ({
     const isConfirmed = window.confirm('本当に削除しますか？');
     if (!isConfirmed) { return }
 
-    // 勝敗カウントリセット
-    if (results[index].shouhai === "勝ち") {
-      setMyWinCount((myWinCount: number) => myWinCount - 1)
-    } else {
-      setMyLoseCount((myLoseCount: number) => myLoseCount - 1)
-    }
-
-    setResults(results.filter(result => result !== results[index]));
+    const newMatches = results.filter(result => result !== results[index])
+    kekka(newMatches);
   };
 
   // 連勝数を計算する関数
   const calculateStreak = () => {
     let streak = 0;
     for (let i = 0; i < results.length; i++) {
-      console.log(results[i])
       if (results[i].shouhai === '勝ち') {
         streak++;
       } else {
@@ -45,7 +36,6 @@ export const Result: React.FC<ResultProps> = ({
     }
     return streak;
   };
-
 
   return (
     <>
