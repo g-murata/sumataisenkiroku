@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState } from 'react';
 import { useEffect } from 'react';
 
@@ -5,7 +6,7 @@ import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 // import { Setting } from './Setting';
 import { Result } from './Result'
-import { Footer } from '../components/Footer';
+// import { Footer } from '../components/Footer';
 
 
 export const Home = () => {
@@ -159,12 +160,12 @@ export const Home = () => {
         </div>
 
         {/* 一旦廃止 */}
-        <div className="py-5">
+        {/* <div className="py-5">
           <Footer
             deleteMode={deleteMode}
             setdeleteMode={setdeleteMode}
           />
-        </div>
+        </div> */}
 
         <button onClick={clearResults}>勝敗記録リセット</button>
 
