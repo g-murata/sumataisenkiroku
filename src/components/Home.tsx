@@ -1,6 +1,3 @@
-// 一時的な処置
-/* eslint-disable */
-
 import { useState } from 'react';
 import { useEffect } from 'react';
 
@@ -8,16 +5,13 @@ import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 // import { Setting } from './Setting';
 import { Result } from './Result'
-// import { Footer } from '../components/Footer';
+import { Footer } from '../components/Footer';
 
 
 export const Home = () => {
   const [selectedMyChara, setSelectedMyChara] = useState<number | null>(null);
   const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
   const bothCharactersSelected = (selectedMyChara !== null && selectedOpponentChara !== null);
-
-  const [myWinCount, setMyWinCount] = useState(0);
-  const [myLoseCount, setMyLoseCount] = useState(0);
 
   const [deleteMode, setdeleteMode] = useState<boolean>(false)
 
@@ -68,7 +62,6 @@ export const Home = () => {
 
   const versusWinResult = () => {
     setAnimateFirstItem(false);
-    setMyWinCount(prevCount => prevCount + 1)
     kekka(selectedMyChara, selectedOpponentChara, "勝ち")
 
     setSelectedOpponentChara(null);
@@ -76,7 +69,6 @@ export const Home = () => {
 
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
-    setMyLoseCount(prevCount => prevCount + 1)
     kekka(selectedMyChara, selectedOpponentChara, "負け")
 
     setSelectedOpponentChara(null);
@@ -160,21 +152,19 @@ export const Home = () => {
             myWinCount={history.winCount}
             myLoseCount={history.loseCount}
             results={history.matches}
-            setResults={setHistory}
-            setMyWinCount={setMyWinCount}
-            setMyLoseCount={setMyLoseCount}
+            kekka={kekka}
             animateFirstItem={animateFirstItem}
             deleteMode={deleteMode}
           />
         </div>
 
         {/* 一旦廃止 */}
-        {/* <div className="py-5">
+        <div className="py-5">
           <Footer
             deleteMode={deleteMode}
             setdeleteMode={setdeleteMode}
           />
-        </div> */}
+        </div>
 
         <button onClick={clearResults}>勝敗記録リセット</button>
 
