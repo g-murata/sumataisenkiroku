@@ -3,15 +3,15 @@ import { useState } from "react";
 interface ResultProps {
   myWinCount: number;
   myLoseCount: number;
-  results: any[];
-  kekka: any;
+  history: any;
+  setHistory: any;
   animateFirstItem: boolean;
   deleteMode: boolean;
 }
 
 
 export const Result: React.FC<ResultProps> = ({
-  myWinCount, myLoseCount, results, kekka, animateFirstItem, deleteMode }) => {
+  myWinCount, myLoseCount, history, setHistory, animateFirstItem, deleteMode }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
   const hoverColor = deleteMode ? 'md:hover:bg-red-400' : 'md:hover:bg-gray-200';
@@ -20,15 +20,21 @@ export const Result: React.FC<ResultProps> = ({
     const isConfirmed = window.confirm('本当に削除しますか？');
     if (!isConfirmed) { return }
 
-    const newMatches = results.filter(result => result !== results[index])
-    kekka(newMatches);
+    const newMatches = history.matches.filter((matche: any) =>
+      matche !== history.matches[index]
+    )    
+    setHistory((prevResults: any) => ({
+      matches: newMatches,  // 試合履歴を追加
+      winCount: prevResults.matches[index].shouhai === "勝ち" ? history.winCount - 1 : history.winCount,  // 勝ち数更新
+      loseCount: prevResults.matches[index].shouhai === "負け" ? history.loseCount - 1 : history.loseCount,  // 負け数更新
+    }));     
   };
 
   // 連勝数を計算する関数
   const calculateStreak = () => {
     let streak = 0;
-    for (let i = 0; i < results.length; i++) {
-      if (results[i].shouhai === '勝ち') {
+    for (let i = 0; i < history.matches.length; i++) {
+      if (history.matches[i].shouhai === '勝ち') {
         streak++;
       } else {
         break;
@@ -51,7 +57,7 @@ export const Result: React.FC<ResultProps> = ({
             <th className="px-5">結果</th>
           </thead>
           <tbody>
-            {results.map((result, index) => (
+            {history.matches.map((matche: any, index: number) => (
               <tr className={`cursor-pointer 
                     ${index === 0 && animateFirstItem ? "fadeIn" : ""} ${(hoverRowIndex === index) ? hoverColor : ''}`}
                 key={index}
@@ -60,12 +66,12 @@ export const Result: React.FC<ResultProps> = ({
                 onClick={() => deleteMode && deleteItem(index)}
               >
                 <td className="px-5 py-1">
-                  <img src={`${process.env.PUBLIC_URL}${result.player.imageUrl}`} alt={result.player.name} />
+                  <img src={`${process.env.PUBLIC_URL}${matche.player.imageUrl}`} alt={matche.player.name} />
                 </td>
                 <td className="px-5 py-1">
-                  <img src={`${process.env.PUBLIC_URL}${result.opponentPlayer.imageUrl}`} alt={result.opponentPlayer.name} />
+                  <img src={`${process.env.PUBLIC_URL}${matche.opponentPlayer.imageUrl}`} alt={matche.opponentPlayer.name} />
                 </td>
-                <td className={`${result.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{result.shouhai}</td>
+                <td className={`${matche.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{matche.shouhai}</td>
               </tr>
             ))}
           </tbody>
