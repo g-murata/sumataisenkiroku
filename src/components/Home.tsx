@@ -147,7 +147,7 @@ export const Home = () => {
           結果送信
         </button>
         
-        <div className="py-5" id= "win-lose-result">
+        <div className="py-5" id= "win-lose-area">
           <Result
             myWinCount={history.winCount}
             myLoseCount={history.loseCount}
