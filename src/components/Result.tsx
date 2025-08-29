@@ -55,16 +55,16 @@ export const Result: React.FC<ResultProps> = ({
   return (
     <>
       <div className="">
-        <span className="pe-8">今日の戦績 {myWinCount}勝{myLoseCount}敗</span>
+        <span className="px-2">今日の戦績 {myWinCount}勝{myLoseCount}敗</span>
         <span className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{calculateStreak()}連勝中！</span>
       </div>
-      <div className="h-48 w-96 bg-gray-100 border border-neutral-800 overflow-y-auto hide-scrollbar md:w-full">
+      <div className="h-48 w-96 bg-gray-100 overflow-y-auto hide-scrollbar md:w-full">
         <table className="w-full ">
           <thead className="bg-gray-400 text-white">
-            <th className="px-5">自分</th>
-            <th className="px-5">相手</th>
-            <th className="px-5">結果</th>
-            <th className="px-5">メモ</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10">自分</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10">相手</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10">結果</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10">メモ</th>
           </thead>
           <tbody>
             {history.matches.map((matche: any, index: number) => (
