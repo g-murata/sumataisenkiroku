@@ -61,10 +61,10 @@ export const Result: React.FC<ResultProps> = ({
       <div className="h-48 w-96 bg-gray-100 overflow-y-auto hide-scrollbar md:w-full">
         <table className="w-full ">
           <thead className="bg-gray-400 text-white">
-            <th className="px-5 sticky top-0 bg-gray-400 z-10">自分</th>
-            <th className="px-5 sticky top-0 bg-gray-400 z-10">相手</th>
-            <th className="px-5 sticky top-0 bg-gray-400 z-10">結果</th>
-            <th className="px-5 sticky top-0 bg-gray-400 z-10">メモ</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">自分</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">相手</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">結果</th>
+            <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-60">メモ</th>
           </thead>
           <tbody>
             {history.matches.map((matche: any, index: number) => (
