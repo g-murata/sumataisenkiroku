@@ -43,18 +43,28 @@ export const Result: React.FC<ResultProps> = ({
     return streak;
   };
 
+  const updateMemo = (index: number, newMemo: string) => {
+    setHistory((prev: any) => {
+      const newMatches = [...prev.matches];
+      newMatches[index] = { ...newMatches[index], memo: newMemo };
+      return { ...prev, matches: newMatches };
+    });
+  };
+
+
   return (
     <>
-      <div className="flex justify-between">
-        <h1>今日の戦績 {myWinCount}勝{myLoseCount}敗</h1>
-        <h1 className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{calculateStreak()}連勝中！</h1>
+      <div className="">
+        <span className="pe-8">今日の戦績 {myWinCount}勝{myLoseCount}敗</span>
+        <span className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{calculateStreak()}連勝中！</span>
       </div>
-      <div className="h-44 w-60 bg-gray-100 border border-neutral-800 overflow-y-auto hide-scrollbar">
+      <div className="h-48 w-96 bg-gray-100 border border-neutral-800 overflow-y-auto hide-scrollbar md:w-full">
         <table className="w-full ">
           <thead className="bg-gray-400 text-white">
             <th className="px-5">自分</th>
             <th className="px-5">相手</th>
             <th className="px-5">結果</th>
+            <th className="px-5">メモ</th>
           </thead>
           <tbody>
             {history.matches.map((matche: any, index: number) => (
@@ -72,6 +82,15 @@ export const Result: React.FC<ResultProps> = ({
                   <img src={`${process.env.PUBLIC_URL}${matche.opponentPlayer.imageUrl}`} alt={matche.opponentPlayer.name} />
                 </td>
                 <td className={`${matche.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{matche.shouhai}</td>
+                <td className="px-5 py-1">
+                  <textarea
+                    value={matche.memo || ""}
+                    onChange={(e) => updateMemo(index, e.target.value)}
+                    placeholder="対戦の反省を書こう"
+                    rows={3} // 行数調整
+                    className="w-full border rounded px-2 py-1 text-sm resize-y"
+                  />
+                </td>                  
               </tr>
             ))}
           </tbody>
