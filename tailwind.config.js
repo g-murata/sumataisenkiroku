@@ -22,7 +22,7 @@ module.exports = {
         '30vw': '30vw',
       },
     fontSize: {
-      xxs: "0.50rem",
+      xxs: "0.60rem",
     },      
     },
   },
