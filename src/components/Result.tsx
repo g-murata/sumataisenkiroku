@@ -89,7 +89,7 @@ export const Result: React.FC<ResultProps> = ({
                     className="w-full border rounded px-2 py-1 text-sm resize-y"
                   />
                 </td>
-                <td className="text-center text-xs">
+                <td className="text-center text-xxs md:text-xs">
                   <button className="md:hidden group-hover:inline-block text-red-600" onClick={() => deleteItem(index)}>◀</button>
                 </td>                 
               </tr>

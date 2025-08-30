@@ -20,7 +20,10 @@ module.exports = {
       },
       width: {
         '30vw': '30vw',
-      }      
+      },
+    fontSize: {
+      xxs: "0.50rem",
+    },      
     },
   },
   plugins: [],
