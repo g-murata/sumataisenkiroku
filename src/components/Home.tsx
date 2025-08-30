@@ -5,7 +5,6 @@ import { Header } from '../components/Header';
 import { Charactar } from './Charactar';
 // import { Setting } from './Setting';
 import { Result } from './Result'
-import { Footer } from '../components/Footer';
 
 
 export const Home = () => {
