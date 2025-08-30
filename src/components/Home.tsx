@@ -13,8 +13,6 @@ export const Home = () => {
   const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
   const bothCharactersSelected = (selectedMyChara !== null && selectedOpponentChara !== null);
 
-  const [deleteMode, setdeleteMode] = useState<boolean>(false)
-
   // 🏆 個々の試合の記録
   interface MatchResult {
     player: any;
@@ -154,18 +152,14 @@ export const Home = () => {
             history={history}
             setHistory={setHistory}
             animateFirstItem={animateFirstItem}
-            deleteMode={deleteMode}
           />
         </div>
 
-        <div className="py-5">
-          <Footer
-            deleteMode={deleteMode}
-            setdeleteMode={setdeleteMode}
-          />
-        </div>
+        {/* <div className="py-5">
+          <Footer />
+        </div> */}
 
-        <button onClick={clearResults}>勝敗記録リセット</button>
+        <button onClick={clearResults}>勝敗記録一括削除</button>
 
       </div>
     </>

@@ -116,7 +116,7 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelectChara, sele
           <span>キャラクターを選んでね。</span>
         }    
       </div>    
-      <div className="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 overflow-y-auto hide-scrollbar h-20vh md:h-35vh">
+      <div className="p-6 bg-white border border-gray-200 rounded-lg shadow overflow-y-auto hide-scrollbar h-20vh md:h-35vh">
         <div className="flex flex-wrap">
         {charactarList.map(character => (
           <img 
