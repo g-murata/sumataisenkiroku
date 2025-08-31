@@ -46,6 +46,12 @@ export const Home = () => {
     setHistory({matches: [], winCount: 0, loseCount: 0}); // ステートもクリア
   }
 
+  const [lineCountHeight, setLineCountHeight] = useState(true);
+
+  const changeLineCount = () => {
+    setLineCountHeight(!lineCountHeight)
+  }  
+
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
@@ -144,22 +150,24 @@ export const Home = () => {
           結果送信
         </button>
         
-        <div className="py-3" id= "win-lose-area">
+        <div className="py-5" id= "win-lose-area">
           <Result
             myWinCount={history.winCount}
             myLoseCount={history.loseCount}
             history={history}
             setHistory={setHistory}
             animateFirstItem={animateFirstItem}
+            lineCountHeight={lineCountHeight}
           />
         </div>
 
         {/* <div className="py-5">
           <Footer />
         </div> */}
-
-        <button onClick={clearResults}>勝敗記録一括削除</button>
-
+        <div className="md:flex">
+          <button className="block md:px-5" onClick={changeLineCount}>レコード行数切り替え（2行/3行）</button>
+          <button onClick={clearResults}>勝敗記録一括削除</button>
+        </div>
       </div>
     </>
   )
