@@ -56,7 +56,7 @@ export const Result: React.FC<ResultProps> = ({
         <span className="px-5">戦績 {myWinCount}勝{myLoseCount}敗</span>
         <span className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{calculateStreak()}連勝中！</span>
       </div>
-      <div className="h-48 w-80 bg-gray-100 overflow-y-auto hide-scrollbar md:w-full">
+      <div className="h-75 w-80 bg-gray-100 overflow-y-auto hide-scrollbar md:w-full">
         <table className="w-full ">
           <thead className="bg-gray-400 text-white">
             <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">自分</th>

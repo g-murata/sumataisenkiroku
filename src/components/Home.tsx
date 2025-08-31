@@ -100,7 +100,7 @@ export const Home = () => {
     <>
       <Header />
       <div className="flex flex-col justify-center items-center">
-        <div className="py-5 w-4/5 md:w-3/5">
+        <div className="py-3 w-4/5 md:w-3/5">
           <div className="md:flex">
             <div>
               <Charactar
@@ -119,7 +119,7 @@ export const Home = () => {
           </div>
         </div>
 
-        <div className="py-5">
+        <div className="py-3">
           <div className="flex">
             <button
               className={`${backgroundColorClass(winOrLose, "red")} text-white font-bold mx-5 py-4 px-8 rounded`}
@@ -144,7 +144,7 @@ export const Home = () => {
           結果送信
         </button>
         
-        <div className="py-5" id= "win-lose-area">
+        <div className="py-3" id= "win-lose-area">
           <Result
             myWinCount={history.winCount}
             myLoseCount={history.loseCount}
