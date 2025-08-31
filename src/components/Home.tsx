@@ -165,7 +165,7 @@ export const Home = () => {
           <Footer />
         </div> */}
         <div className="md:flex">
-          <button className="block md:px-5" onClick={changeLineCount}>レコード行数切り替え（2行/3行）</button>
+          <button className="block md:px-5" onClick={changeLineCount}>行数切り替え（2行/3行）</button>
           <button onClick={clearResults}>勝敗記録一括削除</button>
         </div>
       </div>
