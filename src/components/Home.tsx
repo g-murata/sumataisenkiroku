@@ -46,16 +46,16 @@ export const Home = () => {
     setHistory({matches: [], winCount: 0, loseCount: 0}); // ステートもクリア
   }
 
-  const comingSoon = () => {
-    alert("coming soon...")    
-  }
+  // const comingSoon = () => {
+  //   alert("coming soon...")    
+  // }
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
-  const kekka = (player: any, opponentPlayer: any, shouhai: any) => {
+  const kekka = (nichiji: any, player: any, opponentPlayer: any, shouhai: any) => {
     setHistory(prevResults => ({
-      matches: [{ player, opponentPlayer, shouhai }, ...prevResults.matches],  // 試合履歴を追加
+      matches: [{nichiji, player, opponentPlayer, shouhai }, ...prevResults.matches],  // 試合履歴を追加
       winCount: shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,  // 勝ち数更新
       loseCount: shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,  // 負け数更新
     }));    
@@ -63,14 +63,14 @@ export const Home = () => {
 
   const versusWinResult = () => {
     setAnimateFirstItem(false);
-    kekka(selectedMyChara, selectedOpponentChara, "勝ち")
+    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "勝ち")
 
     setSelectedOpponentChara(null);
   };
 
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
-    kekka(selectedMyChara, selectedOpponentChara, "負け")
+    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "負け")
 
     setSelectedOpponentChara(null);
     setWinOrLose(true);

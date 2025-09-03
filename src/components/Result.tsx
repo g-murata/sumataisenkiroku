@@ -78,7 +78,7 @@ export const Result: React.FC<ResultProps> = ({
                 >
                   {!haishin && 
                     <td className="text-center text-xs">
-                      <span>2025/9/1 18:01</span>
+                      <span>{`${matche.nichiji === undefined ? "" : matche.nichiji}`}</span>
                     </td> 
                   }                
 
