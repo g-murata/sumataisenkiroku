@@ -99,33 +99,35 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelectChara, sele
 
   return (
     <>
-      <div className="h-20">
-        <h1>{player}の使用ファイター：</h1>
-        {selectedChara ?
-          <>
-            <div className="flex">
-              <img 
-                className= "cursor-pointer"
-                src={selectedChara.imageUrl} 
-                alt={selectedChara.name} 
-              />
-              <h1>{`${selectedChara.name}`}</h1>
-            </div>                      
-          </>
-          :
-          <span>キャラクターを選んでね。</span>
-        }    
-      </div>    
-      <div className="p-6 bg-white border border-gray-200 rounded-lg shadow overflow-y-auto hide-scrollbar h-20vh md:h-35vh">
-        <div className="flex flex-wrap">
-        {charactarList.map(character => (
-          <img 
-            className= {`${selectedChara?.id === character?.id ? "bg-red-500" : ""} cursor-pointer`}
-            onClick={() => selectedChara?.id === character?.id ? onSelectChara(null) : onSelectChara(character)} 
-            src={character.imageUrl} 
-            alt={character.name} 
-          />
-        ))}          
+      <div className="w-80 md:w-full">
+        <div className="">
+          <h1>{player}の使用ファイター：</h1>
+          {selectedChara ?
+            <>
+              <div className="flex">
+                <img 
+                  className= "cursor-pointer"
+                  src={selectedChara.imageUrl} 
+                  alt={selectedChara.name} 
+                />
+                <h1>{`${selectedChara.name}`}</h1>
+              </div>                      
+            </>
+            :
+            <span>キャラクターを選んでね。</span>
+          }    
+        </div>    
+        <div className="p-3 bg-white border border-gray-200 rounded-lg shadow overflow-y-auto hide-scrollbar h-20vh md:h-25vh">
+          <div className="flex flex-wrap">
+          {charactarList.map(character => (
+            <img 
+              className= {`${selectedChara?.id === character?.id ? "bg-red-500" : ""} cursor-pointer`}
+              onClick={() => selectedChara?.id === character?.id ? onSelectChara(null) : onSelectChara(character)} 
+              src={character.imageUrl} 
+              alt={character.name} 
+            />
+          ))}          
+          </div>
         </div>
       </div>
     </>

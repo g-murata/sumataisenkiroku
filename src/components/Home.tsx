@@ -46,11 +46,9 @@ export const Home = () => {
     setHistory({matches: [], winCount: 0, loseCount: 0}); // ステートもクリア
   }
 
-  const [lineCountHeight, setLineCountHeight] = useState(true);
-
-  const changeLineCount = () => {
-    setLineCountHeight(!lineCountHeight)
-  }  
+  const comingSoon = () => {
+    alert("coming soon...")    
+  }
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
@@ -106,69 +104,93 @@ export const Home = () => {
     <>
       <Header />
       <div className="flex flex-col justify-center items-center">
-        <div className="py-3 w-4/5 md:w-3/5">
-          <div className="md:flex">
-            <div>
-              <Charactar
-                player={"あなた"}
-                onSelectChara={setSelectedMyChara}
-                selectedChara={selectedMyChara}
-              />
-            </div>
-            <div>
-              <Charactar
-                player={"相手"}
-                onSelectChara={setSelectedOpponentChara}
-                selectedChara={selectedOpponentChara}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="py-3">
-          <div className="flex">
-            <button
-              className={`${backgroundColorClass(winOrLose, "red")} text-white font-bold mx-5 py-4 px-8 rounded`}
-              onClick={() => setWinOrLose(true)}
-              disabled={!bothCharactersSelected}
-            >
-              勝ち
-            </button>
-            <button
-              className={`${backgroundColorClass(!winOrLose, "blue")} text-white font-bold mx-5 py-4 px-8 rounded`}
-              onClick={() => setWinOrLose(false)}
-              disabled={!bothCharactersSelected}
-            >
-              負け
-            </button>
-          </div>
-        </div>
-        <button className={`${backgroundColorClass((bothCharactersSelected), "green")} text-white font-bold mx-5 py-4 px-8 rounded`}
-          onClick={() => winOrLose ? versusWinResult() : versusopponentPlayeresult()}
-          disabled={!bothCharactersSelected}
-        >
-          結果送信
-        </button>
-        
-        <div className="py-5" id= "win-lose-area">
-          <Result
-            myWinCount={history.winCount}
-            myLoseCount={history.loseCount}
-            history={history}
-            setHistory={setHistory}
-            animateFirstItem={animateFirstItem}
-            lineCountHeight={lineCountHeight}
-          />
-        </div>
-
-        {/* <div className="py-5">
-          <Footer />
-        </div> */}
         <div className="md:flex">
-          <button className="block md:px-5" onClick={changeLineCount}>行数切り替え（2行/3行）</button>
-          <button onClick={clearResults}>勝敗記録一括削除</button>
+          <div className="w-full md:w-1/3">
+            <div className= "px-5 py-2">
+              <div>
+                <Charactar
+                  player={"あなた"}
+                  onSelectChara={setSelectedMyChara}
+                  selectedChara={selectedMyChara}
+                />
+              </div>
+              <div>
+                <Charactar
+                  player={"相手"}
+                  onSelectChara={setSelectedOpponentChara}
+                  selectedChara={selectedOpponentChara}
+                />
+              </div>
+            </div>
+          <div className="">
+            <div className="">
+              <div className="flex justify-center items-center">
+                <button
+                  className={`${backgroundColorClass(winOrLose, "red")} text-white font-bold m-2 py-4 px-8 rounded`}
+                  onClick={() => setWinOrLose(true)}
+                  disabled={!bothCharactersSelected}
+                >
+                  勝ち
+                </button>
+                <button
+                  className={`${backgroundColorClass(!winOrLose, "blue")} text-white font-bold m-2 py-4 px-8 rounded`}
+                  onClick={() => setWinOrLose(false)}
+                  disabled={!bothCharactersSelected}
+                >
+                  負け
+                </button>
+              </div>                
+            </div>
+              <div className="flex justify-center items-center py-5">
+                <button className={`${backgroundColorClass((bothCharactersSelected), "green")} text-white font-bold mx-5 py-4 px-10 rounded`}
+                  onClick={() => winOrLose ? versusWinResult() : versusopponentPlayeresult()}
+                  disabled={!bothCharactersSelected}
+                >
+                  結果送信
+                </button>
+              </div>
+          </div>
+
+          </div>          
+          <div className="md:h-90vh flex flex-col px-10" id= "win-lose-area">
+            <Result
+              myWinCount={history.winCount}
+              myLoseCount={history.loseCount}
+              history={history}
+              setHistory={setHistory}
+              animateFirstItem={animateFirstItem}
+              haishin={false}
+            />
+          </div>
+
+          <div className="md:h-90vh flex flex-col px-10 mt-auto">
+            <div className="hidden md:block h-4/5" id= "win-lose-area-haishin">
+              <Result
+                myWinCount={history.winCount}
+                myLoseCount={history.loseCount}
+                history={history}
+                setHistory={setHistory}
+                animateFirstItem={animateFirstItem}
+                haishin={true}
+              />
+            </div>
+            <div className="flex flex-col justify-center items-center">
+              <button className="py-5" onClick={clearResults}>勝敗記録一括削除</button>
+
+              {/* <div>
+                <h1>👷‍♂️coming soon...</h1>
+                <span>キャラおまかせルーレット</span>
+                <img 
+                  src={`${process.env.PUBLIC_URL}/fighter/mario.png`} alt={"TODO:はてなマークが良いな。"}>
+                </img> 
+              </div>
+              <h1>オプション：</h1>
+              <span className="" onClick={comingSoon}>削除確認ON/OFF</span> */}
+            </div>
+          </div>
+
         </div>
-      </div>
+      </div>        
     </>
   )
 }
