@@ -14,9 +14,11 @@ export const Home = () => {
 
   // 🏆 個々の試合の記録
   interface MatchResult {
+    nichiji: any;
     player: any;
     opponentPlayer: any;
     shouhai: any;
+    memo: any;
   }
 
 // 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト
@@ -53,9 +55,9 @@ export const Home = () => {
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
-  const kekka = (nichiji: any, player: any, opponentPlayer: any, shouhai: any) => {
+  const kekka = (nichiji: any, player: any, opponentPlayer: any, shouhai: any, memo: any) => {
     setHistory(prevResults => ({
-      matches: [{nichiji, player, opponentPlayer, shouhai }, ...prevResults.matches],  // 試合履歴を追加
+      matches: [{nichiji, player, opponentPlayer, shouhai, memo }, ...prevResults.matches],  // 試合履歴を追加
       winCount: shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,  // 勝ち数更新
       loseCount: shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,  // 負け数更新
     }));    
@@ -63,14 +65,14 @@ export const Home = () => {
 
   const versusWinResult = () => {
     setAnimateFirstItem(false);
-    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "勝ち")
+    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "勝ち", "")
 
     setSelectedOpponentChara(null);
   };
 
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
-    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "負け")
+    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "負け", "")
 
     setSelectedOpponentChara(null);
     setWinOrLose(true);
@@ -141,7 +143,7 @@ export const Home = () => {
                 </button>
               </div>                
             </div>
-              <div className="flex justify-center items-center py-5">
+              <div className="flex justify-center items-center py-3">
                 <button className={`${backgroundColorClass((bothCharactersSelected), "green")} text-white font-bold mx-5 py-4 px-10 rounded`}
                   onClick={() => winOrLose ? versusWinResult() : versusopponentPlayeresult()}
                   disabled={!bothCharactersSelected}
@@ -163,7 +165,7 @@ export const Home = () => {
             />
           </div>
 
-          <div className="md:h-90vh flex flex-col px-10 mt-auto">
+          <div className="md:h-90vh flex flex-col px-10">
             <div className="hidden md:block h-4/5" id= "win-lose-area-haishin">
               <Result
                 myWinCount={history.winCount}

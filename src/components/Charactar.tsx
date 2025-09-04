@@ -100,7 +100,7 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelectChara, sele
   return (
     <>
       <div className="w-80 md:w-full">
-        <div className="">
+        <div className="h-20">
           <h1>{player}の使用ファイター：</h1>
           {selectedChara ?
             <>
