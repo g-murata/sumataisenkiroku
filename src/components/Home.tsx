@@ -8,16 +8,23 @@ import { Result } from './Result'
 
 
 export const Home = () => {
-  const [selectedMyChara, setSelectedMyChara] = useState<number | null>(null);
-  const [selectedOpponentChara, setSelectedOpponentChara] = useState<number | null>(null);
+  const [selectedMyChara, setSelectedMyChara] = useState<Fighter | null>(null);
+  const [selectedOpponentChara, setSelectedOpponentChara] = useState<Fighter | null>(null);
   const bothCharactersSelected = (selectedMyChara !== null && selectedOpponentChara !== null);
+
+  // キャラクター情報
+  interface Fighter {
+    id: number;
+    name: string;
+    imageUrl: string;
+  }
 
   // 🏆 個々の試合の記録
   interface MatchResult {
-    nichiji: any;
-    player: any;
-    opponentPlayer: any;
-    shouhai: any;
+    nichiji: string;
+    player: Fighter | null;
+    opponentPlayer: Fighter | null;
+    shouhai: "勝ち" | "負け";
     memo: any;
   }
 
@@ -27,7 +34,8 @@ export const Home = () => {
     winCount: number;
     loseCount: number;
   }
-
+ 
+  // 🥞 localStorage
   const STORAGE_KEY = "gameResults";
   const [history, setHistory] = useState<MatchHistory>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -38,8 +46,6 @@ export const Home = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   }, [history]);
 
-  // console.log(history)
-
   const clearResults = () => {
     const isConfirmed = window.confirm('本当にリセットしますか？');
     if (!isConfirmed) { return } 
@@ -48,32 +54,41 @@ export const Home = () => {
     setHistory({matches: [], winCount: 0, loseCount: 0}); // ステートもクリア
   }
 
-  // const comingSoon = () => {
-  //   alert("coming soon...")    
-  // }
-
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
-  const kekka = (nichiji: any, player: any, opponentPlayer: any, shouhai: any, memo: any) => {
+  const kekka = (match: MatchResult) => {
     setHistory(prevResults => ({
-      matches: [{nichiji, player, opponentPlayer, shouhai, memo }, ...prevResults.matches],  // 試合履歴を追加
-      winCount: shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,  // 勝ち数更新
-      loseCount: shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,  // 負け数更新
+      matches: [match, ...prevResults.matches],
+      winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
+      loseCount: match.shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,
     }));    
+    console.log(history)
   };
 
   const versusWinResult = () => {
     setAnimateFirstItem(false);
-    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "勝ち", "")
+    kekka({
+      nichiji: new Date().toLocaleString(), 
+      player: selectedMyChara, 
+      opponentPlayer: selectedOpponentChara, 
+      shouhai: "勝ち", 
+      memo: ""}
+    )
 
     setSelectedOpponentChara(null);
   };
 
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
-    kekka(new Date().toLocaleString(), selectedMyChara, selectedOpponentChara, "負け", "")
-
+    kekka({
+      nichiji: new Date().toLocaleString(), 
+      player: selectedMyChara, 
+      opponentPlayer: selectedOpponentChara, 
+      shouhai: "負け", 
+      memo: ""}
+    )    
+    
     setSelectedOpponentChara(null);
     setWinOrLose(true);
   };
