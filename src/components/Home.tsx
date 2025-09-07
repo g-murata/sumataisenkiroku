@@ -3,27 +3,22 @@ import { useEffect } from 'react';
 
 import { Header } from '../components/Header';
 import { Character } from './Character'
-// import { Setting } from './Setting';
 import { Result } from './Result'
+
+import { CharacterType } from '../types/character';
 
 
 export const Home = () => {
-  const [selectedMyCharacter, setSelectedMyCharacter] = useState<Fighter | null>(null);
-  const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<Fighter | null>(null);
+  const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
+  const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
   const bothCharactersSelected = (selectedMyCharacter !== null && selectedOpponentCharacter !== null);
 
-  // キャラクター情報
-  interface Fighter {
-    fighterNo: number;
-    fighterName: string;
-    imageUrl: string;
-  }
 
   // 🏆 個々の試合の記録
   interface MatchResult {
     nichiji: string;
-    player: Fighter | null;
-    opponentPlayer: Fighter | null;
+    player: CharacterType | null;
+    opponentPlayer: CharacterType | null;
     shouhai: "勝ち" | "負け";
     memo: any;
   }
@@ -58,6 +53,7 @@ export const Home = () => {
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
   const kekka = (match: MatchResult) => {
+    console.log(selectedMyCharacter)
     setHistory(prevResults => ({
       matches: [match, ...prevResults.matches],
       winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
