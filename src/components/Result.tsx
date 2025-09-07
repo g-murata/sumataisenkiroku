@@ -43,10 +43,10 @@ export const Result: React.FC<ResultProps> = ({
   };
 
   const updateMemo = (index: number, newMemo: string) => {
-    setHistory((prev: any) => {
-      const newMatches = [...prev.matches];
+    setHistory((prevResults: any) => {
+      const newMatches = [...prevResults.matches];
       newMatches[index] = { ...newMatches[index], memo: newMemo };
-      return { ...prev, matches: newMatches };
+      return { ...prevResults, matches: newMatches };
     });
   };
 
