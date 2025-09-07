@@ -8,9 +8,9 @@ import { Result } from './Result'
 
 
 export const Home = () => {
-  const [selectedMyChara, setSelectedMyChara] = useState<Fighter | null>(null);
-  const [selectedOpponentChara, setSelectedOpponentChara] = useState<Fighter | null>(null);
-  const bothCharactersSelected = (selectedMyChara !== null && selectedOpponentChara !== null);
+  const [selectedMyCharacter, setSelectedMyCharacter] = useState<Fighter | null>(null);
+  const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<Fighter | null>(null);
+  const bothCharactersSelected = (selectedMyCharacter !== null && selectedOpponentCharacter !== null);
 
   // キャラクター情報
   interface Fighter {
@@ -70,28 +70,28 @@ export const Home = () => {
     setAnimateFirstItem(false);
     kekka({
       nichiji: new Date().toLocaleString(),
-      player: selectedMyChara,
-      opponentPlayer: selectedOpponentChara,
+      player: selectedMyCharacter,
+      opponentPlayer: selectedOpponentCharacter,
       shouhai: "勝ち",
       memo: ""
     }
     )
 
-    setSelectedOpponentChara(null);
+    setSelectedOpponentCharacter(null);
   };
 
   const versusopponentPlayeresult = () => {
     setAnimateFirstItem(false);
     kekka({
       nichiji: new Date().toLocaleString(),
-      player: selectedMyChara,
-      opponentPlayer: selectedOpponentChara,
+      player: selectedMyCharacter,
+      opponentPlayer: selectedOpponentCharacter,
       shouhai: "負け",
       memo: ""
     }
     )
 
-    setSelectedOpponentChara(null);
+    setSelectedOpponentCharacter(null);
     setWinOrLose(true);
   };
 
@@ -129,15 +129,15 @@ export const Home = () => {
               <div>
                 <Character
                   player={"あなた"}
-                  onSelectChara={setSelectedMyChara}
-                  selectedChara={selectedMyChara}
+                  onSelectCharacter={setSelectedMyCharacter}
+                  selectedCharacter={selectedMyCharacter}
                 />
               </div>
               <div>
                 <Character
                   player={"相手"}
-                  onSelectChara={setSelectedOpponentChara}
-                  selectedChara={selectedOpponentChara}
+                  onSelectCharacter={setSelectedOpponentCharacter}
+                  selectedCharacter={selectedOpponentCharacter}
                 />
               </div>
             </div>

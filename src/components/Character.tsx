@@ -2,8 +2,8 @@
 
 interface CharacterProps {
   player: string;
-  onSelectChara: any;
-  selectedChara: any;
+  onSelectCharacter: any;
+  selectedCharacter: any;
 }
 
 const characterList = [
@@ -95,22 +95,22 @@ const characterList = [
   { id: 86, name: '射撃mii', imageUrl: `${process.env.PUBLIC_URL}/fighter/miigunner.png` },
 ]
 
-export const Character: React.FC<CharacterProps> = ({ player, onSelectChara, selectedChara }) => {
+export const Character: React.FC<CharacterProps> = ({ player, onSelectCharacter, selectedCharacter }) => {
 
   return (
     <>
       <div className="w-80 md:w-full">
         <div className="h-20">
           <h1>{player}の使用ファイター：</h1>
-          {selectedChara ?
+          {selectedCharacter ?
             <>
               <div className="flex">
                 <img
                   className="cursor-pointer"
-                  src={selectedChara.imageUrl}
-                  alt={selectedChara.name}
+                  src={selectedCharacter.imageUrl}
+                  alt={selectedCharacter.name}
                 />
-                <h1>{`${selectedChara.name}`}</h1>
+                <h1>{`${selectedCharacter.name}`}</h1>
               </div>
             </>
             :
@@ -121,8 +121,8 @@ export const Character: React.FC<CharacterProps> = ({ player, onSelectChara, sel
           <div className="flex flex-wrap">
             {characterList.map(character => (
               <img
-                className={`${selectedChara?.id === character?.id ? "bg-red-500" : ""} cursor-pointer`}
-                onClick={() => selectedChara?.id === character?.id ? onSelectChara(null) : onSelectChara(character)}
+                className={`${selectedCharacter?.id === character?.id ? "bg-red-500" : ""} cursor-pointer`}
+                onClick={() => selectedCharacter?.id === character?.id ? onSelectCharacter(null) : onSelectCharacter(character)}
                 src={character.imageUrl}
                 alt={character.name}
               />
