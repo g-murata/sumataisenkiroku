@@ -6,7 +6,7 @@ interface CharacterProps {
   selectedChara: any;
 }
 
-const charactarList = [
+const characterList = [
   { id: 1, name: 'マリオ', imageUrl: `${process.env.PUBLIC_URL}/fighter/mario.png` },
   { id: 2, name: 'ドンキー', imageUrl: `${process.env.PUBLIC_URL}/fighter/donkey.png` },
   { id: 3, name: 'リンク', imageUrl: `${process.env.PUBLIC_URL}/fighter/link.png` },
@@ -95,7 +95,7 @@ const charactarList = [
   { id: 86, name: '射撃mii', imageUrl: `${process.env.PUBLIC_URL}/fighter/miigunner.png` },
 ]
 
-export const Charactar: React.FC<CharacterProps> = ({player, onSelectChara, selectedChara}) => {
+export const Character: React.FC<CharacterProps> = ({ player, onSelectChara, selectedChara }) => {
 
   return (
     <>
@@ -105,28 +105,28 @@ export const Charactar: React.FC<CharacterProps> = ({player, onSelectChara, sele
           {selectedChara ?
             <>
               <div className="flex">
-                <img 
-                  className= "cursor-pointer"
-                  src={selectedChara.imageUrl} 
-                  alt={selectedChara.name} 
+                <img
+                  className="cursor-pointer"
+                  src={selectedChara.imageUrl}
+                  alt={selectedChara.name}
                 />
                 <h1>{`${selectedChara.name}`}</h1>
-              </div>                      
+              </div>
             </>
             :
             <span>キャラクターを選んでね。</span>
-          }    
-        </div>    
+          }
+        </div>
         <div className="p-3 bg-white border border-gray-200 rounded-lg shadow overflow-y-auto hide-scrollbar h-20vh md:h-25vh">
           <div className="flex flex-wrap">
-          {charactarList.map(character => (
-            <img 
-              className= {`${selectedChara?.id === character?.id ? "bg-red-500" : ""} cursor-pointer`}
-              onClick={() => selectedChara?.id === character?.id ? onSelectChara(null) : onSelectChara(character)} 
-              src={character.imageUrl} 
-              alt={character.name} 
-            />
-          ))}          
+            {characterList.map(character => (
+              <img
+                className={`${selectedChara?.id === character?.id ? "bg-red-500" : ""} cursor-pointer`}
+                onClick={() => selectedChara?.id === character?.id ? onSelectChara(null) : onSelectChara(character)}
+                src={character.imageUrl}
+                alt={character.name}
+              />
+            ))}
           </div>
         </div>
       </div>
