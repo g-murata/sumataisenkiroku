@@ -63,7 +63,6 @@ export const Home = () => {
       winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
       loseCount: match.shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,
     }));
-    console.log(history)
   };
 
   const versusWinResult = () => {

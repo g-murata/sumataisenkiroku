@@ -11,7 +11,7 @@ interface ResultProps {
 
 
 export const Result: React.FC<ResultProps> = ({
-  myWinCount, myLoseCount, history, setHistory, animateFirstItem, haishin}) => {
+  myWinCount, myLoseCount, history, setHistory, animateFirstItem, haishin }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
 
@@ -21,12 +21,12 @@ export const Result: React.FC<ResultProps> = ({
 
     const newMatches = history.matches.filter((matche: any) =>
       matche !== history.matches[index]
-    )    
+    )
     setHistory((prevResults: any) => ({
       matches: newMatches,  // 試合履歴を追加
       winCount: prevResults.matches[index].shouhai === "勝ち" ? history.winCount - 1 : history.winCount,  // 勝ち数更新
       loseCount: prevResults.matches[index].shouhai === "負け" ? history.loseCount - 1 : history.loseCount,  // 負け数更新
-    }));     
+    }));
   };
 
   // 連勝数を計算する関数
@@ -58,7 +58,7 @@ export const Result: React.FC<ResultProps> = ({
         <span className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{calculateStreak()}連勝中！</span>
       </div>
       <div className="h-80 flex md:h-4/5">
-        <div className={`${haishin ? 'h-45' :'h-full'} w-80 bg-gray-100 overflow-y-auto hide-scrollbar md:w-full`}>
+        <div className={`${haishin ? 'h-45' : 'h-full'} w-80 bg-gray-100 overflow-y-auto hide-scrollbar md:w-full`}>
           <table className="w-full ">
             <thead className="bg-gray-400 text-white">
               {!haishin && <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">日時</th>}
@@ -76,11 +76,11 @@ export const Result: React.FC<ResultProps> = ({
                   onMouseEnter={() => setHoverRowIndex(index)}
                   onMouseLeave={() => setHoverRowIndex(null)}
                 >
-                  {!haishin && 
+                  {!haishin &&
                     <td className="text-center text-xs">
                       <span>{`${matche.nichiji === undefined ? "" : matche.nichiji}`}</span>
-                    </td> 
-                  }                
+                    </td>
+                  }
 
                   <td className="px-5 py-1">
                     <img src={`${process.env.PUBLIC_URL}${matche.player.imageUrl}`} alt={matche.player.name} />
@@ -92,7 +92,7 @@ export const Result: React.FC<ResultProps> = ({
 
                   <td className={`${matche.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{matche.shouhai}</td>
 
-                  {!haishin &&                   
+                  {!haishin &&
                     <td className="py-1">
                       <textarea
                         value={matche.memo || ""}
@@ -103,10 +103,10 @@ export const Result: React.FC<ResultProps> = ({
                       />
                     </td>
                   }
-                  {!haishin && 
+                  {!haishin &&
                     <td className="text-center text-xxs">
                       <button className="md:hidden group-hover:inline-block" onClick={() => deleteItem(index)}>🗑️</button>
-                    </td>                 
+                    </td>
                   }
 
                 </tr>
@@ -114,7 +114,7 @@ export const Result: React.FC<ResultProps> = ({
             </tbody>
           </table>
         </div>
-      </div>        
+      </div>
     </>
   )
 }

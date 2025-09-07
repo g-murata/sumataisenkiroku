@@ -21,15 +21,15 @@ module.exports = {
         '70vh': '70vh',
         '75vh': '75vh',
         '80vh': '80vh',
-        '90vh': '90vh',        
-        '95vh': '95vh',        
+        '90vh': '90vh',
+        '95vh': '95vh',
       },
       width: {
         '30vw': '30vw',
       },
-    fontSize: {
-      xxs: "0.60rem",
-    },      
+      fontSize: {
+        xxs: "0.60rem",
+      },
     },
   },
   plugins: [],
