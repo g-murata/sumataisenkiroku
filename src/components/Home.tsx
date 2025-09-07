@@ -79,7 +79,7 @@ export const Home = () => {
     setSelectedOpponentCharacter(null);
   };
 
-  const versusopponentPlayeresult = () => {
+  const versusOpponentPlayeresult = () => {
     setAnimateFirstItem(false);
     kekka({
       nichiji: new Date().toLocaleString(),
@@ -161,7 +161,7 @@ export const Home = () => {
               </div>
               <div className="flex justify-center items-center py-3">
                 <button className={`${backgroundColorClass((bothCharactersSelected), "green")} text-white font-bold mx-5 py-4 px-10 rounded`}
-                  onClick={() => winOrLose ? versusWinResult() : versusopponentPlayeresult()}
+                  onClick={() => winOrLose ? versusWinResult() : versusOpponentPlayeresult()}
                   disabled={!bothCharactersSelected}
                 >
                   結果送信
