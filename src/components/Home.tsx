@@ -14,8 +14,8 @@ export const Home = () => {
 
   // キャラクター情報
   interface Fighter {
-    id: number;
-    name: string;
+    fighterNo: number;
+    fighterName: string;
     imageUrl: string;
   }
 
