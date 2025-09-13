@@ -89,25 +89,20 @@ export const Home = () => {
     )
 
     setSelectedOpponentCharacter(null);
+    // "勝利"に戻す（初期状態に戻す）
     setWinOrLose(true);
   };
 
-  const backgroundColorClass = (event: any, color: any) => {
-    if (event === true) {
-      switch (color) {
-        case "red":
-          return "bg-red-500"
-        case "blue":
-          return "bg-blue-500"
-        case "green":
-          return "bg-green-500 hover:bg-green-600"
-        default:
-          return "bg-gray-500"
-      }
-    } else {
-      return `bg-gray-400 hover:bg-gray-500`;
-    }
+  const colorMap: Record<"red" | "blue" | "green", string> = {
+    red: "bg-red-500",
+    blue: "bg-blue-500",
+    green: "bg-green-500 hover:bg-green-600",
   };
+
+  const backgroundColorClass = (isActive: boolean, color: keyof typeof colorMap) => {
+    return isActive ? colorMap[color] : "bg-gray-400 hover:bg-gray-500";
+  };
+
 
   // 最初の要素にのみアニメーションを適用するためのフラグを設定
   useEffect(() => {
