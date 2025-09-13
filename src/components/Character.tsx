@@ -1,6 +1,6 @@
 // import { useState } from 'react';
 
-import { CharacterType } from '../types/character';
+import { CharacterType } from "./Home";
 
 const characterList: CharacterType[] = [
   { characterNo: 1, characterName: 'マリオ', imageUrl: `${process.env.PUBLIC_URL}/fighter/mario.png` },
@@ -98,7 +98,6 @@ interface CharacterProps {
 }
 
 export const Character: React.FC<CharacterProps> = ({ player, onSelectCharacter, selectedCharacter }) => {
-
   return (
     <>
       <div className="w-80 md:w-full">

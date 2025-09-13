@@ -5,30 +5,33 @@ import { Header } from '../components/Header';
 import { Character } from './Character'
 import { Result } from './Result'
 
-import { CharacterType } from '../types/character';
+// キャラクター情報
+export interface CharacterType {
+  characterNo: number;
+  characterName: string;
+  imageUrl: string;
+}
 
+// 🏆 個々の試合の記録
+export interface MatchResult {
+  nichiji: string;
+  player: CharacterType | null;
+  opponentPlayer: CharacterType | null;
+  shouhai: "勝ち" | "負け";
+  memo: any;
+}
+
+// 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト
+export interface MatchHistory {
+  matches: MatchResult[];
+  winCount: number;
+  loseCount: number;
+}
 
 export const Home = () => {
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
   const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
   const bothCharactersSelected = (selectedMyCharacter !== null && selectedOpponentCharacter !== null);
-
-
-  // 🏆 個々の試合の記録
-  interface MatchResult {
-    nichiji: string;
-    player: CharacterType | null;
-    opponentPlayer: CharacterType | null;
-    shouhai: "勝ち" | "負け";
-    memo: any;
-  }
-
-  // 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト
-  interface MatchHistory {
-    matches: MatchResult[];
-    winCount: number;
-    loseCount: number;
-  }
 
   // 🥞 localStorage
   const STORAGE_KEY = "gameResults";
@@ -53,7 +56,6 @@ export const Home = () => {
   const [winOrLose, setWinOrLose] = useState<boolean>(true)
 
   const kekka = (match: MatchResult) => {
-    console.log(selectedMyCharacter)
     setHistory(prevResults => ({
       matches: [match, ...prevResults.matches],
       winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
@@ -61,7 +63,7 @@ export const Home = () => {
     }));
   };
 
-  const versusWinResult = () => {
+  const versusWinResult = (): void => {
     setAnimateFirstItem(false);
     kekka({
       nichiji: new Date().toLocaleString(),
@@ -75,7 +77,7 @@ export const Home = () => {
     setSelectedOpponentCharacter(null);
   };
 
-  const versusOpponentPlayeresult = () => {
+  const versusOpponentPlayeresult = (): void => {
     setAnimateFirstItem(false);
     kekka({
       nichiji: new Date().toLocaleString(),

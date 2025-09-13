@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { MatchHistory } from "./Home";
+
 interface ResultProps {
   myWinCount: number;
   myLoseCount: number;
@@ -9,9 +11,7 @@ interface ResultProps {
   haishin: boolean;
 }
 
-
-export const Result: React.FC<ResultProps> = ({
-  myWinCount, myLoseCount, history, setHistory, animateFirstItem, haishin }) => {
+export const Result: React.FC<ResultProps> = ({ myWinCount, myLoseCount, history, setHistory, animateFirstItem, haishin }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
 
@@ -22,7 +22,7 @@ export const Result: React.FC<ResultProps> = ({
     const newMatches = history.matches.filter((matche: any) =>
       matche !== history.matches[index]
     )
-    setHistory((prevResults: any) => ({
+    setHistory((prevResults: MatchHistory) => ({
       matches: newMatches,  // 試合履歴を追加
       winCount: prevResults.matches[index].shouhai === "勝ち" ? history.winCount - 1 : history.winCount,  // 勝ち数更新
       loseCount: prevResults.matches[index].shouhai === "負け" ? history.loseCount - 1 : history.loseCount,  // 負け数更新
@@ -42,14 +42,14 @@ export const Result: React.FC<ResultProps> = ({
     return streak;
   };
 
+  // メモを記録する関数
   const updateMemo = (index: number, newMemo: string) => {
-    setHistory((prevResults: any) => {
+    setHistory((prevResults: MatchHistory) => {
       const newMatches = [...prevResults.matches];
       newMatches[index] = { ...newMatches[index], memo: newMemo };
       return { ...prevResults, matches: newMatches };
     });
   };
-
 
   return (
     <>
