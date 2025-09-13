@@ -24,8 +24,8 @@ export const Result: React.FC<ResultProps> = ({ myWinCount, myLoseCount, history
     )
     setHistory((prevResults: MatchHistory) => ({
       matches: newMatches,  // 試合履歴を追加
-      winCount: prevResults.matches[index].shouhai === "勝ち" ? history.winCount - 1 : history.winCount,  // 勝ち数更新
-      loseCount: prevResults.matches[index].shouhai === "負け" ? history.loseCount - 1 : history.loseCount,  // 負け数更新
+      winCount: prevResults.matches[index].shouhai === "Win" ? history.winCount - 1 : history.winCount,  // win数更新
+      loseCount: prevResults.matches[index].shouhai === "Lose" ? history.loseCount - 1 : history.loseCount,  // lose数更新
     }));
   };
 
@@ -33,7 +33,7 @@ export const Result: React.FC<ResultProps> = ({ myWinCount, myLoseCount, history
   const calculateStreak = () => {
     let streak = 0;
     for (let i = 0; i < history.matches.length; i++) {
-      if (history.matches[i].shouhai === '勝ち') {
+      if (history.matches[i].shouhai === 'Win') {
         streak++;
       } else {
         break;
@@ -90,7 +90,7 @@ export const Result: React.FC<ResultProps> = ({ myWinCount, myLoseCount, history
                     <img src={`${process.env.PUBLIC_URL}${matche.opponentPlayer.imageUrl}`} alt={matche.opponentPlayer.name} />
                   </td>
 
-                  <td className={`${matche.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{matche.shouhai}</td>
+                  <td className={`${matche.shouhai === "Win" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{matche.shouhai}</td>
 
                   {!haishin &&
                     <td className="py-1">

@@ -17,7 +17,7 @@ export interface MatchResult {
   nichiji: string;
   player: CharacterType | null;
   opponentPlayer: CharacterType | null;
-  shouhai: "勝ち" | "負け";
+  shouhai: "Win" | "Lose";
   memo: any;
 }
 
@@ -53,9 +53,9 @@ export const Home = () => {
   }
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
+  const [selectedResult, setSelectedResult] = useState<"Win" | "Lose">("Win");
 
-  const recordResult = (shouhai: "勝ち" | "負け"): void => {
+  const recordResult = (shouhai: "Win" | "Lose"): void => {
     setAnimateFirstItem(false);
 
     kekka({
@@ -69,16 +69,16 @@ export const Home = () => {
     setSelectedOpponentCharacter(null);
 
     // 負けのときだけ初期化
-    if (shouhai === "負け") {
-      setSelectedResult("勝ち");
+    if (shouhai === "Lose") {
+      setSelectedResult("Win");
     }
   };
 
   const kekka = (match: MatchResult) => {
     setHistory(prevResults => ({
       matches: [match, ...prevResults.matches],
-      winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
-      loseCount: match.shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,
+      winCount: match.shouhai === "Win" ? prevResults.winCount + 1 : prevResults.winCount,
+      loseCount: match.shouhai === "Lose" ? prevResults.loseCount + 1 : prevResults.loseCount,
     }));
   };
 
@@ -126,15 +126,15 @@ export const Home = () => {
               <div className="">
                 <div className="flex justify-center items-center">
                   <button
-                    className={`${backgroundColorClass(selectedResult === "勝ち", "red")} text-white font-bold m-2 py-4 px-8 rounded`}
-                    onClick={() => setSelectedResult("勝ち")}
+                    className={`${backgroundColorClass(selectedResult === "Win", "red")} text-white font-bold m-2 py-4 px-8 rounded`}
+                    onClick={() => setSelectedResult("Win")}
                     disabled={!bothCharactersSelected}
                   >
                     勝ち
                   </button>
                   <button
-                    className={`${backgroundColorClass(selectedResult === "負け", "blue")} text-white font-bold m-2 py-4 px-8 rounded`}
-                    onClick={() => setSelectedResult("負け")}
+                    className={`${backgroundColorClass(selectedResult === "Lose", "blue")} text-white font-bold m-2 py-4 px-8 rounded`}
+                    onClick={() => setSelectedResult("Lose")}
                     disabled={!bothCharactersSelected}
                   >
                     負け
