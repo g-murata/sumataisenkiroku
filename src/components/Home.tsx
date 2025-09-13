@@ -53,7 +53,7 @@ export const Home = () => {
   }
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
-  const [winOrLose, setWinOrLose] = useState<boolean>(true)
+  const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
 
   const kekka = (match: MatchResult) => {
     setHistory(prevResults => ({
@@ -90,7 +90,7 @@ export const Home = () => {
 
     setSelectedOpponentCharacter(null);
     // "勝利"に戻す（初期状態に戻す）
-    setWinOrLose(true);
+    setSelectedResult("勝ち");
   };
 
   const colorMap: Record<"red" | "blue" | "green", string> = {
@@ -100,6 +100,7 @@ export const Home = () => {
   };
 
   const backgroundColorClass = (isActive: boolean, color: keyof typeof colorMap) => {
+    debugger
     return isActive ? colorMap[color] : "bg-gray-400 hover:bg-gray-500";
   };
 
@@ -137,15 +138,15 @@ export const Home = () => {
               <div className="">
                 <div className="flex justify-center items-center">
                   <button
-                    className={`${backgroundColorClass(winOrLose, "red")} text-white font-bold m-2 py-4 px-8 rounded`}
-                    onClick={() => setWinOrLose(true)}
+                    className={`${backgroundColorClass(selectedResult == "勝ち", "red")} text-white font-bold m-2 py-4 px-8 rounded`}
+                    onClick={() => setSelectedResult("勝ち")}
                     disabled={!bothCharactersSelected}
                   >
                     勝ち
                   </button>
                   <button
-                    className={`${backgroundColorClass(!winOrLose, "blue")} text-white font-bold m-2 py-4 px-8 rounded`}
-                    onClick={() => setWinOrLose(false)}
+                    className={`${backgroundColorClass(selectedResult == "負け", "blue")} text-white font-bold m-2 py-4 px-8 rounded`}
+                    onClick={() => setSelectedResult("負け")}
                     disabled={!bothCharactersSelected}
                   >
                     負け
@@ -154,7 +155,7 @@ export const Home = () => {
               </div>
               <div className="flex justify-center items-center py-3">
                 <button className={`${backgroundColorClass((bothCharactersSelected), "green")} text-white font-bold mx-5 py-4 px-10 rounded`}
-                  onClick={() => winOrLose ? versusWinResult() : versusOpponentPlayeresult()}
+                  onClick={() => selectedResult == "勝ち" ? versusWinResult() : versusOpponentPlayeresult()}
                   disabled={!bothCharactersSelected}
                 >
                   結果送信
