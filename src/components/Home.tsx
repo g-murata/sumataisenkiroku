@@ -55,42 +55,31 @@ export const Home = () => {
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
 
+  const recordResult = (shouhai: "勝ち" | "負け"): void => {
+    setAnimateFirstItem(false);
+
+    kekka({
+      nichiji: new Date().toLocaleString(),
+      player: selectedMyCharacter,
+      opponentPlayer: selectedOpponentCharacter,
+      shouhai,
+      memo: ""
+    });
+
+    setSelectedOpponentCharacter(null);
+
+    // 負けのときだけ初期化
+    if (shouhai === "負け") {
+      setSelectedResult("勝ち");
+    }
+  };
+
   const kekka = (match: MatchResult) => {
     setHistory(prevResults => ({
       matches: [match, ...prevResults.matches],
       winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
       loseCount: match.shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,
     }));
-  };
-
-  const versusWinResult = (): void => {
-    setAnimateFirstItem(false);
-    kekka({
-      nichiji: new Date().toLocaleString(),
-      player: selectedMyCharacter,
-      opponentPlayer: selectedOpponentCharacter,
-      shouhai: "勝ち",
-      memo: ""
-    }
-    )
-
-    setSelectedOpponentCharacter(null);
-  };
-
-  const versusOpponentPlayeresult = (): void => {
-    setAnimateFirstItem(false);
-    kekka({
-      nichiji: new Date().toLocaleString(),
-      player: selectedMyCharacter,
-      opponentPlayer: selectedOpponentCharacter,
-      shouhai: "負け",
-      memo: ""
-    }
-    )
-
-    setSelectedOpponentCharacter(null);
-    // "勝利"に戻す（初期状態に戻す）
-    setSelectedResult("勝ち");
   };
 
   const colorMap: Record<"red" | "blue" | "green", string> = {
@@ -100,7 +89,6 @@ export const Home = () => {
   };
 
   const backgroundColorClass = (isActive: boolean, color: keyof typeof colorMap) => {
-    debugger
     return isActive ? colorMap[color] : "bg-gray-400 hover:bg-gray-500";
   };
 
@@ -155,7 +143,7 @@ export const Home = () => {
               </div>
               <div className="flex justify-center items-center py-3">
                 <button className={`${backgroundColorClass((bothCharactersSelected), "green")} text-white font-bold mx-5 py-4 px-10 rounded`}
-                  onClick={() => selectedResult == "勝ち" ? versusWinResult() : versusOpponentPlayeresult()}
+                  onClick={() => recordResult(selectedResult)}
                   disabled={!bothCharactersSelected}
                 >
                   結果送信
