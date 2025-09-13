@@ -126,14 +126,14 @@ export const Home = () => {
               <div className="">
                 <div className="flex justify-center items-center">
                   <button
-                    className={`${backgroundColorClass(selectedResult == "勝ち", "red")} text-white font-bold m-2 py-4 px-8 rounded`}
+                    className={`${backgroundColorClass(selectedResult === "勝ち", "red")} text-white font-bold m-2 py-4 px-8 rounded`}
                     onClick={() => setSelectedResult("勝ち")}
                     disabled={!bothCharactersSelected}
                   >
                     勝ち
                   </button>
                   <button
-                    className={`${backgroundColorClass(selectedResult == "負け", "blue")} text-white font-bold m-2 py-4 px-8 rounded`}
+                    className={`${backgroundColorClass(selectedResult === "負け", "blue")} text-white font-bold m-2 py-4 px-8 rounded`}
                     onClick={() => setSelectedResult("負け")}
                     disabled={!bothCharactersSelected}
                   >
