@@ -54,6 +54,13 @@ export const Home = () => {
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
+  const kekka = (match: MatchResult) => {
+    setHistory(prevResults => ({
+      matches: [match, ...prevResults.matches],
+      winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
+      loseCount: match.shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,
+    }));
+  };
 
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
     setAnimateFirstItem(false);
@@ -72,14 +79,6 @@ export const Home = () => {
     if (shouhai === "負け") {
       setSelectedResult("勝ち");
     }
-  };
-
-  const kekka = (match: MatchResult) => {
-    setHistory(prevResults => ({
-      matches: [match, ...prevResults.matches],
-      winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
-      loseCount: match.shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,
-    }));
   };
 
   const colorMap: Record<"red" | "blue" | "green", string> = {
