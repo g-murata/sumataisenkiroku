@@ -1,39 +1,101 @@
 import { useState } from "react";
-
-import { MatchHistory } from "./Home";
+import { MatchHistory, MatchResult } from "./Home";
+import { characterList } from "./Character";
+import { MatchDetailModal } from "./MatchDetailModal";
 
 interface ResultProps {
-  myWinCount: number;
-  myLoseCount: number;
-  history: any;
+  // 親で計算済みのリストを受け取る
+  filteredMatches: { match: MatchResult; originalIndex: number }[];
+  history: MatchHistory;
   setHistory: any;
   animateFirstItem: boolean;
   haishin: boolean;
+
+  // フィルター操作用関数
+  filterMyCharId: number | null;
+  setFilterMyCharId: (id: number | null) => void;
+  filterOppCharId: number | null;
+  setFilterOppCharId: (id: number | null) => void;
+  
+  // 日付フィルター型定義更新
+  filterDateRange: "all" | "today" | "week" | "custom";
+  setFilterDateRange: (range: "all" | "today" | "week" | "custom") => void;
+  
+  // ▼ 新規追加：カスタム日付用
+  customStartDate: string;
+  setCustomStartDate: (date: string) => void;
+  customEndDate: string;
+  setCustomEndDate: (date: string) => void;
 }
 
-export const Result: React.FC<ResultProps> = ({ myWinCount, myLoseCount, history, setHistory, animateFirstItem, haishin }) => {
+export const Result: React.FC<ResultProps> = ({ 
+  filteredMatches, 
+  history, setHistory, animateFirstItem, haishin,
+  filterMyCharId, setFilterMyCharId,
+  filterOppCharId, setFilterOppCharId,
+  filterDateRange, setFilterDateRange,
+  customStartDate, setCustomStartDate,
+  customEndDate, setCustomEndDate
+}) => {
 
-  const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null)
+  const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMatchIndex, setSelectedMatchIndex] = useState<number | null>(null);
 
-  const deleteItem = (index: number) => {
-    const isConfirmed = window.confirm('本当に削除しますか？');
-    if (!isConfirmed) { return }
-
-    const newMatches = history.matches.filter((matche: any) =>
-      matche !== history.matches[index]
-    )
-    setHistory((prevResults: MatchHistory) => ({
-      matches: newMatches,  // 試合履歴を追加
-      winCount: prevResults.matches[index].shouhai === "勝ち" ? history.winCount - 1 : history.winCount,  // 勝ち数更新
-      loseCount: prevResults.matches[index].shouhai === "負け" ? history.loseCount - 1 : history.loseCount,  // 負け数更新
-    }));
+  // ▼ モーダルを開く処理
+  const handleRowClick = (originalIndex: number) => {
+    if (haishin) return; // 配信モードなら何もしない
+    setSelectedMatchIndex(originalIndex);
+    setIsModalOpen(true);
   };
 
-  // 連勝数を計算する関数
+  // ▼ モーダルでの保存処理
+  const handleModalSave = (updatedMatch: MatchResult) => {
+    if (selectedMatchIndex === null) return;
+    
+    setHistory((prev: MatchHistory) => {
+      const newMatches = [...prev.matches];
+      newMatches[selectedMatchIndex] = updatedMatch;
+      
+      // 日付順（新しい順）にソート
+      newMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
+      
+      return { ...prev, matches: newMatches };
+    });
+    setIsModalOpen(false);
+  };
+
+  // ▼ モーダルでの削除処理
+  const handleModalDelete = () => {
+    if (selectedMatchIndex === null) return;
+    const targetMatch = history.matches[selectedMatchIndex];
+
+    setHistory((prev: MatchHistory) => {
+      const newMatches = prev.matches.filter((_, i) => i !== selectedMatchIndex);
+      return {
+        matches: newMatches,
+        winCount: targetMatch.shouhai === "勝ち" ? prev.winCount - 1 : prev.winCount,
+        loseCount: targetMatch.shouhai === "負け" ? prev.loseCount - 1 : prev.loseCount,
+      };
+    });
+    setIsModalOpen(false);
+  };
+
+  // ▼ 勝敗数の計算
+  const filteredWinCount = filteredMatches.filter(item => item.match.shouhai === "勝ち").length;
+  const filteredLoseCount = filteredMatches.filter(item => item.match.shouhai === "負け").length;
+  const totalFilteredMatches = filteredWinCount + filteredLoseCount;
+  
+  // ▼ 勝率の計算
+  const winRate = totalFilteredMatches > 0 
+    ? ((filteredWinCount / totalFilteredMatches) * 100).toFixed(1)
+    : "0.0";
+
+  // ▼ 連勝数を計算
   const calculateStreak = () => {
     let streak = 0;
-    for (let i = 0; i < history.matches.length; i++) {
-      if (history.matches[i].shouhai === '勝ち') {
+    for (let i = 0; i < filteredMatches.length; i++) {
+      if (filteredMatches[i].match.shouhai === '勝ち') {
         streak++;
       } else {
         break;
@@ -42,79 +104,152 @@ export const Result: React.FC<ResultProps> = ({ myWinCount, myLoseCount, history
     return streak;
   };
 
-  // メモを記録する関数
-  const updateMemo = (index: number, newMemo: string) => {
-    setHistory((prevResults: MatchHistory) => {
-      const newMatches = [...prevResults.matches];
-      newMatches[index] = { ...newMatches[index], memo: newMemo };
-      return { ...prevResults, matches: newMatches };
-    });
-  };
-
   return (
     <>
-      <div className="">
-        <span className="px-5">戦績 {myWinCount}勝{myLoseCount}敗</span>
-        <span className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600`}>{calculateStreak()}連勝中！</span>
+      <div className="flex justify-between items-end mb-2">
+        <div className="flex items-center">
+          <span className="px-5 font-bold text-lg whitespace-nowrap">
+            {filteredWinCount}勝{filteredLoseCount}敗
+            <span className="ml-2 text-gray-600 text-sm">({winRate}%)</span>
+          </span>
+          <span className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600 animate-bounce ml-2`}>
+            {calculateStreak()}連勝!
+          </span>
+        </div>
       </div>
+
+      {/* ▼ フィルターUIエリア (配信モードでは非表示) */}
+      {!haishin && (
+        <div className="flex flex-col gap-2 mb-2 px-2 bg-gray-100 p-2 rounded">
+          {/* 日付フィルター */}
+          <div className="flex flex-col gap-2 w-full">
+             <select
+                className="border rounded p-1 text-sm bg-white w-full font-bold text-gray-700 cursor-pointer hover:bg-gray-50"
+                value={filterDateRange}
+                onChange={(e) => setFilterDateRange(e.target.value as any)}
+             >
+               <option value="all">📅 全期間</option>
+               <option value="today">🔥 今日</option>
+               <option value="week">📅 直近1週間</option>
+               <option value="custom">🛠️ 期間指定</option>
+             </select>
+
+             {/* ▼ 期間指定が選ばれた時だけ表示される日付ピッカー */}
+             {filterDateRange === "custom" && (
+                <div className="flex items-center gap-1 bg-white p-1 rounded border animate-fadeIn">
+                  <input 
+                    type="date" 
+                    className="border rounded px-1 text-sm w-full"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                  />
+                  <span className="text-gray-500">~</span>
+                  <input 
+                    type="date" 
+                    className="border rounded px-1 text-sm w-full"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                  />
+                </div>
+             )}
+          </div>
+
+          {/* キャラフィルター */}
+          <div className="flex gap-2 w-full items-center">
+            <select 
+              className="border rounded p-1 text-sm bg-white w-1/2 cursor-pointer hover:bg-gray-50"
+              value={filterMyCharId || ""}
+              onChange={(e) => setFilterMyCharId(e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="">自分の全キャラ</option>
+              {characterList.map(c => (
+                <option key={`my-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
+              ))}
+            </select>
+            <span className="text-gray-400 text-xs">vs</span>
+            <select 
+              className="border rounded p-1 text-sm bg-white w-1/2 cursor-pointer hover:bg-gray-50"
+              value={filterOppCharId || ""}
+              onChange={(e) => setFilterOppCharId(e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="">相手の全キャラ</option>
+              {characterList.map(c => (
+                <option key={`opp-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* ▼ 結果リスト表示 */}
       <div className="h-80 flex md:h-4/5">
-        <div className={`${haishin ? 'h-45' : 'h-full'} w-80 bg-gray-100 overflow-y-auto hide-scrollbar md:w-full`}>
-          <table className="w-full ">
-            <thead className="bg-gray-400 text-white">
-              {!haishin && <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">日時</th>}
-              <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">自分</th>
-              <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">相手</th>
-              <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-24">結果</th>
-              {!haishin && <th className="px-5 sticky top-0 bg-gray-400 z-10 md:w-60">メモ</th>}
-              {!haishin && <th className="px-2 sticky top-0 bg-gray-400 z-10"></th>}
+        <div className={`${haishin ? 'h-45' : 'h-full'} w-full bg-white border rounded-lg shadow-inner overflow-y-auto hide-scrollbar md:w-full`}>
+          <table className="w-full table-fixed">
+            <thead className="bg-gray-600 text-white text-xs">
+              {!haishin && <th className="sticky top-0 bg-gray-600 z-10 w-16 py-2">日時</th>}
+              <th className="sticky top-0 bg-gray-600 z-10 w-12">自分</th>
+              <th className="sticky top-0 bg-gray-600 z-10 w-12">相手</th>
+              <th className="sticky top-0 bg-gray-600 z-10 w-12">結果</th>
+              {!haishin && <th className="sticky top-0 bg-gray-600 z-10">メモ</th>}
             </thead>
             <tbody>
-              {history.matches.map((matche: any, index: number) => (
-                <tr className={`group cursor-pointer 
-                      ${index === 0 && animateFirstItem ? "fadeIn" : ""} ${(hoverRowIndex === index) ? 'md:hover:bg-gray-200' : ''}`}
-                  key={index}
-                  onMouseEnter={() => setHoverRowIndex(index)}
+              {filteredMatches.map(({ match, originalIndex }, loopIndex) => (
+                <tr className={`group cursor-pointer border-b border-gray-100
+                      ${loopIndex === 0 && animateFirstItem && !filterMyCharId && !filterOppCharId ? "fadeIn" : ""} 
+                      ${(hoverRowIndex === loopIndex) ? 'bg-blue-50' : ''}`}
+                  key={originalIndex}
+                  onMouseEnter={() => setHoverRowIndex(loopIndex)}
                   onMouseLeave={() => setHoverRowIndex(null)}
+                  onClick={() => handleRowClick(originalIndex)}
                 >
                   {!haishin &&
-                    <td className="text-center text-xs">
-                      <span>{`${matche.nichiji === undefined ? "" : matche.nichiji}`}</span>
+                    <td className="text-center text-xxs py-2 text-gray-500">
+                      {match.nichiji?.split(' ')[0].slice(5)}<br/>
+                      {match.nichiji?.split(' ')[1]?.slice(0, 5)}
                     </td>
                   }
 
-                  <td className="px-5 py-1">
-                    <img src={`${process.env.PUBLIC_URL}${matche.player.imageUrl}`} alt={matche.player.name} />
+                  <td className="py-1 text-center">
+                    <img src={match.player?.imageUrl} alt={match.player?.characterName} className="h-8 w-8 mx-auto object-contain"/>
                   </td>
 
-                  <td className="px-5 py-1">
-                    <img src={`${process.env.PUBLIC_URL}${matche.opponentPlayer.imageUrl}`} alt={matche.opponentPlayer.name} />
+                  <td className="py-1 text-center">
+                    <img src={match.opponentPlayer?.imageUrl} alt={match.opponentPlayer?.characterName} className="h-8 w-8 mx-auto object-contain"/>
                   </td>
 
-                  <td className={`${matche.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"} text-center p-1`}>{matche.shouhai}</td>
+                  <td className={`text-center font-bold text-sm ${match.shouhai === "勝ち" ? "text-red-500" : "text-blue-500"} p-1`}>
+                    {match.shouhai}
+                  </td>
 
                   {!haishin &&
-                    <td className="py-1">
-                      <textarea
-                        value={matche.memo || ""}
-                        onChange={(e) => updateMemo(index, e.target.value)}
-                        placeholder="対戦の反省を書こう"
-                        rows={3} // 行数調整
-                        className="w-full border rounded px-2 py-1 text-sm resize-y"
-                      />
+                    <td className="py-2 px-2">
+                       <p className="text-xs text-gray-600 truncate">{match.memo}</p>
                     </td>
                   }
-                  {!haishin &&
-                    <td className="text-center text-xxs">
-                      <button className="md:hidden group-hover:inline-block" onClick={() => deleteItem(index)}>🗑️</button>
-                    </td>
-                  }
-
                 </tr>
               ))}
+              {filteredMatches.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center py-10 text-gray-400 text-sm">
+                    {filterDateRange === "custom" && (!customStartDate || !customEndDate) 
+                      ? "期間を指定してください" 
+                      : "条件に一致する記録がありません"}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+      
+      {/* ▼ 詳細編集モーダル */}
+      <MatchDetailModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        match={selectedMatchIndex !== null ? history.matches[selectedMatchIndex] : null}
+        onSave={handleModalSave}
+        onDelete={handleModalDelete}
+      />
     </>
   )
 }

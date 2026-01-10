@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
-
+import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
-import { Character } from './Character'
-import { Result } from './Result'
+import { Character } from './Character';
+import { Result } from './Result';
 
 // キャラクター情報
 export interface CharacterType {
@@ -44,6 +42,54 @@ export const Home = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   }, [history]);
 
+  // ▼ フィルター用State
+  const [filterMyCharId, setFilterMyCharId] = useState<number | null>(null);
+  const [filterOppCharId, setFilterOppCharId] = useState<number | null>(null);
+  
+  // 日付フィルター： "custom" を追加
+  const [filterDateRange, setFilterDateRange] = useState<"all" | "today" | "week" | "custom">("all");
+  // 期間指定用の開始日と終了日
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+
+  // ▼ フィルタリングロジック
+  const filteredMatchesWithIndex = history.matches
+    .map((match, index) => ({ match, originalIndex: index }))
+    .filter(({ match }) => {
+      // キャラフィルター
+      const isMyCharMatch = filterMyCharId ? match.player?.characterNo === filterMyCharId : true;
+      const isOppCharMatch = filterOppCharId ? match.opponentPlayer?.characterNo === filterOppCharId : true;
+      
+      // 日付フィルター
+      let isDateMatch = true;
+      const matchDate = new Date(match.nichiji);
+      const now = new Date();
+
+      if (filterDateRange === "today") {
+        isDateMatch = matchDate.toDateString() === now.toDateString();
+      } else if (filterDateRange === "week") {
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(now.getDate() - 7);
+        isDateMatch = matchDate >= oneWeekAgo;
+      } else if (filterDateRange === "custom") {
+        // 期間指定ロジック
+        if (customStartDate && customEndDate) {
+          const start = new Date(customStartDate);
+          start.setHours(0, 0, 0, 0); // その日の0時から
+          
+          const end = new Date(customEndDate);
+          end.setHours(23, 59, 59, 999); // その日の終わりまで
+
+          isDateMatch = matchDate >= start && matchDate <= end;
+        } else {
+          // 日付が未入力の場合は全表示（または非表示）にするが、ここでは全表示扱い
+          isDateMatch = true;
+        }
+      }
+
+      return isMyCharMatch && isOppCharMatch && isDateMatch;
+    });
+
   const clearResults = () => {
     const isConfirmed = window.confirm('本当にリセットしますか？');
     if (!isConfirmed) { return }
@@ -54,6 +100,7 @@ export const Home = () => {
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
+
   const kekka = (match: MatchResult) => {
     setHistory(prevResults => ({
       matches: [match, ...prevResults.matches],
@@ -91,7 +138,6 @@ export const Home = () => {
     return isActive ? colorMap[color] : "bg-gray-400 hover:bg-gray-500";
   };
 
-
   // 最初の要素にのみアニメーションを適用するためのフラグを設定
   useEffect(() => {
     if (history.matches.length > 0) {
@@ -103,7 +149,7 @@ export const Home = () => {
     <>
       <Header />
       <div className="flex flex-col justify-center items-center">
-        <div className="md:flex">
+        <div className="md:flex w-full max-w-7xl">
           <div className="w-full md:w-1/3">
             <div className="px-5 py-2 flex flex-col justify-center items-center">
               <div>
@@ -151,40 +197,56 @@ export const Home = () => {
             </div>
 
           </div>
-          <div className="md:h-90vh flex flex-col px-10" id="win-lose-area">
+          
+          {/* ▼ メイン結果画面エリア */}
+          <div className="md:w-1/3 md:h-90vh flex flex-col px-2 md:px-5" id="win-lose-area">
             <Result
-              myWinCount={history.winCount}
-              myLoseCount={history.loseCount}
+              filteredMatches={filteredMatchesWithIndex}
               history={history}
               setHistory={setHistory}
               animateFirstItem={animateFirstItem}
               haishin={false}
+              // フィルターprops
+              filterMyCharId={filterMyCharId}
+              setFilterMyCharId={setFilterMyCharId}
+              filterOppCharId={filterOppCharId}
+              setFilterOppCharId={setFilterOppCharId}
+              filterDateRange={filterDateRange}
+              setFilterDateRange={setFilterDateRange}
+              // ▼ 新規追加：カスタム日付用
+              customStartDate={customStartDate}
+              setCustomStartDate={setCustomStartDate}
+              customEndDate={customEndDate}
+              setCustomEndDate={setCustomEndDate}
             />
           </div>
 
-          <div className="md:h-90vh flex flex-col px-10">
+          {/* ▼ 配信画面エリア */}
+          <div className="md:w-1/3 md:h-90vh flex flex-col px-10">
             <div className="hidden md:block h-4/5" id="win-lose-area-haishin">
               <Result
-                myWinCount={history.winCount}
-                myLoseCount={history.loseCount}
+                filteredMatches={filteredMatchesWithIndex}
                 history={history}
                 setHistory={setHistory}
                 animateFirstItem={animateFirstItem}
                 haishin={true}
+                // ダミー関数
+                filterMyCharId={filterMyCharId}
+                setFilterMyCharId={() => {}}
+                filterOppCharId={filterOppCharId}
+                setFilterOppCharId={() => {}}
+                filterDateRange={filterDateRange}
+                setFilterDateRange={() => {}}
+                customStartDate={customStartDate}
+                setCustomStartDate={() => {}}
+                customEndDate={customEndDate}
+                setCustomEndDate={() => {}}
               />
             </div>
-            <div className="flex flex-col justify-center items-center">
-              <button className="py-5" onClick={clearResults}>勝敗記録一括削除</button>
-
-              {/* <div>
-                <h1>👷‍♂️coming soon...</h1>
-                <span>キャラおまかせルーレット</span>
-                <img 
-                  src={`${process.env.PUBLIC_URL}/fighter/mario.png`} alt={"TODO:はてなマークが良いな。"}>
-                </img> 
-              </div>
-              <h1>オプション：</h1>
-              <span className="" onClick={comingSoon}>削除確認ON/OFF</span> */}
+            <div className="flex flex-col justify-center items-center mt-4">
+              <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={clearResults}>
+                勝敗記録一括削除
+              </button>
             </div>
           </div>
 

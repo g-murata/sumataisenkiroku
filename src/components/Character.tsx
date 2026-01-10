@@ -2,7 +2,7 @@
 
 import { CharacterType } from "./Home";
 
-const characterList: CharacterType[] = [
+export const characterList: CharacterType[] = [
   { characterNo: 1, characterName: 'マリオ', imageUrl: `${process.env.PUBLIC_URL}/fighter/mario.png` },
   { characterNo: 2, characterName: 'ドンキー', imageUrl: `${process.env.PUBLIC_URL}/fighter/donkey.png` },
   { characterNo: 3, characterName: 'リンク', imageUrl: `${process.env.PUBLIC_URL}/fighter/link.png` },
