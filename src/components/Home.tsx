@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Character } from './Character';
 import { Result } from './Result';
+import { ResultAnimation } from './ResultAnimation';
 
 // キャラクター情報
 export interface CharacterType {
@@ -99,6 +100,8 @@ export const Home = () => {
   }
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
+  const [showAnimation, setShowAnimation] = useState<"勝ち" | "負け" | null>(null);  
+
   const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
 
   const kekka = (match: MatchResult) => {
@@ -111,6 +114,7 @@ export const Home = () => {
 
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
     setAnimateFirstItem(false);
+    setShowAnimation(shouhai);
 
     kekka({
       nichiji: new Date().toLocaleString(),
@@ -148,6 +152,12 @@ export const Home = () => {
   return (
     <>
       <Header />
+      {showAnimation && (
+        <ResultAnimation 
+          result={showAnimation} 
+          onComplete={() => setShowAnimation(null)} 
+        />
+      )}      
       <div className="flex flex-col justify-center items-center">
         <div className="md:flex w-full max-w-7xl">
           <div className="w-full md:w-1/3">

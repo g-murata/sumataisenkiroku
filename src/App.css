@@ -21,3 +21,57 @@
 .fadeIn {
   animation: fadeIn 1.0s ease-out;
 }
+
+/* 勝利アニメーション：ドーン！と拡大してスタンプされる感じ */
+@keyframes stampIn {
+  0% {
+    opacity: 0;
+    transform: scale(3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 敗北アニメーション：横からスライドしてきて、少し揺れる */
+@keyframes slideInShake {
+  0% {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(20px);
+  }
+  80% {
+    transform: translateX(-10px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* 背景の集中線やフラッシュ効果 */
+@keyframes flashBg {
+  0% { background-color: rgba(255, 255, 255, 0.8); }
+  100% { background-color: rgba(0, 0, 0, 0.6); }
+}
+
+.animate-stamp-in {
+  animation: stampIn 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-slide-shake {
+  animation: slideInShake 0.5s ease-out forwards;
+}
+
+.animate-flash-bg {
+  animation: flashBg 0.3s ease-out forwards;
+}
