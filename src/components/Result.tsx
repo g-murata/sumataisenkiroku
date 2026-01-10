@@ -239,7 +239,11 @@ export const Result: React.FC<ResultProps> = ({
               ))}
               {filteredMatches.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-10 text-gray-400 text-sm">
+                  {/* 配信モードなら3列、通常なら5列結合にする */}
+                  <td 
+                    colSpan={haishin ? 3 : 5} 
+                    className="text-center py-10 text-gray-400 text-sm"
+                  >
                     {filterDateRange === "custom" && (!customStartDate || !customEndDate) 
                       ? "期間を指定してください" 
                       : "条件に一致する記録がありません"}
