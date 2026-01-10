@@ -190,7 +190,8 @@ export const Result: React.FC<ResultProps> = ({
       )}
 
       {/* ▼ 結果リスト表示 */}
-      <div className="h-80 flex md:h-4/5">
+      {/* 修正点: haishin時は高さを自動(h-auto)にし、通常時は画面いっぱい(h-4/5)にする */}
+      <div className={`${haishin ? 'h-auto' : 'h-80 md:h-4/5'} flex`}>
         <div className={`${haishin ? 'h-45' : 'h-full'} w-full bg-white border rounded-lg shadow-inner overflow-y-auto hide-scrollbar md:w-full`}>
           <table className="w-full table-fixed">
             <thead className="bg-gray-600 text-white text-xs">

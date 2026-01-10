@@ -46,12 +46,13 @@ export const Home = () => {
   // ▼ フィルター用State
   const [filterMyCharId, setFilterMyCharId] = useState<number | null>(null);
   const [filterOppCharId, setFilterOppCharId] = useState<number | null>(null);
-  
-  // 日付フィルター： "custom" を追加
   const [filterDateRange, setFilterDateRange] = useState<"all" | "today" | "week" | "custom">("all");
-  // 期間指定用の開始日と終了日
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
+
+  // ▼ アニメーション制御用State
+  const [showResultAnimation, setShowResultAnimation] = useState(false);
+  const [lastResultForAnim, setLastResultForAnim] = useState<"勝ち" | "負け">("勝ち");
 
   // ▼ フィルタリングロジック
   const filteredMatchesWithIndex = history.matches
@@ -73,21 +74,16 @@ export const Home = () => {
         oneWeekAgo.setDate(now.getDate() - 7);
         isDateMatch = matchDate >= oneWeekAgo;
       } else if (filterDateRange === "custom") {
-        // 期間指定ロジック
         if (customStartDate && customEndDate) {
           const start = new Date(customStartDate);
-          start.setHours(0, 0, 0, 0); // その日の0時から
-          
+          start.setHours(0, 0, 0, 0); 
           const end = new Date(customEndDate);
-          end.setHours(23, 59, 59, 999); // その日の終わりまで
-
+          end.setHours(23, 59, 59, 999); 
           isDateMatch = matchDate >= start && matchDate <= end;
         } else {
-          // 日付が未入力の場合は全表示（または非表示）にするが、ここでは全表示扱い
           isDateMatch = true;
         }
       }
-
       return isMyCharMatch && isOppCharMatch && isDateMatch;
     });
 
@@ -96,12 +92,10 @@ export const Home = () => {
     if (!isConfirmed) { return }
 
     localStorage.removeItem(STORAGE_KEY);
-    setHistory({ matches: [], winCount: 0, loseCount: 0 }); // ステートもクリア
+    setHistory({ matches: [], winCount: 0, loseCount: 0 });
   }
 
   const [animateFirstItem, setAnimateFirstItem] = useState(false);
-  const [showAnimation, setShowAnimation] = useState<"勝ち" | "負け" | null>(null);  
-
   const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
 
   const kekka = (match: MatchResult) => {
@@ -114,7 +108,10 @@ export const Home = () => {
 
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
     setAnimateFirstItem(false);
-    setShowAnimation(shouhai);
+
+    // ▼ アニメーション開始トリガー
+    setLastResultForAnim(shouhai);
+    setShowResultAnimation(true);
 
     kekka({
       nichiji: new Date().toLocaleString(),
@@ -126,7 +123,6 @@ export const Home = () => {
 
     setSelectedOpponentCharacter(null);
 
-    // 負けのときだけ初期化
     if (shouhai === "負け") {
       setSelectedResult("勝ち");
     }
@@ -142,7 +138,6 @@ export const Home = () => {
     return isActive ? colorMap[color] : "bg-gray-400 hover:bg-gray-500";
   };
 
-  // 最初の要素にのみアニメーションを適用するためのフラグを設定
   useEffect(() => {
     if (history.matches.length > 0) {
       setAnimateFirstItem(true);
@@ -152,12 +147,16 @@ export const Home = () => {
   return (
     <>
       <Header />
-      {showAnimation && (
+
+      {/* ▼ 全画面用アニメーション (fixed) */}
+      {showResultAnimation && (
         <ResultAnimation 
-          result={showAnimation} 
-          onComplete={() => setShowAnimation(null)} 
+          result={lastResultForAnim} 
+          mode="fixed"
+          onComplete={() => setShowResultAnimation(false)}
         />
-      )}      
+      )}
+
       <div className="flex flex-col justify-center items-center">
         <div className="md:flex w-full max-w-7xl">
           <div className="w-full md:w-1/3">
@@ -205,7 +204,6 @@ export const Home = () => {
                 </button>
               </div>
             </div>
-
           </div>
           
           {/* ▼ メイン結果画面エリア */}
@@ -216,14 +214,12 @@ export const Home = () => {
               setHistory={setHistory}
               animateFirstItem={animateFirstItem}
               haishin={false}
-              // フィルターprops
               filterMyCharId={filterMyCharId}
               setFilterMyCharId={setFilterMyCharId}
               filterOppCharId={filterOppCharId}
               setFilterOppCharId={setFilterOppCharId}
               filterDateRange={filterDateRange}
               setFilterDateRange={setFilterDateRange}
-              // ▼ 新規追加：カスタム日付用
               customStartDate={customStartDate}
               setCustomStartDate={setCustomStartDate}
               customEndDate={customEndDate}
@@ -232,34 +228,53 @@ export const Home = () => {
           </div>
 
           {/* ▼ 配信画面エリア */}
-          <div className="md:w-1/3 md:h-90vh flex flex-col px-10">
-            <div className="hidden md:block h-4/5" id="win-lose-area-haishin">
-              <Result
-                filteredMatches={filteredMatchesWithIndex}
-                history={history}
-                setHistory={setHistory}
-                animateFirstItem={animateFirstItem}
-                haishin={true}
-                // ダミー関数
-                filterMyCharId={filterMyCharId}
-                setFilterMyCharId={() => {}}
-                filterOppCharId={filterOppCharId}
-                setFilterOppCharId={() => {}}
-                filterDateRange={filterDateRange}
-                setFilterDateRange={() => {}}
-                customStartDate={customStartDate}
-                setCustomStartDate={() => {}}
-                customEndDate={customEndDate}
-                setCustomEndDate={() => {}}
-              />
+          <div className="md:w-1/3 flex flex-col px-10">
+            {/* ここが点線枠（OBS用取り込みエリア） */}
+            <div className="hidden md:flex flex-col border-4 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 items-center justify-center relative mt-2">
+               {/* ラベル */}
+               <span className="absolute -top-3 bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
+                 🔴 配信用 (OBS取り込み枠)
+               </span>
+
+               {/* 白いカード部分（トリミング対象） */}
+               <div className="w-full bg-white rounded-lg shadow-lg p-2 overflow-hidden relative" id="win-lose-area-haishin">
+                  <Result
+                    filteredMatches={filteredMatchesWithIndex}
+                    history={history}
+                    setHistory={setHistory}
+                    animateFirstItem={animateFirstItem}
+                    haishin={true}
+                    // ダミー関数
+                    filterMyCharId={filterMyCharId}
+                    setFilterMyCharId={() => {}}
+                    filterOppCharId={filterOppCharId}
+                    setFilterOppCharId={() => {}}
+                    filterDateRange={filterDateRange}
+                    setFilterDateRange={() => {}}
+                    customStartDate={customStartDate}
+                    setCustomStartDate={() => {}}
+                    customEndDate={customEndDate}
+                    setCustomEndDate={() => {}}
+                  />
+
+                  {/* ▼ 配信枠用アニメーション (absolute配置) */}
+                  {showResultAnimation && (
+                    <ResultAnimation 
+                      result={lastResultForAnim} 
+                      mode="absolute"
+                    />
+                  )}
+               </div>
+
+               <p className="text-gray-400 text-xxs mt-2">※OBSでこの枠の内側をトリミングしてください</p>
             </div>
-            <div className="flex flex-col justify-center items-center mt-4">
+
+            <div className="flex flex-col justify-center items-center mt-6">
               <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={clearResults}>
                 勝敗記録一括削除
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </>
