@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MatchResult } from "./Home";
-import { characterList } from "./Character"; // キャラ一覧を使うのでimport
+import { characterList } from "./Character";
 
 interface MatchDetailModalProps {
   isOpen: boolean;
@@ -10,11 +10,22 @@ interface MatchDetailModalProps {
   onDelete: () => void;
 }
 
+// 日付オブジェクトから input type="datetime-local" 用の文字列 (yyyy-MM-ddThh:mm) を生成する関数
+const toDateTimeInputStr = (dateStr: string) => {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const year = d.getFullYear();
+  const month = (`0${d.getMonth() + 1}`).slice(-2);
+  const day = (`0${d.getDate()}`).slice(-2);
+  const hours = (`0${d.getHours()}`).slice(-2);
+  const minutes = (`0${d.getMinutes()}`).slice(-2);
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onClose, match, onSave, onDelete }) => {
   const [memo, setMemo] = useState("");
   const [dateStr, setDateStr] = useState("");
   
-  // ▼ 追加: 編集用のState
   const [shouhai, setShouhai] = useState<"勝ち" | "負け">("勝ち");
   const [myCharId, setMyCharId] = useState<number>(0);
   const [oppCharId, setOppCharId] = useState<number>(0);
@@ -26,36 +37,35 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
       setMyCharId(match.player?.characterNo || 0);
       setOppCharId(match.opponentPlayer?.characterNo || 0);
 
-      const d = new Date(match.nichiji);
-      if (!isNaN(d.getTime())) {
-        const year = d.getFullYear();
-        const month = (`0${d.getMonth() + 1}`).slice(-2);
-        const day = (`0${d.getDate()}`).slice(-2);
-        const hours = (`0${d.getHours()}`).slice(-2);
-        const minutes = (`0${d.getMinutes()}`).slice(-2);
-        setDateStr(`${year}-${month}-${day}T${hours}:${minutes}`);
-      } else {
-        setDateStr("");
-      }
+      // 初期表示用の日付文字列をセット
+      setDateStr(toDateTimeInputStr(match.nichiji));
     }
   }, [match, isOpen]);
 
   if (!isOpen || !match) return null;
 
   const handleSaveClick = () => {
-    const newDate = dateStr ? new Date(dateStr).toLocaleString() : match.nichiji;
+    // ▼ ここが修正ポイント！
+    // 1. 元の日時の「分まで」の文字列を作る
+    const originalDateInputStr = toDateTimeInputStr(match.nichiji);
     
-    // IDからキャラ情報を復元する
+    // 2. ユーザーがいじった inputの値(dateStr) と比較する
+    //    一緒なら「時間は変えてない」とみなして、元の match.nichiji (秒あり) を採用
+    //    違うなら「時間を変更した」とみなして、新しい日付 (秒は00になる) を採用
+    const finalDate = (dateStr === originalDateInputStr)
+      ? match.nichiji 
+      : new Date(dateStr).toLocaleString();
+
     const newMyChar = characterList.find(c => c.characterNo === myCharId) || match.player;
     const newOppChar = characterList.find(c => c.characterNo === oppCharId) || match.opponentPlayer;
 
     onSave({
       ...match,
-      nichiji: newDate,
+      nichiji: finalDate, // 判定後の日付を使う
       memo: memo,
-      shouhai: shouhai, // 変更後の勝敗
-      player: newMyChar || null, // 変更後の自キャラ
-      opponentPlayer: newOppChar || null, // 変更後の相手キャラ
+      shouhai: shouhai,
+      player: newMyChar || null,
+      opponentPlayer: newOppChar || null,
     });
   };
 
@@ -110,7 +120,6 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
                     ))}
                  </select>
                  <div className="flex justify-center mt-2">
-                    {/* 選択中のキャラ画像をプレビュー表示 */}
                     <img 
                       src={characterList.find(c => c.characterNo === myCharId)?.imageUrl} 
                       className="h-16 w-16 object-contain"
