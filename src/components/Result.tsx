@@ -49,7 +49,7 @@ export const Result: React.FC<ResultProps> = ({
     setIsModalOpen(true);
   };
 
-  // ▼ モーダルでの保存処理
+  // ▼ モーダルでの保存処理（勝敗数の再計算ロジックを追加）
   const handleModalSave = (updatedMatch: MatchResult) => {
     if (selectedMatchIndex === null) return;
     
@@ -57,10 +57,18 @@ export const Result: React.FC<ResultProps> = ({
       const newMatches = [...prev.matches];
       newMatches[selectedMatchIndex] = updatedMatch;
       
-      // 日付順（新しい順）にソート
+      // 1. 日付順にソートしなおす
       newMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
-      
-      return { ...prev, matches: newMatches };
+
+      // 2. 勝敗数を最初から数え直す（勝敗を変更した場合に対応するため）
+      const newWinCount = newMatches.filter(m => m.shouhai === "勝ち").length;
+      const newLoseCount = newMatches.filter(m => m.shouhai === "負け").length;
+
+      return { 
+        matches: newMatches,
+        winCount: newWinCount,
+        loseCount: newLoseCount
+      };
     });
     setIsModalOpen(false);
   };

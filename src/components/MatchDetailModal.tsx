@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { MatchResult } from "./Home";
+import { MatchResult, CharacterType } from "./Home";
+import { characterList } from "./Character"; // キャラ一覧を使うのでimport
 
 interface MatchDetailModalProps {
   isOpen: boolean;
@@ -12,16 +13,21 @@ interface MatchDetailModalProps {
 export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onClose, match, onSave, onDelete }) => {
   const [memo, setMemo] = useState("");
   const [dateStr, setDateStr] = useState("");
+  
+  // ▼ 追加: 編集用のState
+  const [shouhai, setShouhai] = useState<"勝ち" | "負け">("勝ち");
+  const [myCharId, setMyCharId] = useState<number>(0);
+  const [oppCharId, setOppCharId] = useState<number>(0);
 
-  // モーダルが開かれたとき、propsのデータでstateを初期化
   useEffect(() => {
     if (match) {
       setMemo(match.memo || "");
-      // 日時の変換処理 (input type="datetime-local" 用のフォーマットに合わせる)
-      // 例: "2024/1/1 12:00:00" -> "2024-01-01T12:00"
+      setShouhai(match.shouhai);
+      setMyCharId(match.player?.characterNo || 0);
+      setOppCharId(match.opponentPlayer?.characterNo || 0);
+
       const d = new Date(match.nichiji);
       if (!isNaN(d.getTime())) {
-        // 日本時間に合わせる簡易的な処理
         const year = d.getFullYear();
         const month = (`0${d.getMonth() + 1}`).slice(-2);
         const day = (`0${d.getDate()}`).slice(-2);
@@ -37,13 +43,19 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
   if (!isOpen || !match) return null;
 
   const handleSaveClick = () => {
-    // 日付文字列を元のフォーマットに戻す（簡易版）
     const newDate = dateStr ? new Date(dateStr).toLocaleString() : match.nichiji;
     
+    // IDからキャラ情報を復元する
+    const newMyChar = characterList.find(c => c.characterNo === myCharId) || match.player;
+    const newOppChar = characterList.find(c => c.characterNo === oppCharId) || match.opponentPlayer;
+
     onSave({
       ...match,
       nichiji: newDate,
       memo: memo,
+      shouhai: shouhai, // 変更後の勝敗
+      player: newMyChar || null, // 変更後の自キャラ
+      opponentPlayer: newOppChar || null, // 変更後の相手キャラ
     });
   };
 
@@ -55,9 +67,9 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden animate-fadeIn">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden animate-fadeIn max-h-[90vh] overflow-y-auto">
         {/* ヘッダー */}
-        <div className="bg-green-600 text-white p-4 flex justify-between items-center">
+        <div className="bg-green-600 text-white p-4 flex justify-between items-center sticky top-0 z-10">
           <h2 className="text-xl font-bold">対戦詳細・編集</h2>
           <button onClick={onClose} className="text-white hover:text-gray-200">
             <i className="fas fa-times text-xl"></i>
@@ -66,27 +78,71 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
 
         {/* ボディ */}
         <div className="p-6">
-          {/* 対戦カード表示 */}
-          <div className="flex justify-center items-center gap-4 mb-6">
-            <div className="text-center">
-              <span className="text-xs text-gray-500">自分</span>
-              <img src={match.player?.imageUrl} alt={match.player?.characterName} className="w-16 h-16 object-contain mx-auto" />
-            </div>
-            <div className="text-2xl font-bold text-gray-400">VS</div>
-            <div className="text-center">
-              <span className="text-xs text-gray-500">相手</span>
-              <img src={match.opponentPlayer?.imageUrl} alt={match.opponentPlayer?.characterName} className="w-16 h-16 object-contain mx-auto" />
-            </div>
+          
+          {/* 勝敗の変更 */}
+          <div className="flex justify-center mb-6 gap-4">
+            <button
+              onClick={() => setShouhai("勝ち")}
+              className={`py-2 px-8 rounded font-bold border-2 ${shouhai === "勝ち" ? "bg-red-500 text-white border-red-500" : "bg-white text-gray-400 border-gray-200"}`}
+            >
+              勝ち
+            </button>
+            <button
+              onClick={() => setShouhai("負け")}
+              className={`py-2 px-8 rounded font-bold border-2 ${shouhai === "負け" ? "bg-blue-500 text-white border-blue-500" : "bg-white text-gray-400 border-gray-200"}`}
+            >
+              負け
+            </button>
           </div>
 
-          <div className="text-center mb-6">
-            <span className={`text-2xl font-bold ${match.shouhai === "勝ち" ? "text-red-600" : "text-blue-600"}`}>
-              {match.shouhai}
-            </span>
-          </div>
-
-          {/* 編集フォーム */}
           <div className="space-y-4">
+            {/* キャラ変更エリア */}
+            <div className="grid grid-cols-2 gap-4">
+               <div>
+                 <label className="block text-sm font-bold text-gray-700 mb-1">自分</label>
+                 <select 
+                    className="w-full border rounded p-2 text-sm bg-gray-50"
+                    value={myCharId}
+                    onChange={(e) => setMyCharId(Number(e.target.value))}
+                 >
+                    {characterList.map(c => (
+                      <option key={`my-edit-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
+                    ))}
+                 </select>
+                 <div className="flex justify-center mt-2">
+                    {/* 選択中のキャラ画像をプレビュー表示 */}
+                    <img 
+                      src={characterList.find(c => c.characterNo === myCharId)?.imageUrl} 
+                      className="h-16 w-16 object-contain"
+                      alt="my char"
+                    />
+                 </div>
+               </div>
+
+               <div>
+                 <label className="block text-sm font-bold text-gray-700 mb-1">相手</label>
+                 <select 
+                    className="w-full border rounded p-2 text-sm bg-gray-50"
+                    value={oppCharId}
+                    onChange={(e) => setOppCharId(Number(e.target.value))}
+                 >
+                    {characterList.map(c => (
+                      <option key={`opp-edit-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
+                    ))}
+                 </select>
+                 <div className="flex justify-center mt-2">
+                    <img 
+                      src={characterList.find(c => c.characterNo === oppCharId)?.imageUrl} 
+                      className="h-16 w-16 object-contain"
+                      alt="opp char"
+                    />
+                 </div>
+               </div>
+            </div>
+
+            <hr className="my-4"/>
+
+            {/* 日時とメモ */}
             <div>
               <label className="block text-sm font-bold text-gray-700">日時</label>
               <input
@@ -99,7 +155,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
             <div>
               <label className="block text-sm font-bold text-gray-700">メモ</label>
               <textarea
-                rows={4}
+                rows={3}
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
@@ -109,24 +165,24 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
           </div>
         </div>
 
-        {/* フッター（アクションボタン） */}
-        <div className="bg-gray-100 p-4 flex justify-between">
+        {/* フッター */}
+        <div className="bg-gray-100 p-4 flex justify-between sticky bottom-0">
           <button 
             onClick={handleDeleteClick}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded text-sm"
           >
             削除
           </button>
           <div className="flex gap-2">
             <button 
               onClick={onClose}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded text-sm"
             >
               キャンセル
             </button>
             <button 
               onClick={handleSaveClick}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm"
             >
               保存する
             </button>
