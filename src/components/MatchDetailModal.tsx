@@ -69,7 +69,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden animate-fadeIn max-h-[90vh] overflow-y-auto">
         {/* ヘッダー */}
-        <div className="bg-green-600 text-white p-4 flex justify-between items-center sticky top-0 z-10">
+        <div className="bg-blue-400 text-white p-4 flex justify-between items-center sticky top-0 z-10">
           <h2 className="text-xl font-bold">対戦詳細・編集</h2>
           <button onClick={onClose} className="text-white hover:text-gray-200">
             <i className="fas fa-times text-xl"></i>
