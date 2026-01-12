@@ -13,7 +13,7 @@ export const ResultAnimation: React.FC<ResultAnimationProps> = ({ result, onComp
     if (onComplete) {
       const timer = setTimeout(() => {
         onComplete();
-      }, 1200);
+      }, 2500);
       return () => clearTimeout(timer);
     }
   }, [onComplete]);
