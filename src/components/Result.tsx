@@ -44,7 +44,6 @@ export const Result: React.FC<ResultProps> = ({
 
   // ▼ モーダルを開く処理
   const handleRowClick = (originalIndex: number) => {
-    if (haishin) return; // 配信モードなら何もしない
     setSelectedMatchIndex(originalIndex);
     setIsModalOpen(true);
   };

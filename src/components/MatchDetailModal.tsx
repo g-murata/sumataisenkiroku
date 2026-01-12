@@ -45,13 +45,8 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
   if (!isOpen || !match) return null;
 
   const handleSaveClick = () => {
-    // ▼ ここが修正ポイント！
-    // 1. 元の日時の「分まで」の文字列を作る
     const originalDateInputStr = toDateTimeInputStr(match.nichiji);
     
-    // 2. ユーザーがいじった inputの値(dateStr) と比較する
-    //    一緒なら「時間は変えてない」とみなして、元の match.nichiji (秒あり) を採用
-    //    違うなら「時間を変更した」とみなして、新しい日付 (秒は00になる) を採用
     const finalDate = (dateStr === originalDateInputStr)
       ? match.nichiji 
       : new Date(dateStr).toLocaleString();
