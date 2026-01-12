@@ -13,7 +13,7 @@ export const ResultAnimation: React.FC<ResultAnimationProps> = ({ result, onComp
     if (onComplete) {
       const timer = setTimeout(() => {
         onComplete();
-      }, 2500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [onComplete]);
@@ -31,7 +31,7 @@ export const ResultAnimation: React.FC<ResultAnimationProps> = ({ result, onComp
   const positionClass = mode === "fixed" ? "fixed inset-0 z-50" : "absolute inset-0 z-10";
   
   // 配信枠内(absolute)のときは、少し文字と余白を小さくする
-  const textSizeClass = mode === "fixed" ? "text-6xl md:text-7xl" : "text-6xl";
+  const textSizeClass = mode === "fixed" ? "text-3xl md:text-7xl" : "text-6xl";
   const paddingClass = mode === "fixed" ? "px-12 py-6" : "px-4 py-2";
   const offsetClass = mode === "absolute" ? "mt-10" : "";
 
