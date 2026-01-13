@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MatchResult } from "./Home";
+import { MatchResult } from '../types';
 import { characterList } from "./Character";
 
 interface MatchDetailModalProps {

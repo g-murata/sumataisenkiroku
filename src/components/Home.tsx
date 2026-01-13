@@ -3,29 +3,7 @@ import { Header } from '../components/Header';
 import { Character } from './Character';
 import { Result } from './Result';
 import { ResultAnimation } from './ResultAnimation';
-
-// キャラクター情報
-export interface CharacterType {
-  characterNo: number;
-  characterName: string;
-  imageUrl: string;
-}
-
-// 🏆 個々の試合の記録
-export interface MatchResult {
-  nichiji: string;
-  player: CharacterType | null;
-  opponentPlayer: CharacterType | null;
-  shouhai: "勝ち" | "負け";
-  memo: any;
-}
-
-// 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト
-export interface MatchHistory {
-  matches: MatchResult[];
-  winCount: number;
-  loseCount: number;
-}
+import { CharacterType, MatchHistory, MatchResult } from '../types';
 
 export const Home = () => {
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);

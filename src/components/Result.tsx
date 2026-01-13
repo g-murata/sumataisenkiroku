@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MatchHistory, MatchResult } from "./Home";
+import { MatchHistory, MatchResult } from '../types';
 import { characterList } from "./Character";
 import { MatchDetailModal } from "./MatchDetailModal";
 
