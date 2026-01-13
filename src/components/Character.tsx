@@ -1,6 +1,6 @@
 // import { useState } from 'react';
 
-import { CharacterType } from "./Home";
+import { CharacterType } from '../types';
 
 export const characterList: CharacterType[] = [
   { characterNo: 1, characterName: 'マリオ', imageUrl: `${process.env.PUBLIC_URL}/fighter/mario.png` },
