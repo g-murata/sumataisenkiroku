@@ -95,7 +95,6 @@ export const Home = () => {
     setHistory({ matches: [], winCount: 0, loseCount: 0 });
   }
 
-  const [animateFirstItem, setAnimateFirstItem] = useState(false);
   const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
 
   const kekka = (match: MatchResult) => {
@@ -107,7 +106,6 @@ export const Home = () => {
   };
 
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
-    setAnimateFirstItem(false);
 
     // ▼ アニメーション開始トリガー
     setLastResultForAnim(shouhai);
@@ -137,12 +135,6 @@ export const Home = () => {
   const backgroundColorClass = (isActive: boolean, color: keyof typeof colorMap) => {
     return isActive ? colorMap[color] : "bg-gray-400 hover:bg-gray-500";
   };
-
-  useEffect(() => {
-    if (history.matches.length > 0) {
-      setAnimateFirstItem(true);
-    }
-  }, [history.matches]);
 
   return (
     <>
@@ -212,7 +204,6 @@ export const Home = () => {
               filteredMatches={filteredMatchesWithIndex}
               history={history}
               setHistory={setHistory}
-              animateFirstItem={animateFirstItem}
               haishin={false}
               filterMyCharId={filterMyCharId}
               setFilterMyCharId={setFilterMyCharId}
@@ -242,7 +233,6 @@ export const Home = () => {
                     filteredMatches={filteredMatchesWithIndex}
                     history={history}
                     setHistory={setHistory}
-                    animateFirstItem={animateFirstItem}
                     haishin={true}
                     // ダミー関数
                     filterMyCharId={filterMyCharId}

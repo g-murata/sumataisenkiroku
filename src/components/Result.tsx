@@ -8,7 +8,6 @@ interface ResultProps {
   filteredMatches: { match: MatchResult; originalIndex: number }[];
   history: MatchHistory;
   setHistory: any;
-  animateFirstItem: boolean;
   haishin: boolean;
 
   // フィルター操作用関数
@@ -30,7 +29,7 @@ interface ResultProps {
 
 export const Result: React.FC<ResultProps> = ({ 
   filteredMatches, 
-  history, setHistory, animateFirstItem, haishin,
+  history, setHistory, haishin,
   filterMyCharId, setFilterMyCharId,
   filterOppCharId, setFilterOppCharId,
   filterDateRange, setFilterDateRange,
@@ -202,9 +201,7 @@ export const Result: React.FC<ResultProps> = ({
             </thead>
             <tbody>
               {filteredMatches.map(({ match, originalIndex }, loopIndex) => (
-                <tr className={`group cursor-pointer border-b border-gray-100
-                      ${loopIndex === 0 && animateFirstItem && !filterMyCharId && !filterOppCharId ? "fadeIn" : ""} 
-                      ${(hoverRowIndex === loopIndex) ? 'bg-blue-50' : ''}`}
+                <tr className={`group cursor-pointer border-b border-gray-100 ${(hoverRowIndex === loopIndex) ? 'bg-blue-50' : ''}`}
                   key={originalIndex}
                   onMouseEnter={() => setHoverRowIndex(loopIndex)}
                   onMouseLeave={() => setHoverRowIndex(null)}
