@@ -6,12 +6,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ user }) => {
-  const bgColor = user ? "bg-red-400" : "bg-green-400";
+  const bgColor = user ? "bg-green-500" : "bg-blue-500";
+  const titleText = user ? "スマ対戦記録" : "スマ対戦記録 (おためし版)";
 
   return (
     <div className={`${bgColor} text-white md:mb-3 transition-colors duration-300`}>        
       <div className="flex justify-between items-center p-2 max-w-7xl mx-auto">
-        <h1 className="text-xl font-bold flex-grow text-center">スマ対戦記録</h1>
+        <h1 className="text-xl font-bold flex-grow text-center">{titleText}</h1>
         {user ? (
            <div className="absolute right-4 text-xs md:text-sm bg-black bg-opacity-20 px-2 py-1 rounded">
              {user.email}
