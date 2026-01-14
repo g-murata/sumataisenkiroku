@@ -22,5 +22,3 @@ export interface MatchHistory {
   winCount: number;
   loseCount: number;
 }
-
-// テストですよー
