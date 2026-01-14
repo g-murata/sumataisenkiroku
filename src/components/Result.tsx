@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MatchHistory, MatchResult } from '../types';
 import { characterList } from "./Character";
-import { MatchDetailModal } from "./MatchDetailModal";
+// ★削除: MatchDetailModalのimportは不要になりました
 
 interface ResultProps {
   // 親で計算済みのリストを受け取る
@@ -20,11 +20,14 @@ interface ResultProps {
   filterDateRange: "all" | "today" | "week" | "custom";
   setFilterDateRange: (range: "all" | "today" | "week" | "custom") => void;
   
-  // ▼ 新規追加：カスタム日付用
+  // カスタム日付用
   customStartDate: string;
   setCustomStartDate: (date: string) => void;
   customEndDate: string;
   setCustomEndDate: (date: string) => void;
+
+  // ★追加: 行がクリックされたことを親に伝える関数
+  onRowClick: (index: number) => void;
 }
 
 export const Result: React.FC<ResultProps> = ({ 
@@ -34,58 +37,13 @@ export const Result: React.FC<ResultProps> = ({
   filterOppCharId, setFilterOppCharId,
   filterDateRange, setFilterDateRange,
   customStartDate, setCustomStartDate,
-  customEndDate, setCustomEndDate
+  customEndDate, setCustomEndDate,
+  onRowClick // ★受け取り
 }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMatchIndex, setSelectedMatchIndex] = useState<number | null>(null);
-
-  // ▼ モーダルを開く処理
-  const handleRowClick = (originalIndex: number) => {
-    setSelectedMatchIndex(originalIndex);
-    setIsModalOpen(true);
-  };
-
-  // ▼ モーダルでの保存処理（勝敗数の再計算ロジックを追加）
-  const handleModalSave = (updatedMatch: MatchResult) => {
-    if (selectedMatchIndex === null) return;
-    
-    setHistory((prev: MatchHistory) => {
-      const newMatches = [...prev.matches];
-      newMatches[selectedMatchIndex] = updatedMatch;
-      
-      // 1. 日付順にソートしなおす
-      newMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
-
-      // 2. 勝敗数を最初から数え直す（勝敗を変更した場合に対応するため）
-      const newWinCount = newMatches.filter(m => m.shouhai === "勝ち").length;
-      const newLoseCount = newMatches.filter(m => m.shouhai === "負け").length;
-
-      return { 
-        matches: newMatches,
-        winCount: newWinCount,
-        loseCount: newLoseCount
-      };
-    });
-    setIsModalOpen(false);
-  };
-
-  // ▼ モーダルでの削除処理
-  const handleModalDelete = () => {
-    if (selectedMatchIndex === null) return;
-    const targetMatch = history.matches[selectedMatchIndex];
-
-    setHistory((prev: MatchHistory) => {
-      const newMatches = prev.matches.filter((_, i) => i !== selectedMatchIndex);
-      return {
-        matches: newMatches,
-        winCount: targetMatch.shouhai === "勝ち" ? prev.winCount - 1 : prev.winCount,
-        loseCount: targetMatch.shouhai === "負け" ? prev.loseCount - 1 : prev.loseCount,
-      };
-    });
-    setIsModalOpen(false);
-  };
+  
+  // ★削除: ここにあった isModalOpen や handleModalSave などのロジックは全て削除しました。
 
   // ▼ 勝敗数の計算
   const filteredWinCount = filteredMatches.filter(item => item.match.shouhai === "勝ち").length;
@@ -187,6 +145,7 @@ export const Result: React.FC<ResultProps> = ({
         </div>
       )}
 
+      {/* ▼ 結果リスト表示 */}
       <div className={`${haishin ? 'h-auto' : 'h-80 md:h-4/5'} flex`}>
         <div className={`${haishin ? 'h-38' : 'h-full'} w-full bg-white border rounded-lg shadow-inner overflow-y-auto hide-scrollbar md:w-full`}>
           <table className="w-full table-fixed">
@@ -203,7 +162,8 @@ export const Result: React.FC<ResultProps> = ({
                   key={originalIndex}
                   onMouseEnter={() => setHoverRowIndex(loopIndex)}
                   onMouseLeave={() => setHoverRowIndex(null)}
-                  onClick={() => handleRowClick(originalIndex)}
+                  // ★修正: ここで親から渡された関数を実行！
+                  onClick={() => onRowClick(originalIndex)}
                 >
                   {!haishin &&
                     <td className="text-center text-xxs py-2 text-gray-500">
@@ -248,14 +208,7 @@ export const Result: React.FC<ResultProps> = ({
         </div>
       </div>
       
-      {/* ▼ 詳細編集モーダル */}
-      <MatchDetailModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        match={selectedMatchIndex !== null ? history.matches[selectedMatchIndex] : null}
-        onSave={handleModalSave}
-        onDelete={handleModalDelete}
-      />
+      {/* ★削除: MatchDetailModal の配置も削除 */}
     </>
   )
 }

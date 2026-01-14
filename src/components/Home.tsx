@@ -70,7 +70,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     setLastResultForAnim(shouhai);
     setShowResultAnimation(true);
 
-    // 2. 親（App）にデータを渡す！ (ここが変更点)
+    // 2. 親（App）にデータを渡す！
     onAddResult({
       nichiji: new Date().toLocaleString(),
       player: selectedMyCharacter,
@@ -164,8 +164,10 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
             <Result
               filteredMatches={filteredMatchesWithIndex}
               history={history}
-              setHistory={() => {}} // ★重要: Homeでは履歴変更しないのでダミー関数を渡す(編集はAppのモーダルでやるため)
-              // onRowClick={onRowClick} // ★追加: Result側でこのpropsを受け取ってクリック時に実行してもらう必要あり
+              setHistory={() => {}} 
+              
+              onRowClick={onRowClick} // ★重要: これでApp.tsxのモーダルが開くようになります！
+              
               haishin={false}
               filterMyCharId={filterMyCharId}
               setFilterMyCharId={setFilterMyCharId}
@@ -184,20 +186,19 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
           <div className="md:w-1/3 flex flex-col px-10">
             {/* ここが点線枠（OBS用取り込みエリア） */}
             <div className="hidden md:flex flex-col border-4 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 items-center justify-center relative mt-2">
-               {/* ラベル */}
                <span className="absolute -top-3 bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
                  🔴 配信用 (OBS取り込み枠)
                </span>
 
-               {/* 白いカード部分（トリミング対象） */}
                <div className="w-full bg-white rounded-lg shadow-lg p-2 overflow-hidden relative" id="win-lose-area-haishin">
                   <Result
                     filteredMatches={filteredMatchesWithIndex}
                     history={history}
-                    setHistory={() => {}} // ダミー
-                    // onRowClick={() => {}} // 配信画面はクリックしても反応しなくてOK
+                    setHistory={() => {}}
+                    
+                    onRowClick={() => {}} // ★配信画面はクリックしても何も起きなくてOK
+                    
                     haishin={true}
-                    // フィルターステートのダミー（配信画面は操作しないので）
                     filterMyCharId={filterMyCharId}
                     setFilterMyCharId={() => {}}
                     filterOppCharId={filterOppCharId}
@@ -210,7 +211,6 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                     setCustomEndDate={() => {}}
                   />
 
-                  {/* ▼ 配信枠用アニメーション (absolute配置) */}
                   {showResultAnimation && (
                     <ResultAnimation 
                       result={lastResultForAnim} 
