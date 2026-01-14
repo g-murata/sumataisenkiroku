@@ -13,7 +13,8 @@ const STORAGE_KEY = "gameResults";
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
-
+  const [isLoading, setIsLoading] = useState(true)
+  
   // 初期値はローカルストレージから（一瞬表示される用）
   const [history, setHistory] = useState<MatchHistory>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -74,7 +75,11 @@ export default function App() {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
-        fetchMatches(currentUser.id); // ログイン中ならクラウドからロード
+        fetchMatches(currentUser.id).then(() => {
+          setIsLoading(false); // データ取得も終わったら表示開始
+        });
+      } else {
+        setIsLoading(false); // 未ログインなら即表示開始
       }
     });
 
@@ -246,7 +251,12 @@ export default function App() {
     }
   };
 
-  return (
+  if (isLoading) {
+    // ここをリッチなローディングアニメーションにしてもOK
+    return <div className="flex justify-center items-center h-screen">読み込み中...</div>;
+  }
+
+  return (    
     <div>
       <Header user={user} />
 
