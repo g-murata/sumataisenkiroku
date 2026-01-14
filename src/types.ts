@@ -7,12 +7,13 @@ export interface CharacterType {
 
 // 🏆 個々の試合の記録
 export interface MatchResult {
-  id?: number; // ★重要：SupabaseのID用に追加（?をつけて「無くてもOK」にする）
+  id?: number;
+  user_id?: string;
   nichiji: string;
   player: CharacterType | null;
   opponentPlayer: CharacterType | null;
   shouhai: "勝ち" | "負け";
-  memo: string; // any ではなく string の方が安全です
+  memo: string;
 }
 
 // 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト

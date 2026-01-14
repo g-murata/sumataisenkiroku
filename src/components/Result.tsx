@@ -187,8 +187,6 @@ export const Result: React.FC<ResultProps> = ({
         </div>
       )}
 
-      {/* ▼ 結果リスト表示 */}
-      {/* 修正点: haishin時は高さを自動(h-auto)にし、通常時は画面いっぱい(h-4/5)にする */}
       <div className={`${haishin ? 'h-auto' : 'h-80 md:h-4/5'} flex`}>
         <div className={`${haishin ? 'h-38' : 'h-full'} w-full bg-white border rounded-lg shadow-inner overflow-y-auto hide-scrollbar md:w-full`}>
           <table className="w-full table-fixed">
@@ -235,7 +233,6 @@ export const Result: React.FC<ResultProps> = ({
               ))}
               {filteredMatches.length === 0 && (
                 <tr>
-                  {/* 配信モードなら3列、通常なら5列結合にする */}
                   <td 
                     colSpan={haishin ? 3 : 5} 
                     className="text-center py-10 text-gray-400 text-sm"

@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import './App.css';
 
 import { supabase } from './supabaseClient';
+import { Header } from './components/Header';
 import { Home } from './components/Home';
 import { MatchHistory, MatchResult } from './types';
+import { MatchDetailModal } from './components/MatchDetailModal';
 
 const STORAGE_KEY = "gameResults";
 
@@ -165,10 +167,28 @@ export default function App() {
     }
   };
 
-  
   return (
     <div>
-       <h1>スマ対戦記録</h1>
+      <Header user={user} />
+
+      {/* --- メイン画面 (Home) --- */}
+      <Home 
+        history={history}
+        onAddResult={handleAddResult}
+        onRowClick={(index) => {
+          setSelectedMatchIndex(index);
+          setIsModalOpen(true);
+        }}
+        onClearResults={handleClearResults}
+      />
+
+      <MatchDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        match={selectedMatchIndex !== null ? history.matches[selectedMatchIndex] : null}
+        onSave={handleUpdateMatch}
+        onDelete={handleDeleteMatch}
+      />
     </div>
   );
 }
