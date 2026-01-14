@@ -13,7 +13,7 @@ const STORAGE_KEY = "gameResults";
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
   
   // 初期値はローカルストレージから（一瞬表示される用）
   const [history, setHistory] = useState<MatchHistory>(() => {
@@ -70,36 +70,38 @@ export default function App() {
   // ▼ 3. ログイン監視とデータロードの切り替え
   // ---------------------------------------------------------
   useEffect(() => {
-    // 初回ロード時のチェック
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchMatches(currentUser.id).then(() => {
-          setIsLoading(false); // データ取得も終わったら表示開始
-        });
-      } else {
-        setIsLoading(false); // 未ログインなら即表示開始
-      }
-    });
+      const init = async () => {
+        // セッションチェック
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-    // ログイン状態の変化を監視
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+        if (currentUser) {
+          // ログインしてるなら、データを取り終わるまで待つ (await)
+          await fetchMatches(currentUser.id);
+        }
+        
+        // 全部の準備ができたら、ロード終了！(フェードイン開始)
+        setIsLoading(false);
+      };
 
-      if (currentUser) {
-        // 🟢 ログイン時: Supabaseから取得
-        fetchMatches(currentUser.id);
-      } else {
-        // 🔵 ログアウト時: LocalStorageから取得
-        const stored = localStorage.getItem(STORAGE_KEY);
-        setHistory(stored ? JSON.parse(stored) : { matches: [], winCount: 0, loseCount: 0 });
-      }
-    });
+      init();
 
-    return () => subscription.unsubscribe();
-  }, []);
+      // ログイン状態の監視 (ここは既存のままでOKですが、isLoading操作は不要)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        // ログアウトしたりアカウント切り替えた時の処理
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        if (currentUser) {
+          fetchMatches(currentUser.id);
+        } else {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          setHistory(stored ? JSON.parse(stored) : { matches: [], winCount: 0, loseCount: 0 });
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }, []);
 
 
   // ---------------------------------------------------------
@@ -252,8 +254,7 @@ export default function App() {
   };
 
   if (isLoading) {
-    // ここをリッチなローディングアニメーションにしてもOK
-    return <div className="flex justify-center items-center h-screen">読み込み中...</div>;
+    return <div className="h-screen w-screen bg-white" />;
   }
 
   return (    
