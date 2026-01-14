@@ -1,39 +1,39 @@
 // 使用していない変数があってもエラーにならないよう。
 /* eslint-disable no-unused-vars */
-
+import { useState, useEffect } from 'react';
 import './App.css';
 
 import { supabase } from './supabaseClient';
 import { Home } from './components/Home';
+import { MatchHistory, MatchResult } from './types';
 
-const handleLogin = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+const STORAGE_KEY = "gameResults";
+
+export default function App() {
+  const [user, setUser] = useState<any>(null);
+
+  const [history, setHistory] = useState<MatchHistory>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : { matches: [], winCount: 0, loseCount: 0 };
   });
-  if (error) console.error('Login error:', error);
-};
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMatchIndex, setSelectedMatchIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
 
-function App() {
   return (
-    <>
-      <button 
-        onClick={handleLogin}
-        style={{ 
-          padding: '10px 20px', 
-          fontSize: '16px', 
-          backgroundColor: '#4285F4', 
-          color: 'white', 
-          border: 'none', 
-          borderRadius: '4px',
-          cursor: 'pointer' 
-        }}
-      >
-        Googleでログイン
-      </button>    
-      <Home />
-    </>
-   );
+    <div>
+       <h1>スマ対戦記録</h1>
+    </div>
+  );
 }
-
-export default App;
