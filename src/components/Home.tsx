@@ -1,4 +1,6 @@
 import  { useState } from 'react';
+
+import { supabase } from '../supabaseClient';
 import { Character } from './Character';
 import { Result } from './Result';
 import { ResultAnimation } from './ResultAnimation';
@@ -10,6 +12,7 @@ interface HomeProps {
   onAddResult: (match: MatchResult) => void;
   onRowClick: (index: number) => void;
   onClearResults: () => void;
+  user: any; // ★追加: ログイン情報を受け取る
 }
 
 export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults }) => {
@@ -64,24 +67,87 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       return isMyCharMatch && isOppCharMatch && isDateMatch;
     });
 
+// ▼ 2. 日本時間形式 (YYYY/MM/DD HH:mm:ss) に変換する便利関数
+  const formatJST = (d: Date) => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0'); // 1桁なら0をつける
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd} ${hh}:${min}:${ss}`;
+  };
+
+  const migrateData = async () => {
+    // 1. ログインチェック
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("ログインしてから実行してください！");
+      return;
+    }
+
+    // 2. LocalStorageからデータ取得
+    const storedData = localStorage.getItem("gameResults");
+    if (!storedData) {
+      alert("ローカルストレージにデータがありません。");
+      return;
+    }
+    
+    const parsedData = JSON.parse(storedData);
+    const localMatches = parsedData.matches;
+
+    if (localMatches.length === 0) {
+      alert("移行するデータがありません。");
+      return;
+    }
+
+    if (!window.confirm(`${localMatches.length}件のデータをDB（データベース）に移行しますか？`)) {
+      return;
+    }
+
+    // 3. データ変換（自分のIDを付与）
+    const insertData = localMatches.map((m: any) => ({
+      user_id: user.id,
+      date: formatJST(new Date(m.nichiji)),
+      my_char_id: m.player.characterNo,
+      opp_char_id: m.opponentPlayer.characterNo,
+      my_char: m.player.characterName,
+      opponent_char: m.opponentPlayer.characterName,
+      result: m.shouhai,
+      memo: m.memo || ""
+    }));
+
+    // 4. 一括登録
+    const { error } = await supabase.from('matches').insert(insertData);
+
+    if (error) {
+      console.error("移行エラー:", error);
+      alert(`エラー: ${error.message}`);
+    } else {
+      alert("🎉 移行完了！リロードします。");      
+      window.location.reload();
+    }
+  };
+
+
   // ▼ 記録ボタンが押された時の処理
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
-    // 1. アニメーション開始 (UIの動き)
     setLastResultForAnim(shouhai);
     setShowResultAnimation(true);
 
-    // 2. 親（App）にデータを渡す！
+    // ★ ここで formatJST を使って、きれいな日付を作ります！
+    const now = new Date();
+    const formattedDate = formatJST(now);
+
     onAddResult({
-      nichiji: new Date().toLocaleString(),
+      nichiji: formattedDate, // ← 修正：変換後の日付を入れる
       player: selectedMyCharacter,
       opponentPlayer: selectedOpponentCharacter,
       shouhai,
       memo: ""
     });
 
-    // 3. UIリセット
     setSelectedOpponentCharacter(null);
-
     if (shouhai === "負け") {
       setSelectedResult("勝ち");
     }
@@ -226,6 +292,21 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
               <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={onClearResults}>
                 勝敗記録一括削除
               </button>
+              {/* {user && (
+                <button 
+                  className="py-2 px-4 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-bold"
+                  onClick={migrateData}
+                >
+                  💻 デバイスの対戦結果を移行する
+                </button>
+                )} */}
+              <button 
+                className="py-2 px-4 bg-orange-300 text-white rounded hover:bg-orange-400 font-bold m-2"
+                onClick={migrateData}
+              >
+                💻 デバイスの対戦結果を移行する
+              </button>              
+
             </div>
           </div>
         </div>

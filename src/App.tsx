@@ -269,6 +269,7 @@ export default function App() {
           setIsModalOpen(true);
         }}
         onClearResults={handleClearResults}
+        user={user} // ★これを追加！
       />
 
       <MatchDetailModal
