@@ -67,17 +67,6 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       return isMyCharMatch && isOppCharMatch && isDateMatch;
     });
 
-// ▼ 2. 日本時間形式 (YYYY/MM/DD HH:mm:ss) に変換する便利関数
-  const formatJST = (d: Date) => {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0'); // 1桁なら0をつける
-    const dd = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
-    const ss = String(d.getSeconds()).padStart(2, '0');
-    return `${yyyy}/${mm}/${dd} ${hh}:${min}:${ss}`;
-  };
-
   const migrateData = async () => {
     // 1. ログインチェック
     const { data: { user } } = await supabase.auth.getUser();
