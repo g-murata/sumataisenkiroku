@@ -108,7 +108,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     // 3. データ変換（自分のIDを付与）
     const insertData = localMatches.map((m: any) => ({
       user_id: user.id,
-      date: formatJST(new Date(m.nichiji)),
+      date: new Date(m.nichiji).toISOString(),
       my_char_id: m.player.characterNo,
       opp_char_id: m.opponentPlayer.characterNo,
       my_char: m.player.characterName,
@@ -135,12 +135,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     setLastResultForAnim(shouhai);
     setShowResultAnimation(true);
 
-    // ★ ここで formatJST を使って、きれいな日付を作ります！
-    const now = new Date();
-    const formattedDate = formatJST(now);
-
     onAddResult({
-      nichiji: formattedDate, // ← 修正：変換後の日付を入れる
+      nichiji: new Date().toISOString(),
       player: selectedMyCharacter,
       opponentPlayer: selectedOpponentCharacter,
       shouhai,

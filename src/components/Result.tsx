@@ -68,6 +68,18 @@ export const Result: React.FC<ResultProps> = ({
     return streak;
   };
 
+  const formatJST = (dateStr: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
+  };
+
+
   return (
     <>
       <div className="flex justify-between items-end mb-2">
@@ -167,8 +179,7 @@ export const Result: React.FC<ResultProps> = ({
                 >
                   {!haishin &&
                     <td className="text-center text-xxs py-2 text-gray-500">
-                      {match.nichiji?.split(' ')[0].slice(5)}<br/>
-                      {match.nichiji?.split(' ')[1]?.slice(0, 5)}
+                      {formatJST(match.nichiji)}
                     </td>
                   }
 
