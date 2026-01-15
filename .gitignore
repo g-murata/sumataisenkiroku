@@ -24,3 +24,8 @@ yarn-error.log*
 
 # 画像ファイル
 *Zone.Identifier
+
+# envファイル
+.env
+.env.local
+.env.*.local

@@ -1,47 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Header } from '../components/Header';
+import  { useState } from 'react';
 import { Character } from './Character';
 import { Result } from './Result';
 import { ResultAnimation } from './ResultAnimation';
+import { CharacterType, MatchHistory, MatchResult } from '../types';
 
-// キャラクター情報
-export interface CharacterType {
-  characterNo: number;
-  characterName: string;
-  imageUrl: string;
+// ★ 親（App）から受け取るものを定義
+interface HomeProps {
+  history: MatchHistory;
+  onAddResult: (match: MatchResult) => void;
+  onRowClick: (index: number) => void;
+  onClearResults: () => void;
 }
 
-// 🏆 個々の試合の記録
-export interface MatchResult {
-  nichiji: string;
-  player: CharacterType | null;
-  opponentPlayer: CharacterType | null;
-  shouhai: "勝ち" | "負け";
-  memo: any;
-}
-
-// 📊 全体の試合履歴 & 勝敗数を管理するオブジェクト
-export interface MatchHistory {
-  matches: MatchResult[];
-  winCount: number;
-  loseCount: number;
-}
-
-export const Home = () => {
+export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults }) => {
+  // ▼ UI用のState（キャラ選択やフィルターはHome持ちのままでOK）
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
   const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
+  const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
+  
   const bothCharactersSelected = (selectedMyCharacter !== null && selectedOpponentCharacter !== null);
-
-  // 🥞 localStorage
-  const STORAGE_KEY = "gameResults";
-  const [history, setHistory] = useState<MatchHistory>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : { matches: [], winCount: 0, loseCount: 0 };
-  });
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-  }, [history]);
 
   // ▼ フィルター用State
   const [filterMyCharId, setFilterMyCharId] = useState<number | null>(null);
@@ -54,7 +31,7 @@ export const Home = () => {
   const [showResultAnimation, setShowResultAnimation] = useState(false);
   const [lastResultForAnim, setLastResultForAnim] = useState<"勝ち" | "負け">("勝ち");
 
-  // ▼ フィルタリングロジック
+  // ▼ フィルタリングロジック（historyはPropsから来るが、計算はここで行う）
   const filteredMatchesWithIndex = history.matches
     .map((match, index) => ({ match, originalIndex: index }))
     .filter(({ match }) => {
@@ -87,31 +64,14 @@ export const Home = () => {
       return isMyCharMatch && isOppCharMatch && isDateMatch;
     });
 
-  const clearResults = () => {
-    const isConfirmed = window.confirm('本当にリセットしますか？');
-    if (!isConfirmed) { return }
-
-    localStorage.removeItem(STORAGE_KEY);
-    setHistory({ matches: [], winCount: 0, loseCount: 0 });
-  }
-
-  const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
-
-  const kekka = (match: MatchResult) => {
-    setHistory(prevResults => ({
-      matches: [match, ...prevResults.matches],
-      winCount: match.shouhai === "勝ち" ? prevResults.winCount + 1 : prevResults.winCount,
-      loseCount: match.shouhai === "負け" ? prevResults.loseCount + 1 : prevResults.loseCount,
-    }));
-  };
-
+  // ▼ 記録ボタンが押された時の処理
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
-
-    // ▼ アニメーション開始トリガー
+    // 1. アニメーション開始 (UIの動き)
     setLastResultForAnim(shouhai);
     setShowResultAnimation(true);
 
-    kekka({
+    // 2. 親（App）にデータを渡す！
+    onAddResult({
       nichiji: new Date().toLocaleString(),
       player: selectedMyCharacter,
       opponentPlayer: selectedOpponentCharacter,
@@ -119,6 +79,7 @@ export const Home = () => {
       memo: ""
     });
 
+    // 3. UIリセット
     setSelectedOpponentCharacter(null);
 
     if (shouhai === "負け") {
@@ -126,6 +87,7 @@ export const Home = () => {
     }
   };
 
+  // ▼ 色管理のヘルパー
   const colorMap: Record<"red" | "blue" | "green", string> = {
     red: "bg-red-500",
     blue: "bg-blue-500",
@@ -138,8 +100,6 @@ export const Home = () => {
 
   return (
     <>
-      <Header />
-
       {/* ▼ 全画面用アニメーション (fixed) */}
       {showResultAnimation && (
         <ResultAnimation 
@@ -151,6 +111,7 @@ export const Home = () => {
 
       <div className="flex flex-col justify-center items-center">
         <div className="md:flex w-full max-w-7xl">
+          {/* --- 入力エリア --- */}
           <div className="w-full md:w-1/3">
             <div className="px-5 py-2 flex flex-col justify-center items-center">
               <div>
@@ -203,7 +164,10 @@ export const Home = () => {
             <Result
               filteredMatches={filteredMatchesWithIndex}
               history={history}
-              setHistory={setHistory}
+              setHistory={() => {}} 
+              
+              onRowClick={onRowClick} // ★重要: これでApp.tsxのモーダルが開くようになります！
+              
               haishin={false}
               filterMyCharId={filterMyCharId}
               setFilterMyCharId={setFilterMyCharId}
@@ -222,19 +186,19 @@ export const Home = () => {
           <div className="md:w-1/3 flex flex-col px-10">
             {/* ここが点線枠（OBS用取り込みエリア） */}
             <div className="hidden md:flex flex-col border-4 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 items-center justify-center relative mt-2">
-               {/* ラベル */}
                <span className="absolute -top-3 bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
                  🔴 配信用 (OBS取り込み枠)
                </span>
 
-               {/* 白いカード部分（トリミング対象） */}
                <div className="w-full bg-white rounded-lg shadow-lg p-2 overflow-hidden relative" id="win-lose-area-haishin">
                   <Result
                     filteredMatches={filteredMatchesWithIndex}
                     history={history}
-                    setHistory={setHistory}
+                    setHistory={() => {}}
+                    
+                    onRowClick={() => {}} // ★配信画面はクリックしても何も起きなくてOK
+                    
                     haishin={true}
-                    // ダミー関数
                     filterMyCharId={filterMyCharId}
                     setFilterMyCharId={() => {}}
                     filterOppCharId={filterOppCharId}
@@ -247,7 +211,6 @@ export const Home = () => {
                     setCustomEndDate={() => {}}
                   />
 
-                  {/* ▼ 配信枠用アニメーション (absolute配置) */}
                   {showResultAnimation && (
                     <ResultAnimation 
                       result={lastResultForAnim} 
@@ -260,7 +223,7 @@ export const Home = () => {
             </div>
 
             <div className="flex flex-col justify-center items-center mt-6">
-              <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={clearResults}>
+              <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={onClearResults}>
                 勝敗記録一括削除
               </button>
             </div>
