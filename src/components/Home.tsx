@@ -15,7 +15,7 @@ interface HomeProps {
   user: any; // ★追加: ログイン情報を受け取る
 }
 
-export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults }) => {
+export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults, user }) => {
   // ▼ UI用のState（キャラ選択やフィルターはHome持ちのままでOK）
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
   const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
@@ -33,6 +33,10 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
   // ▼ アニメーション制御用State
   const [showResultAnimation, setShowResultAnimation] = useState(false);
   const [lastResultForAnim, setLastResultForAnim] = useState<"勝ち" | "負け">("勝ち");
+
+  // TODO:　これenvに入れるか。
+  const STORAGE_KEY = "gameResults";
+
 
   // ▼ フィルタリングロジック（historyはPropsから来るが、計算はここで行う）
   const filteredMatchesWithIndex = history.matches
@@ -76,7 +80,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     }
 
     // 2. LocalStorageからデータ取得
-    const storedData = localStorage.getItem("gameResults");
+    const storedData = localStorage.getItem(STORAGE_KEY);
     if (!storedData) {
       alert("ローカルストレージにデータがありません。");
       return;
@@ -110,10 +114,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     const { error } = await supabase.from('matches').insert(insertData);
 
     if (error) {
-      console.error("移行エラー:", error);
-      alert(`エラー: ${error.message}`);
+      alert(`移行エラー: ${error.message}`);
     } else {
-      alert("🎉 移行完了！リロードします。");      
+      // 2. 削除確認（ここを追加！）
+      alert("🎉 移行が完了しました!")
+      if (window.confirm("💻 続けて、移行元の対戦結果を一括削除しますか？")) {
+        localStorage.removeItem(STORAGE_KEY);
+        alert("移行元の対戦結果を削除しました。");
+      }  
       window.location.reload();
     }
   };
@@ -277,21 +285,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
               <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={onClearResults}>
                 勝敗記録一括削除
               </button>
-              {/* {user && (
+              {(user && localStorage.getItem(STORAGE_KEY)) && (
                 <button 
                   className="py-2 px-4 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-bold"
                   onClick={migrateData}
                 >
                   💻 デバイスの対戦結果を移行する
                 </button>
-                )} */}
-              <button 
-                className="py-2 px-4 bg-orange-300 text-white rounded hover:bg-orange-400 font-bold m-2"
-                onClick={migrateData}
-              >
-                💻 デバイスの対戦結果を移行する
-              </button>              
-
+                )}
             </div>
           </div>
         </div>
