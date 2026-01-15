@@ -69,8 +69,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
         }
       }
       return isMyCharMatch && isOppCharMatch && isDateMatch;
-    });
-
+    }).sort((a, b) => new Date(b.match.nichiji).getTime() - new Date(a.match.nichiji).getTime());
+ 
   const migrateData = async () => {
     // 1. ログインチェック
     const { data: { user } } = await supabase.auth.getUser();

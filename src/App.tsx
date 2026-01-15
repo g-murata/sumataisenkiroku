@@ -33,7 +33,7 @@ export default function App() {
       .from('matches')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .order('date', { ascending: false });
 
     if (error) {
       console.error('データ取得エラー:', error);
@@ -52,6 +52,8 @@ export default function App() {
         player: characterList.find(c => c.characterNo === d.my_char_id) || null,
         opponentPlayer: characterList.find(c => c.characterNo === d.opp_char_id) || null,
       }));
+
+      formattedMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
 
       // 勝敗数を再計算
       const win = formattedMatches.filter(m => m.shouhai === "勝ち").length;
