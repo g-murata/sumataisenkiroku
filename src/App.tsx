@@ -137,7 +137,7 @@ export default function App() {
             opponent_char: newMatch.opponentPlayer?.characterName,
             
             result: newMatch.shouhai,
-            date: newMatch.nichiji,
+            date: new Date(newMatch.nichiji).toISOString(),
             memo: newMatch.memo
           }
         ]);
@@ -187,7 +187,7 @@ export default function App() {
           opponent_char: updatedMatch.opponentPlayer?.characterName,
 
           result: updatedMatch.shouhai,
-          date: updatedMatch.nichiji,
+          date: new Date(updatedMatch.nichiji).toISOString(),
           memo: updatedMatch.memo
         })
         .eq('id', updatedMatch.id);
