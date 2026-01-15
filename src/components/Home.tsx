@@ -101,6 +101,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     // 3. データ変換（自分のIDを付与）
     const insertData = localMatches.map((m: any) => ({
       user_id: user.id,
+      created_at: new Date(m.nichiji).toISOString(),
       date: new Date(m.nichiji).toISOString(),
       my_char_id: m.player.characterNo,
       opp_char_id: m.opponentPlayer.characterNo,
