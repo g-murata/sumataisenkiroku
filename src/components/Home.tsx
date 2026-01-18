@@ -145,7 +145,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     window.open(
       `${window.location.origin}?mode=obs`, 
       'smash-record-obs', 
-      'width=420,height=600,menubar=no,toolbar=no,location=no,status=no,resizable=yes'
+      'width=300,height=200,menubar=no,toolbar=no,location=no,status=no,resizable=yes'
     );
   };
 

@@ -1,9 +1,9 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
-// 通信チャンネル名（合言葉）
+// 通信チャンネル名
 const CHANNEL_NAME = 'smash-record-sync';
 
-// メッセージの型定義
+// メッセージ型定義
 type SyncMessage = 
   | { type: 'UPDATE_DATA' }
   | { type: 'TRIGGER_ANIMATION', result: "勝ち" | "負け" };
@@ -12,31 +12,39 @@ export const useObsSync = (
   onUpdateData?: () => void,
   onTriggerAnimation?: (result: "勝ち" | "負け") => void
 ) => {
-  
-  // ▼ 受信側 (OBS画面用) の処理
+  // 最新の関数を保持するためのRef (これでuseEffectの再実行を防ぐ)
+  const onUpdateDataRef = useRef(onUpdateData);
+  const onTriggerAnimationRef = useRef(onTriggerAnimation);
+
+  // 関数が更新されたらRefも更新
   useEffect(() => {
-    // チャンネルを開く
+    onUpdateDataRef.current = onUpdateData;
+    onTriggerAnimationRef.current = onTriggerAnimation;
+  }, [onUpdateData, onTriggerAnimation]);
+
+  // ▼ 受信側 (OBS画面用)
+  useEffect(() => {
     const channel = new BroadcastChannel(CHANNEL_NAME);
     
     channel.onmessage = (event) => {
       const msg = event.data as SyncMessage;
       
-      // データ更新命令が来たら
-      if (msg.type === 'UPDATE_DATA' && onUpdateData) {
-        onUpdateData();
+      // データ更新命令
+      if (msg.type === 'UPDATE_DATA' && onUpdateDataRef.current) {
+        onUpdateDataRef.current();
       }
-      // アニメーション命令が来たら
-      if (msg.type === 'TRIGGER_ANIMATION' && onTriggerAnimation) {
-        onTriggerAnimation(msg.result);
+      // アニメーション命令
+      if (msg.type === 'TRIGGER_ANIMATION' && onTriggerAnimationRef.current) {
+        onTriggerAnimationRef.current(msg.result);
       }
     };
 
     return () => {
       channel.close();
     };
-  }, [onUpdateData, onTriggerAnimation]);
+  }, []); // 依存配列を空にして、接続を維持する
 
-  // ▼ 送信側 (メイン操作画面用) の処理
+  // ▼ 送信側 (メイン操作画面用)
   const notifyUpdate = useCallback(() => {
     const channel = new BroadcastChannel(CHANNEL_NAME);
     channel.postMessage({ type: 'UPDATE_DATA' });

@@ -4,10 +4,13 @@ import './App.css';
 import { supabase } from './supabaseClient';
 import { Header } from './components/Header';
 import { Home } from './components/Home';
+import { Result } from './components/Result';
+import { ResultAnimation } from './components/ResultAnimation';
 import { MatchHistory, MatchResult } from './types';
 import { MatchDetailModal } from './components/MatchDetailModal';
-// ▼ 1. キャラクターリストをインポート（IDから画像を復元するために必要）
 import { characterList } from './components/Character';
+// ★追加: フックをインポート
+import { useObsSync } from './hooks/useObsSync';
 
 const STORAGE_KEY = "gameResults";
 
@@ -15,7 +18,13 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // 初期値はローカルストレージから（一瞬表示される用）
+  // ▼ URLパラメータで「OBSモード」かどうか判定
+  const searchParams = new URLSearchParams(window.location.search);
+  const isObsMode = searchParams.get('mode') === 'obs';
+
+  // ▼ OBS側のアニメーション制御用State
+  const [obsAnimResult, setObsAnimResult] = useState<"勝ち"|"負け" | null>(null);
+
   const [history, setHistory] = useState<MatchHistory>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : { matches: [], winCount: 0, loseCount: 0 };
@@ -24,16 +33,13 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState<number | null>(null);
 
-  // ---------------------------------------------------------
-  // ▼ 2. Supabaseからデータを読み込む関数 (Read)
-  // ---------------------------------------------------------
+  // ▼ データ取得関数
   const fetchMatches = async (userId: string) => {
-    // DBから自分のデータを取得 (作成日時の新しい順)
     const { data, error } = await supabase
       .from('matches')
       .select('*')
       .eq('user_id', userId)
-      .order('date', { ascending: false });
+      .order('created_at', { ascending: false }); // 作成順の降順
 
     if (error) {
       console.error('データ取得エラー:', error);
@@ -41,25 +47,22 @@ export default function App() {
     }
 
     if (data) {
-      // DBのデータ(スネークケース等)をアプリの型(MatchResult)に変換
       const formattedMatches: MatchResult[] = data.map((d: any) => ({
         id: d.id,
         user_id: d.user_id,
-        nichiji: d.date, // ※DBのカラム名に合わせてください
+        nichiji: d.date,
         shouhai: d.result,
         memo: d.memo,
-        // ID(数字)からキャラ情報(オブジェクト)を復元
         player: characterList.find(c => c.characterNo === d.my_char_id) || null,
         opponentPlayer: characterList.find(c => c.characterNo === d.opp_char_id) || null,
       }));
 
+      // 日付順ソート (念のため)
       formattedMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
 
-      // 勝敗数を再計算
       const win = formattedMatches.filter(m => m.shouhai === "勝ち").length;
       const lose = formattedMatches.filter(m => m.shouhai === "負け").length;
 
-      // 画面更新
       setHistory({
         matches: formattedMatches,
         winCount: win,
@@ -67,101 +70,116 @@ export default function App() {
       });
     }
   };
+  
+  // ▼ ゲスト時の再読込用
+  const reloadFromStorage = () => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+       setHistory(JSON.parse(stored));
+    }
+  };
 
-  // ---------------------------------------------------------
-  // ▼ 3. ログイン監視とデータロードの切り替え
-  // ---------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // ★★★ 通信機能のセットアップ (ここが重要！) ★★★
+  // --------------------------------------------------------------------------
+  const { notifyUpdate, notifyAnimation } = useObsSync(
+    // ① データ更新命令が来た時の処理 (OBS画面で実行)
+    async () => {
+      if (user) {
+        await fetchMatches(user.id);
+      } else {
+        reloadFromStorage();
+      }
+    },
+    // ② アニメーション命令が来た時の処理 (OBS画面で実行)
+    (result) => {
+      setObsAnimResult(result);
+      // 3秒後にアニメ表示を消す
+      setTimeout(() => setObsAnimResult(null), 3000); 
+    }
+  );
+
+
+  // ▼ 初期化
   useEffect(() => {
-      const init = async () => {
-        // セッションチェック
-        const { data: { session } } = await supabase.auth.getSession();
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
 
-        if (currentUser) {
-          // ログインしてるなら、データを取り終わるまで待つ (await)
-          await fetchMatches(currentUser.id);
-        }
-        
-        // 全部の準備ができたら、ロード終了！(フェードイン開始)
-        setIsLoading(false);
-      };
+      if (currentUser) {
+        await fetchMatches(currentUser.id);
+      } else {
+        window.addEventListener('storage', reloadFromStorage);
+      }
+      setIsLoading(false);
+    };
 
-      init();
+    init();
 
-      // ログイン状態の監視 (ここは既存のままでOKですが、isLoading操作は不要)
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        // ログアウトしたりアカウント切り替えた時の処理
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          fetchMatches(currentUser.id);
-        } else {
-          const stored = localStorage.getItem(STORAGE_KEY);
-          setHistory(stored ? JSON.parse(stored) : { matches: [], winCount: 0, loseCount: 0 });
-        }
-      });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        fetchMatches(currentUser.id);
+      } else {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        setHistory(stored ? JSON.parse(stored) : { matches: [], winCount: 0, loseCount: 0 });
+      }
+    });
 
-      return () => subscription.unsubscribe();
-    }, []);
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('storage', reloadFromStorage);
+    };
+  }, []);
 
 
   // ---------------------------------------------------------
   // 4. 新規登録 (Create)
   // ---------------------------------------------------------
   const handleAddResult = async (newMatch: MatchResult) => {
-    // まず画面を更新（サクサク動くように）
+    // 画面の即時更新
     const newMatches = [newMatch, ...history.matches];
     const newWin = newMatch.shouhai === "勝ち" ? history.winCount + 1 : history.winCount;
     const newLose = newMatch.shouhai === "負け" ? history.loseCount + 1 : history.loseCount;
     const newState = { matches: newMatches, winCount: newWin, loseCount: newLose };
     
-    // 一旦ローカルステート更新（失敗したら戻すなどの処理は省略）
     setHistory(newState);
 
+    // ★★★ OBS画面へ「アニメーション出せ！」と送信 ★★★
+    notifyAnimation(newMatch.shouhai);
+
     if (user) {
-      // ★ ログイン中: SupabaseへINSERT
-      // handleAddResult 内の supabase.insert 部分
-
-      const { error } = await supabase
-        .from('matches')
-        .insert([
-          {
-            user_id: user.id,
-            // ▼ ここ修正: IDを保存するように追加！
-            my_char_id: newMatch.player?.characterNo,
-            opp_char_id: newMatch.opponentPlayer?.characterNo,
-            
-            // テキストも念のため保存しておく（見やすさのため）
-            my_char: newMatch.player?.characterName,
-            opponent_char: newMatch.opponentPlayer?.characterName,
-            
-            result: newMatch.shouhai,
-            date: new Date(newMatch.nichiji).toISOString(),
-            memo: newMatch.memo
-          }
-        ]);
+      const { error } = await supabase.from('matches').insert([{
+          user_id: user.id,
+          my_char_id: newMatch.player?.characterNo,
+          opp_char_id: newMatch.opponentPlayer?.characterNo,
+          my_char: newMatch.player?.characterName,
+          opponent_char: newMatch.opponentPlayer?.characterName,
+          result: newMatch.shouhai,
+          date: newMatch.nichiji,
+          memo: newMatch.memo
+        }]);
       
-      if (error) {
-        console.error('Supabase保存エラー:', error);
-      } else {
-        // 保存成功したら、DBから最新データを再取得して整合性を保つ
-        fetchMatches(user.id);
+      if (!error) {
+        await fetchMatches(user.id); // IDなどを確定させるため再取得
+        // ★★★ OBS画面へ「DB更新したから読み込んで！」と送信 ★★★
+        notifyUpdate(); 
       }
-
     } else {
-      // ★ ゲスト: LocalStorageへ保存
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      // ★★★ OBS画面へ「ストレージ更新したよ！」と送信 ★★★
+      notifyUpdate();
     }
   };
 
   // ---------------------------------------------------------
-  // 5. 編集・更新 (Update)
+  // 5. 編集 (Update)
   // ---------------------------------------------------------
   const handleUpdateMatch = async (updatedMatch: MatchResult) => {
     if (selectedMatchIndex === null) return;
 
-    // 画面更新ロジック...
     const newMatches = [...history.matches];
     newMatches[selectedMatchIndex] = updatedMatch;
     newMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
@@ -173,19 +191,13 @@ export default function App() {
     setIsModalOpen(false);
 
     if (user && updatedMatch.id) {
-      // ★ ログイン中: UPDATE
-      // handleUpdateMatch 内の supabase.update 部分
       const { error } = await supabase
         .from('matches')
         .update({
-          // ▼ ここ修正: IDを保存するように追加！
           my_char_id: updatedMatch.player?.characterNo,
           opp_char_id: updatedMatch.opponentPlayer?.characterNo,
-
-          // テキストも更新
           my_char: updatedMatch.player?.characterName,
           opponent_char: updatedMatch.opponentPlayer?.characterName,
-
           result: updatedMatch.shouhai,
           date: new Date(updatedMatch.nichiji).toISOString(),
           memo: updatedMatch.memo
@@ -193,11 +205,14 @@ export default function App() {
         .eq('id', updatedMatch.id);
 
       if (error) console.error('更新エラー:', error);
-      else fetchMatches(user.id); // 再取得
+      else {
+        await fetchMatches(user.id);
+        notifyUpdate(); // ★通信: 更新通知
+      }
 
     } else {
-      // ★ ゲスト: LocalStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      notifyUpdate(); // ★通信: 更新通知
     }
   };
 
@@ -217,18 +232,15 @@ export default function App() {
     setIsModalOpen(false);
 
     if (user && targetMatch.id) {
-      // ★ ログイン中: DELETE
-      const { error } = await supabase
-        .from('matches')
-        .delete()
-        .eq('id', targetMatch.id);
-
+      const { error } = await supabase.from('matches').delete().eq('id', targetMatch.id);
       if (error) console.error('削除エラー:', error);
-      else fetchMatches(user.id); // 再取得
-
+      else {
+        await fetchMatches(user.id);
+        notifyUpdate(); // ★通信: 更新通知
+      }
     } else {
-      // ★ ゲスト: LocalStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      notifyUpdate(); // ★通信: 更新通知
     }
   };
 
@@ -239,30 +251,65 @@ export default function App() {
     if (!window.confirm('本当に全ての履歴を削除しますか？')) return;
 
     if (user) {
-      // ★ ログイン中
-      const { error } = await supabase
-        .from('matches')
-        .delete()
-        .eq('user_id', user.id);
-
+      const { error } = await supabase.from('matches').delete().eq('user_id', user.id);
       if (error) console.error('全削除エラー:', error);
-      else fetchMatches(user.id);
-
+      else {
+        await fetchMatches(user.id);
+        notifyUpdate(); // ★通信: 更新通知
+      }
     } else {
-      // ★ ゲスト
       localStorage.removeItem(STORAGE_KEY);
       setHistory({ matches: [], winCount: 0, loseCount: 0 });
+      notifyUpdate(); // ★通信: 更新通知
     }
   };
+
 
   if (isLoading) {
     return <div className="h-screen w-screen bg-white" />;
   }
 
+  // =========================================================
+  // ★★★ OBSモード時の表示 (シンプル版) ★★★
+  // =========================================================
+  if (isObsMode) {
+    const obsMatches = history.matches.map((m, i) => ({ match: m, originalIndex: i }));
+    
+    return (
+      <div className="h-screen w-screen bg-white overflow-hidden relative">
+        <Result
+          filteredMatches={obsMatches}
+          history={history}
+          setHistory={() => {}}
+          haishin={true} // 配信用モードON (ヘッダーなし、メモなし)
+          
+          // フィルター機能は無効化
+          filterMyCharId={null} setFilterMyCharId={() => {}}
+          filterOppCharId={null} setFilterOppCharId={() => {}}
+          filterDateRange="all" setFilterDateRange={() => {}}
+          customStartDate="" setCustomStartDate={() => {}}
+          customEndDate="" setCustomEndDate={() => {}}
+          onRowClick={() => {}} // クリック無効
+        />
+
+        {/* 信号を受け取ったらアニメーション発火！ */}
+        {obsAnimResult && (
+           <ResultAnimation 
+             result={obsAnimResult} 
+             mode="fixed"
+             onComplete={() => setObsAnimResult(null)}
+           />
+        )}
+      </div>
+    );
+  }
+
+  // =========================================================
+  // ★★★ 通常モード時の表示 ★★★
+  // =========================================================
   return (    
     <div>
       <Header user={user} />
-
       <Home 
         history={history}
         onAddResult={handleAddResult}
@@ -271,9 +318,9 @@ export default function App() {
           setIsModalOpen(true);
         }}
         onClearResults={handleClearResults}
-        user={user} // ★これを追加！
+        user={user}
       />
-
+      
       <MatchDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
