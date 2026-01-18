@@ -309,7 +309,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
             {/* PiPが起動中かどうかで表示を変えてもいいが、ボタンで制御する */}
             
             {/* ★ デザイン通りの「ランチャーボックス」 */}
-            <div className="w-full border-4 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center bg-gray-50 text-center h-64 shadow-sm relative">
+            <div className="hidden md:flex w-full border-4 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center bg-gray-50 text-center h-64 shadow-sm relative">
                
                {/* 起動中の場合、ここにResultAnimationを出してもいいが、PiP側に出るのでここでは静かにしておく */}
                
