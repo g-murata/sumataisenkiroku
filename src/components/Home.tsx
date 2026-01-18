@@ -60,7 +60,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       // ▼ 初期サイズ指定 (幅350px, 高さ400px くらいが画像に近いサイズ感)
       // @ts-ignore
       const win = await window.documentPictureInPicture.requestWindow({
-        width: 350,
+        width: 100,
         height: 200,
       });
 
