@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { supabase } from '../supabaseClient';
 import { Character } from './Character';
@@ -33,17 +34,79 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
   const [showResultAnimation, setShowResultAnimation] = useState(false);
   const [lastResultForAnim, setLastResultForAnim] = useState<"勝ち" | "負け">("勝ち");
 
+  // ★ PiPウインドウの状態管理
+  const [pipWindow, setPipWindow] = useState<Window | null>(null);
+
   const STORAGE_KEY = "gameResults";
 
+  // ----------------------------------------------------------------------
+  // ★ Document Picture-in-Picture (PiP) を制御する関数
+  // ----------------------------------------------------------------------
+  const togglePip = async () => {
+    // すでに開いていれば閉じる
+    if (pipWindow) {
+      pipWindow.close();
+      setPipWindow(null);
+      return;
+    }
+
+    // ブラウザ対応チェック
+    if (!("documentPictureInPicture" in window)) {
+      alert("このブラウザは対応していません。PC版ChromeまたはEdgeを使ってください。");
+      return;
+    }
+
+    try {
+      // ▼ 初期サイズ指定 (幅350px, 高さ400px くらいが画像に近いサイズ感)
+      // @ts-ignore
+      const win = await window.documentPictureInPicture.requestWindow({
+        width: 350,
+        height: 200,
+      });
+
+      // ★★★ タイトル変更 ★★★
+      win.document.title = "スマ対戦記録（OBS配信枠）";
+
+      // 親ウインドウのCSS (Tailwindなど) をすべてコピーして適用する
+      Array.from(document.styleSheets).forEach((styleSheet) => {
+        try {
+          if (styleSheet.href) {
+            const newLink = document.createElement("link");
+            newLink.rel = "stylesheet";
+            newLink.href = styleSheet.href;
+            win.document.head.appendChild(newLink);
+          } else if (styleSheet.cssRules) {
+            const newStyle = document.createElement("style");
+            Array.from(styleSheet.cssRules).forEach((rule) => {
+              newStyle.appendChild(document.createTextNode(rule.cssText));
+            });
+            win.document.head.appendChild(newStyle);
+          }
+        } catch (e) {
+          console.error("Style copy error:", e);
+        }
+      });
+
+      // ウインドウが閉じられた（×ボタンなど）時の処理
+      win.addEventListener("pagehide", () => {
+        setPipWindow(null);
+      });
+
+      setPipWindow(win);
+
+    } catch (err) {
+      console.error("PiP failed:", err);
+    }
+  };
+
+  // ----------------------------------------------------------------------
   // ▼ フィルタリングロジック
   const filteredMatchesWithIndex = history.matches
     .map((match, index) => ({ match, originalIndex: index }))
     .filter(({ match }) => {
-      // キャラフィルター
       const isMyCharMatch = filterMyCharId ? match.player?.characterNo === filterMyCharId : true;
       const isOppCharMatch = filterOppCharId ? match.opponentPlayer?.characterNo === filterOppCharId : true;
       
-      // 日付フィルター
       let isDateMatch = true;
       const matchDate = new Date(match.nichiji);
       const now = new Date();
@@ -61,21 +124,22 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
           const end = new Date(customEndDate);
           end.setHours(23, 59, 59, 999); 
           isDateMatch = matchDate >= start && matchDate <= end;
-        } else {
-          isDateMatch = true;
         }
       }
       return isMyCharMatch && isOppCharMatch && isDateMatch;
-    })
+    });
 
+  // ----------------------------------------------------------------------
   // ▼ データ移行ロジック
   const migrateData = async () => {
+    // 1. ログインチェック
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       alert("ログインしてから実行してください！");
       return;
     }
 
+    // 2. LocalStorageからデータ取得
     const storedData = localStorage.getItem(STORAGE_KEY);
     if (!storedData) {
       alert("ローカルストレージにデータがありません。");
@@ -94,6 +158,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       return;
     }
 
+    // 3. データ変換（自分のIDを付与）
     const insertData = localMatches.map((m: any) => ({
       user_id: user.id,
       created_at: new Date(m.nichiji).toISOString(),
@@ -106,12 +171,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       memo: m.memo || ""
     }));
 
+    // 4. 一括登録
     const { error } = await supabase.from('matches').insert(insertData);
 
     if (error) {
       alert(`移行エラー: ${error.message}`);
     } else {
-      alert("🎉 移行が完了しました!")
+      // 5. 完了＆削除確認
+      alert("🎉 移行が完了しました!");
       if (window.confirm("💻 続けて、移行元の対戦結果を一括削除しますか？")) {
         localStorage.removeItem(STORAGE_KEY);
         alert("移行元の対戦結果を削除しました。");
@@ -120,7 +187,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     }
   };
 
-  // ▼ 記録ボタンが押された時の処理
+  // ----------------------------------------------------------------------
+  // ▼ 記録ロジック
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
     setLastResultForAnim(shouhai);
     setShowResultAnimation(true);
@@ -139,17 +207,6 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     }
   };
 
-  // ▼ OBS用ウィンドウを開く処理
-  const openObsWindow = () => {
-    // 幅400px程度の縦長ウィンドウを開く
-    window.open(
-      `${window.location.origin}?mode=obs`, 
-      'smash-record-obs', 
-      'width=300,height=200,menubar=no,toolbar=no,location=no,status=no,resizable=yes'
-    );
-  };
-
-  // ▼ 色管理のヘルパー
   const colorMap: Record<"red" | "blue" | "green", string> = {
     red: "bg-red-500",
     blue: "bg-blue-500",
@@ -160,9 +217,29 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     return isActive ? colorMap[color] : "bg-gray-400 hover:bg-gray-500";
   };
 
+  // ★ Resultコンポーネントを描画する関数
+  const renderResult = (isPipMode: boolean) => (
+    <Result
+      filteredMatches={filteredMatchesWithIndex}
+      history={history}
+      setHistory={() => {}}
+      onRowClick={isPipMode ? () => {} : onRowClick}
+      haishin={isPipMode} // PiPなら配信モード(true)
+      filterMyCharId={filterMyCharId}
+      setFilterMyCharId={isPipMode ? () => {} : setFilterMyCharId}
+      filterOppCharId={filterOppCharId}
+      setFilterOppCharId={isPipMode ? () => {} : setFilterOppCharId}
+      filterDateRange={filterDateRange}
+      setFilterDateRange={isPipMode ? () => {} : setFilterDateRange}
+      customStartDate={customStartDate}
+      setCustomStartDate={isPipMode ? () => {} : setCustomStartDate}
+      customEndDate={customEndDate}
+      setCustomEndDate={isPipMode ? () => {} : setCustomEndDate}
+    />
+  );
+
   return (
     <>
-      {/* ▼ 全画面用アニメーション (fixed) */}
       {showResultAnimation && (
         <ResultAnimation 
           result={lastResultForAnim} 
@@ -221,63 +298,82 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
             </div>
           </div>
           
-          {/* ▼ メイン結果画面エリア */}
+          {/* ▼ 真ん中の履歴エリア */}
           <div className="md:w-1/3 md:h-90vh flex flex-col px-2 md:px-5" id="win-lose-area">
-            <Result
-              filteredMatches={filteredMatchesWithIndex}
-              history={history}
-              setHistory={() => {}} 
-              
-              onRowClick={onRowClick}
-              
-              haishin={false}
-              filterMyCharId={filterMyCharId}
-              setFilterMyCharId={setFilterMyCharId}
-              filterOppCharId={filterOppCharId}
-              setFilterOppCharId={setFilterOppCharId}
-              filterDateRange={filterDateRange}
-              setFilterDateRange={setFilterDateRange}
-              customStartDate={customStartDate}
-              setCustomStartDate={setCustomStartDate}
-              customEndDate={customEndDate}
-              setCustomEndDate={setCustomEndDate}
-            />
+             {/* 通常時はここでResult(false)を表示 */}
+             {renderResult(false)}
           </div>
 
-          {/* ▼ 配信画面エリア（ここを変更） */}
-          <div className="md:w-1/3 flex flex-col px-10">
-            {/* 以前の点線枠を取り払い、ボタンに変更 */}
-            <div className="hidden md:flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 mt-2 text-center">
-               <i className="fas fa-desktop text-4xl text-gray-400 mb-3"></i>
-               <h3 className="font-bold text-gray-600 mb-2">OBS配信モード</h3>
-               <p className="text-xs text-gray-500 mb-6">
+          {/* ▼ 右側のOBS配信モードエリア（ここをデザイン変更！） */}
+          <div className="md:w-1/3 flex flex-col px-10 mt-4 md:mt-0">
+            {/* PiPが起動中かどうかで表示を変えてもいいが、ボタンで制御する */}
+            
+            {/* ★ デザイン通りの「ランチャーボックス」 */}
+            <div className="w-full border-4 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center bg-gray-50 text-center h-64 shadow-sm relative">
+               
+               {/* 起動中の場合、ここにResultAnimationを出してもいいが、PiP側に出るのでここでは静かにしておく */}
+               
+               {/* アイコン（FontAwesomeのPCアイコン） */}
+               <i className="fas fa-desktop text-5xl text-gray-300 mb-4"></i>
+
+               <h2 className="text-gray-600 font-bold text-lg mb-2">OBS配信モード</h2>
+               <p className="text-xs text-gray-400 mb-6 leading-relaxed">
                  ここをクリックすると、<br/>
                  配信レイアウト専用の<br/>
                  別ウィンドウが立ち上がります。
                </p>
-               
+
+               {/* 専用ウィンドウボタン */}
                <button 
-                 onClick={openObsWindow}
-                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition transform hover:scale-105 flex items-center"
+                  onClick={togglePip}
+                  className={`
+                    font-bold py-3 px-6 rounded-full shadow-lg flex items-center gap-2 transition-all transform hover:scale-105 text-white
+                    ${pipWindow ? "bg-gray-500 hover:bg-gray-600" : "bg-indigo-600 hover:bg-indigo-700"}
+                  `}
                >
-                 <i className="fas fa-external-link-alt mr-2"></i>
-                 専用ウィンドウを開く
+                  {pipWindow ? (
+                     <>
+                       <i className="fas fa-times-circle"></i> 元に戻す
+                     </>
+                  ) : (
+                     <>
+                       <i className="fas fa-external-link-alt"></i> 専用ウィンドウを開く
+                     </>
+                  )}
                </button>
             </div>
 
-            <div className="flex flex-col justify-center items-center mt-6 gap-2">
-              <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={onClearResults}>
+            {/* 下部のボタン群 */}
+            <div className="flex flex-col justify-center items-center mt-6 gap-3">
+              <button className="py-2 px-6 bg-gray-200 rounded hover:bg-gray-300 text-sm text-gray-600 font-bold w-full max-w-xs" onClick={onClearResults}>
                 勝敗記録一括削除
               </button>
               {(user && localStorage.getItem(STORAGE_KEY)) && (
                 <button 
-                  className="py-2 px-4 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-bold"
+                  className="py-2 px-6 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm font-bold w-full max-w-xs shadow-md"
                   onClick={migrateData}
                 >
-                  💻 デバイスの対戦結果を移行する
+                  <i className="fas fa-laptop-medical mr-2"></i> デバイスの対戦結果を移行する
                 </button>
                 )}
             </div>
+            
+            {/* ★ PiPウインドウへの転送ポータル
+              pipWindowが存在する時だけ、ここ経由で「Result(true)」を向こうのWindowへ送り込む
+            */}
+            {pipWindow && createPortal(
+              <div className="h-full bg-white flex flex-col overflow-hidden relative">
+                 {/* PiPウインドウの中身: 勝敗アニメーションもこっちに出す */}
+                 {renderResult(true)}
+                 {showResultAnimation && (
+                    <ResultAnimation 
+                      result={lastResultForAnim} 
+                      mode="absolute" // 枠内絶対配置
+                    />
+                  )}
+              </div>, 
+              pipWindow.document.body
+            )}
           </div>
         </div>
       </div>
