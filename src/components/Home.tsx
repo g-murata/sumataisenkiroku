@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 
 import { supabase } from '../supabaseClient';
 import { Character } from './Character';
@@ -6,17 +6,16 @@ import { Result } from './Result';
 import { ResultAnimation } from './ResultAnimation';
 import { CharacterType, MatchHistory, MatchResult } from '../types';
 
-// ★ 親（App）から受け取るものを定義
 interface HomeProps {
   history: MatchHistory;
   onAddResult: (match: MatchResult) => void;
   onRowClick: (index: number) => void;
   onClearResults: () => void;
-  user: any; // ★追加: ログイン情報を受け取る
+  user: any;
 }
 
 export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults, user }) => {
-  // ▼ UI用のState（キャラ選択やフィルターはHome持ちのままでOK）
+  // ▼ UI用のState
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
   const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
   const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
@@ -34,11 +33,9 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
   const [showResultAnimation, setShowResultAnimation] = useState(false);
   const [lastResultForAnim, setLastResultForAnim] = useState<"勝ち" | "負け">("勝ち");
 
-  // TODO:　これenvに入れるか。
   const STORAGE_KEY = "gameResults";
 
-
-  // ▼ フィルタリングロジック（historyはPropsから来るが、計算はここで行う）
+  // ▼ フィルタリングロジック
   const filteredMatchesWithIndex = history.matches
     .map((match, index) => ({ match, originalIndex: index }))
     .filter(({ match }) => {
@@ -71,15 +68,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       return isMyCharMatch && isOppCharMatch && isDateMatch;
     })
 
+  // ▼ データ移行ロジック
   const migrateData = async () => {
-    // 1. ログインチェック
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       alert("ログインしてから実行してください！");
       return;
     }
 
-    // 2. LocalStorageからデータ取得
     const storedData = localStorage.getItem(STORAGE_KEY);
     if (!storedData) {
       alert("ローカルストレージにデータがありません。");
@@ -98,7 +94,6 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       return;
     }
 
-    // 3. データ変換（自分のIDを付与）
     const insertData = localMatches.map((m: any) => ({
       user_id: user.id,
       created_at: new Date(m.nichiji).toISOString(),
@@ -111,13 +106,11 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       memo: m.memo || ""
     }));
 
-    // 4. 一括登録
     const { error } = await supabase.from('matches').insert(insertData);
 
     if (error) {
       alert(`移行エラー: ${error.message}`);
     } else {
-      // 2. 削除確認（ここを追加！）
       alert("🎉 移行が完了しました!")
       if (window.confirm("💻 続けて、移行元の対戦結果を一括削除しますか？")) {
         localStorage.removeItem(STORAGE_KEY);
@@ -126,7 +119,6 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       window.location.reload();
     }
   };
-
 
   // ▼ 記録ボタンが押された時の処理
   const recordResult = (shouhai: "勝ち" | "負け"): void => {
@@ -145,6 +137,16 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     if (shouhai === "負け") {
       setSelectedResult("勝ち");
     }
+  };
+
+  // ▼ OBS用ウィンドウを開く処理
+  const openObsWindow = () => {
+    // 幅400px程度の縦長ウィンドウを開く
+    window.open(
+      `${window.location.origin}?mode=obs`, 
+      'smash-record-obs', 
+      'width=420,height=600,menubar=no,toolbar=no,location=no,status=no,resizable=yes'
+    );
   };
 
   // ▼ 色管理のヘルパー
@@ -226,7 +228,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
               history={history}
               setHistory={() => {}} 
               
-              onRowClick={onRowClick} // ★重要: これでApp.tsxのモーダルが開くようになります！
+              onRowClick={onRowClick}
               
               haishin={false}
               filterMyCharId={filterMyCharId}
@@ -242,47 +244,28 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
             />
           </div>
 
-          {/* ▼ 配信画面エリア */}
+          {/* ▼ 配信画面エリア（ここを変更） */}
           <div className="md:w-1/3 flex flex-col px-10">
-            {/* ここが点線枠（OBS用取り込みエリア） */}
-            <div className="hidden md:flex flex-col border-4 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 items-center justify-center relative mt-2">
-               <span className="absolute -top-3 bg-gray-600 text-white text-xs px-2 py-1 rounded-full">
-                 🔴 配信用 (OBS取り込み枠)
-               </span>
-
-               <div className="w-full bg-white rounded-lg shadow-lg p-2 overflow-hidden relative" id="win-lose-area-haishin">
-                  <Result
-                    filteredMatches={filteredMatchesWithIndex}
-                    history={history}
-                    setHistory={() => {}}
-                    
-                    onRowClick={() => {}} // ★配信画面はクリックしても何も起きなくてOK
-                    
-                    haishin={true}
-                    filterMyCharId={filterMyCharId}
-                    setFilterMyCharId={() => {}}
-                    filterOppCharId={filterOppCharId}
-                    setFilterOppCharId={() => {}}
-                    filterDateRange={filterDateRange}
-                    setFilterDateRange={() => {}}
-                    customStartDate={customStartDate}
-                    setCustomStartDate={() => {}}
-                    customEndDate={customEndDate}
-                    setCustomEndDate={() => {}}
-                  />
-
-                  {showResultAnimation && (
-                    <ResultAnimation 
-                      result={lastResultForAnim} 
-                      mode="absolute"
-                    />
-                  )}
-               </div>
-
-               <p className="text-gray-400 text-xxs mt-2">※OBSでこの枠の内側をトリミングしてください</p>
+            {/* 以前の点線枠を取り払い、ボタンに変更 */}
+            <div className="hidden md:flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 mt-2 text-center">
+               <i className="fas fa-desktop text-4xl text-gray-400 mb-3"></i>
+               <h3 className="font-bold text-gray-600 mb-2">OBS配信モード</h3>
+               <p className="text-xs text-gray-500 mb-6">
+                 ここをクリックすると、<br/>
+                 配信レイアウト専用の<br/>
+                 別ウィンドウが立ち上がります。
+               </p>
+               
+               <button 
+                 onClick={openObsWindow}
+                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition transform hover:scale-105 flex items-center"
+               >
+                 <i className="fas fa-external-link-alt mr-2"></i>
+                 専用ウィンドウを開く
+               </button>
             </div>
 
-            <div className="flex flex-col justify-center items-center mt-6">
+            <div className="flex flex-col justify-center items-center mt-6 gap-2">
               <button className="py-2 px-4 bg-gray-200 rounded hover:bg-gray-300 text-sm" onClick={onClearResults}>
                 勝敗記録一括削除
               </button>
