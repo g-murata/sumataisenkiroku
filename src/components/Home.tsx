@@ -60,7 +60,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       // ▼ 初期サイズ指定 (幅350px, 高さ400px くらいが画像に近いサイズ感)
       // @ts-ignore
       const win = await window.documentPictureInPicture.requestWindow({
-        width: 100,
+        width: 150,
         height: 200,
       });
 
@@ -154,7 +154,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       return;
     }
 
-    if (!window.confirm(`${localMatches.length}件のデータをDB（データベース）に移行しますか？`)) {
+    if (!window.confirm(`${localMatches.length}件のデータをDBに移行しますか？`)) {
       return;
     }
 
