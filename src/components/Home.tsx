@@ -61,7 +61,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       // @ts-ignore
       const win = await window.documentPictureInPicture.requestWindow({
         width: 280,
-        height: 210,
+        height: 190,
       });
 
       // ★★★ タイトル変更 ★★★
