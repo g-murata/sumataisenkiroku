@@ -61,7 +61,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       // @ts-ignore
       const win = await window.documentPictureInPicture.requestWindow({
         width: 280,
-        height: 190,
+        height: 210,
       });
 
       // ★★★ タイトル変更 ★★★
@@ -358,6 +358,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
             {/* PiPウインドウへの転送ポータル */}
             {pipWindow && createPortal(
               <div className="h-full bg-white flex flex-col overflow-hidden relative">
+                <div className="h-4 bg-white w-full flex-shrink-0"></div>
                  {renderResult(true)}
                  {showResultAnimation && (
                     <ResultAnimation 
