@@ -57,7 +57,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     }
 
     try {
-      // ▼ 初期サイズ指定 (幅350px, 高さ400px くらいが画像に近いサイズ感)
+      // ▼ 初期サイズ指定
       // @ts-ignore
       const win = await window.documentPictureInPicture.requestWindow({
         width: 280,
@@ -304,16 +304,13 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
              {renderResult(false)}
           </div>
 
-          {/* ▼ 右側のOBS配信モードエリア（ここをデザイン変更！） */}
+          {/* ▼ 右側のOBS配信モードエリア */}
           <div className="md:w-1/3 flex flex-col px-10 mt-4 md:mt-0">
-            {/* PiPが起動中かどうかで表示を変えてもいいが、ボタンで制御する */}
             
             {/* ★ デザイン通りの「ランチャーボックス」 */}
-            <div className="hidden md:flex w-full border-4 border-dashed border-gray-200 rounded-3xl p-8 flex flex-col items-center justify-center bg-gray-50 text-center h-64 shadow-sm relative">
+            {/* hidden md:flex を削除し、常に flex 表示にしました */}
+            <div className="flex w-full border-4 border-dashed border-gray-200 rounded-3xl p-8 flex-col items-center justify-center bg-gray-50 text-center h-64 shadow-sm relative">
                
-               {/* 起動中の場合、ここにResultAnimationを出してもいいが、PiP側に出るのでここでは静かにしておく */}
-               
-               {/* アイコン（FontAwesomeのPCアイコン） */}
                <i className="fas fa-desktop text-5xl text-gray-300 mb-4"></i>
 
                <h2 className="text-gray-600 font-bold text-lg mb-2">OBS配信モード</h2>
@@ -358,17 +355,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                 )}
             </div>
             
-            {/* ★ PiPウインドウへの転送ポータル
-              pipWindowが存在する時だけ、ここ経由で「Result(true)」を向こうのWindowへ送り込む
-            */}
+            {/* PiPウインドウへの転送ポータル */}
             {pipWindow && createPortal(
               <div className="h-full bg-white flex flex-col overflow-hidden relative">
-                 {/* PiPウインドウの中身: 勝敗アニメーションもこっちに出す */}
                  {renderResult(true)}
                  {showResultAnimation && (
                     <ResultAnimation 
                       result={lastResultForAnim} 
-                      mode="absolute" // 枠内絶対配置
+                      mode="absolute"
                     />
                   )}
               </div>, 
