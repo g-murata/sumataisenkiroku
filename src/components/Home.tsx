@@ -358,7 +358,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
             {/* PiPウインドウへの転送ポータル */}
             {pipWindow && createPortal(
               <div className="h-full bg-white flex flex-col overflow-hidden relative">
-                <div className="h-4 bg-white w-full flex-shrink-0"></div>
+                <div className="h-2 bg-white w-full flex-shrink-0"></div>
                  {renderResult(true)}
                  {showResultAnimation && (
                     <ResultAnimation 
