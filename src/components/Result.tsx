@@ -100,6 +100,7 @@ export const Result: React.FC<ResultProps> = ({
           {/* 日付フィルター */}
           <div className="flex flex-col gap-2 w-full">
              <select
+                aria-label="日付範囲"
                 className="border rounded p-1 text-sm bg-white w-full font-bold text-gray-700 cursor-pointer hover:bg-gray-50"
                 value={filterDateRange}
                 onChange={(e) => setFilterDateRange(e.target.value as any)}
@@ -133,6 +134,7 @@ export const Result: React.FC<ResultProps> = ({
           {/* キャラフィルター */}
           <div className="flex gap-2 w-full items-center">
             <select 
+              aria-label="自分の使用キャラ"
               className="border rounded p-1 text-sm bg-white w-1/2 cursor-pointer hover:bg-gray-50"
               value={filterMyCharId || ""}
               onChange={(e) => setFilterMyCharId(e.target.value ? Number(e.target.value) : null)}
@@ -144,6 +146,7 @@ export const Result: React.FC<ResultProps> = ({
             </select>
             <span className="text-gray-400 text-xs">vs</span>
             <select 
+              aria-label="相手の使用キャラ"
               className="border rounded p-1 text-sm bg-white w-1/2 cursor-pointer hover:bg-gray-50"
               value={filterOppCharId || ""}
               onChange={(e) => setFilterOppCharId(e.target.value ? Number(e.target.value) : null)}
@@ -162,11 +165,13 @@ export const Result: React.FC<ResultProps> = ({
         <div className={`${haishin ? 'h-38' : 'h-full'} w-full bg-white border rounded-lg shadow-inner overflow-y-auto hide-scrollbar md:w-full`}>
           <table className="w-full table-fixed">
             <thead className="bg-gray-600 text-white text-xs">
-              {!haishin && <th className="sticky top-0 bg-gray-600 z-10 w-16 py-2">日時</th>}
-              <th className="sticky top-0 bg-gray-600 z-10 w-12">自分</th>
-              <th className="sticky top-0 bg-gray-600 z-10 w-12">相手</th>
-              <th className="sticky top-0 bg-gray-600 z-10 w-12">結果</th>
-              {!haishin && <th className="sticky top-0 bg-gray-600 z-10">メモ</th>}
+              <tr>
+                {!haishin && <th className="sticky top-0 bg-gray-600 z-10 w-16 py-2">日時</th>}
+                <th className="sticky top-0 bg-gray-600 z-10 w-12">自分</th>
+                <th className="sticky top-0 bg-gray-600 z-10 w-12">相手</th>
+                <th className="sticky top-0 bg-gray-600 z-10 w-12">結果</th>
+                {!haishin && <th className="sticky top-0 bg-gray-600 z-10">メモ</th>}
+              </tr>
             </thead>
             <tbody>
               {filteredMatches.map(({ match, originalIndex }, loopIndex) => (
