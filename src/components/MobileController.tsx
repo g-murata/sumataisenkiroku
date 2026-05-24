@@ -51,7 +51,7 @@ export const MobileController: React.FC<MobileControllerProps> = ({
     const sortedIds = Object.keys(counts)
       .map(Number)
       .sort((a, b) => counts[b] - counts[a])
-      .slice(0, 6); // リモコン用に少し多めの最大6件をクイック表示
+      .slice(0, 6);
 
     return sortedIds
       .map(id => characterList.find(c => c.characterNo === id))
@@ -112,11 +112,120 @@ export const MobileController: React.FC<MobileControllerProps> = ({
     return total > 0 ? ((history.winCount / total) * 100).toFixed(1) : "0.0";
   }, [history.winCount, history.loseCount]);
 
+  // ----------------------------------------------------------------------
+  // ▼ キャラ選択パネル（再利用可能コンポーネント）
+  // ----------------------------------------------------------------------
+  const CharacterSelector = ({
+    label,
+    color,
+    selected,
+    onSelect,
+    favorites,
+    showAll,
+    setShowAll,
+    search,
+    setSearch,
+    filteredList,
+    idPrefix,
+  }: {
+    label: string;
+    color: "red" | "blue";
+    selected: CharacterType | null;
+    onSelect: (c: CharacterType | null) => void;
+    favorites: CharacterType[];
+    showAll: boolean;
+    setShowAll: (v: boolean) => void;
+    search: string;
+    setSearch: (v: string) => void;
+    filteredList: CharacterType[];
+    idPrefix: string;
+  }) => {
+    const borderSelected = color === "red"
+      ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)] scale-105"
+      : "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)] scale-105";
+    const labelColor = color === "red" ? "text-red-400" : "text-blue-400";
+    const btnBorderSelected = color === "red"
+      ? "border-red-500 text-red-400 bg-red-950/10"
+      : "border-blue-500 text-blue-400 bg-blue-950/10";
+    const gridBorderSelected = color === "red"
+      ? "border-red-500 bg-red-950/30 shadow-[0_0_8px_rgba(239,68,68,0.4)]"
+      : "border-blue-500 bg-blue-950/30 shadow-[0_0_8px_rgba(59,130,246,0.4)]";
+
+    return (
+      <div className="glass-panel p-3 rounded-2xl bg-slate-900/30 border border-white/5 flex flex-col gap-2">
+        <span className={`text-[10px] font-black tracking-wider ${labelColor} uppercase flex items-center gap-1`}>
+          {color === "red" ? "👤" : "⚔️"} {label}: {selected?.characterName || "未選択"}
+        </span>
+
+        {/* クイック選択お気に入り */}
+        <div className="flex gap-2 items-center overflow-x-auto hide-scrollbar py-0.5 min-h-[3.25rem]">
+          {favorites.map(char => {
+            const isSelected = selected?.characterNo === char.characterNo;
+            return (
+              <button
+                key={`${idPrefix}-fav-${char.characterNo}`}
+                onClick={() => isSelected ? onSelect(null) : onSelect(char)}
+                className={`w-12 h-12 rounded-full p-1 bg-slate-950/60 border-2 flex-shrink-0 transition-all flex items-center justify-center ${
+                  isSelected ? borderSelected : "border-white/10"
+                }`}
+              >
+                <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
+              </button>
+            );
+          })}
+
+          {/* 🔍 展開ボタン */}
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className={`w-12 h-12 rounded-full border-2 border-dashed flex-shrink-0 flex items-center justify-center text-slate-500 font-bold transition-all text-xs ${
+              showAll ? btnBorderSelected : "border-slate-800 hover:border-slate-600"
+            }`}
+          >
+            {showAll ? <i className="fas fa-times"></i> : <i className="fas fa-search"></i>}
+          </button>
+        </div>
+
+        {/* 全キャラリスト（インライン展開 → overlap しない） */}
+        {showAll && (
+          <div className="flex flex-col gap-2 bg-slate-950/70 p-2.5 rounded-xl border border-white/5 shadow-inner">
+            <input
+              type="text"
+              placeholder="ファイター名で検索..."
+              className="w-full px-3 py-1.5 text-xs glass-input rounded-lg border border-white/5 bg-slate-900/60 text-slate-200"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+            <div className="overflow-y-auto max-h-[28vh] pr-1 grid grid-cols-6 gap-1.5">
+              {filteredList.map(char => {
+                const isSelected = selected?.characterNo === char.characterNo;
+                return (
+                  <button
+                    key={`${idPrefix}-all-${char.characterNo}`}
+                    onClick={() => {
+                      onSelect(char);
+                      setShowAll(false);
+                    }}
+                    className={`w-10 h-10 p-1.5 rounded-lg border bg-slate-900/30 flex items-center justify-center transition-all ${
+                      isSelected ? gridBorderSelected : "border-transparent"
+                    }`}
+                  >
+                    <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="h-screen w-screen bg-[#07070d] text-white flex flex-col justify-between p-4 overflow-hidden select-none font-sans box-border">
-      
+    <div className="h-screen w-screen bg-[#07070d] text-white flex flex-col p-3 gap-3 overflow-y-auto select-none font-sans box-border">
+
       {/* 🟢 ヘッダー: LIVE接続ランプと現在スコアの簡易ボード */}
-      <div className="glass-panel p-3 rounded-2xl bg-slate-950/60 border border-white/5 flex items-center justify-between shadow-lg">
+      <div className="glass-panel p-3 rounded-2xl bg-slate-950/60 border border-white/5 flex items-center justify-between shadow-lg flex-shrink-0">
         {/* LIVE SYNC 表示 */}
         <div className="flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-full">
           <span className="relative flex h-1.5 w-1.5">
@@ -148,147 +257,49 @@ export const MobileController: React.FC<MobileControllerProps> = ({
         )}
       </div>
 
-      {/* 🕹️ メイン領域: キャラ選択 (縦分割スクロール可能、アFavoritesは1画面に収まる) */}
-      <div className="flex-grow flex flex-col justify-center gap-3 my-3 overflow-hidden">
-        
-        {/* 1. あなたのエントリー */}
-        <div className="glass-panel p-3 rounded-2xl bg-slate-900/30 border border-white/5 flex flex-col gap-2 relative">
-          <span className="text-[10px] font-black tracking-wider text-red-400 uppercase flex items-center gap-1">
-            👤 あなたのファイター: {selectedMyCharacter?.characterName || "未選択"}
-          </span>
+      {/* 🕹️ メイン領域: キャラ選択（インライン展開でoverlapなし） */}
+      <div className="flex flex-col gap-3 flex-1">
 
-          {/* クイック選択お気に入り */}
-          <div className="flex gap-2 items-center overflow-x-auto hide-scrollbar py-0.5 min-h-[3.25rem]">
-            {myFavorites.map(char => {
-              const isSelected = selectedMyCharacter?.characterNo === char.characterNo;
-              return (
-                <button
-                  key={`controller-my-${char.characterNo}`}
-                  onClick={() => isSelected ? setSelectedMyCharacter(null) : setSelectedMyCharacter(char)}
-                  className={`w-12 h-12 rounded-full p-1 bg-slate-950/60 border-2 flex-shrink-0 transition-all flex items-center justify-center ${
-                    isSelected ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.6)] scale-105" : "border-white/10"
-                  }`}
-                >
-                  <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
-                </button>
-              );
-            })}
-            
-            {/* 🔍 展開ボタン */}
-            <button
-              onClick={() => setShowMyAll(!showMyAll)}
-              className={`w-12 h-12 rounded-full border-2 border-dashed flex-shrink-0 flex items-center justify-center text-slate-500 font-bold transition-all text-xs ${
-                showMyAll ? "border-red-500 text-red-400 bg-red-950/10" : "border-slate-800 hover:border-slate-600"
-              }`}
-            >
-              {showMyAll ? <i className="fas fa-times"></i> : <i className="fas fa-search"></i>}
-            </button>
-          </div>
+        {/* 1. あなたのファイター */}
+        <CharacterSelector
+          label="あなたのファイター"
+          color="red"
+          selected={selectedMyCharacter}
+          onSelect={setSelectedMyCharacter}
+          favorites={myFavorites}
+          showAll={showMyAll}
+          setShowAll={(v) => {
+            setShowMyAll(v);
+            if (v) setShowOppAll(false); // 片方だけ開く
+          }}
+          search={mySearch}
+          setSearch={setMySearch}
+          filteredList={myFilteredList}
+          idPrefix="my"
+        />
 
-          {/* 全キャラリストアコーディオン */}
-          {showMyAll && (
-            <div className="flex flex-col gap-2 mt-1 bg-slate-950/70 p-2.5 rounded-xl border border-white/5 absolute left-2 right-2 top-[4.5rem] z-30 shadow-2xl max-h-[30vh] overflow-hidden">
-              <input
-                type="text"
-                placeholder="ファイター名で検索..."
-                className="w-full px-3 py-1.5 text-xs glass-input rounded-lg border border-white/5 bg-slate-900/60 text-slate-200"
-                value={mySearch}
-                onChange={(e) => setMySearch(e.target.value)}
-              />
-              <div className="overflow-y-auto pr-1 flex-grow grid grid-cols-5 gap-1.5">
-                {myFilteredList.map(char => {
-                  const isSelected = selectedMyCharacter?.characterNo === char.characterNo;
-                  return (
-                    <button
-                      key={`all-my-${char.characterNo}`}
-                      onClick={() => {
-                        setSelectedMyCharacter(char);
-                        setShowMyAll(false);
-                      }}
-                      className={`w-10 h-10 p-1.5 rounded-lg border bg-slate-900/30 flex items-center justify-center transition-all ${
-                        isSelected ? "border-red-500 bg-red-950/30 shadow-[0_0_8px_rgba(239,68,68,0.4)]" : "border-transparent"
-                      }`}
-                    >
-                      <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 2. 相手のエントリー */}
-        <div className="glass-panel p-3 rounded-2xl bg-slate-900/30 border border-white/5 flex flex-col gap-2 relative">
-          <span className="text-[10px] font-black tracking-wider text-blue-400 uppercase flex items-center gap-1">
-            ⚔️ 相手のファイター: {selectedOpponentCharacter?.characterName || "未選択"}
-          </span>
-
-          {/* クイック選択お気に入り */}
-          <div className="flex gap-2 items-center overflow-x-auto hide-scrollbar py-0.5 min-h-[3.25rem]">
-            {oppFavorites.map(char => {
-              const isSelected = selectedOpponentCharacter?.characterNo === char.characterNo;
-              return (
-                <button
-                  key={`controller-opp-${char.characterNo}`}
-                  onClick={() => isSelected ? setSelectedOpponentCharacter(null) : setSelectedOpponentCharacter(char)}
-                  className={`w-12 h-12 rounded-full p-1 bg-slate-950/60 border-2 flex-shrink-0 transition-all flex items-center justify-center ${
-                    isSelected ? "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)] scale-105" : "border-white/10"
-                  }`}
-                >
-                  <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
-                </button>
-              );
-            })}
-            
-            {/* 🔍 展開ボタン */}
-            <button
-              onClick={() => setShowOppAll(!showOppAll)}
-              className={`w-12 h-12 rounded-full border-2 border-dashed flex-shrink-0 flex items-center justify-center text-slate-500 font-bold transition-all text-xs ${
-                showOppAll ? "border-blue-500 text-blue-400 bg-blue-950/10" : "border-slate-800 hover:border-slate-600"
-              }`}
-            >
-              {showOppAll ? <i className="fas fa-times"></i> : <i className="fas fa-search"></i>}
-            </button>
-          </div>
-
-          {/* 全キャラリストアコーディオン */}
-          {showOppAll && (
-            <div className="flex flex-col gap-2 mt-1 bg-slate-950/70 p-2.5 rounded-xl border border-white/5 absolute left-2 right-2 top-[4.5rem] z-30 shadow-2xl max-h-[30vh] overflow-hidden">
-              <input
-                type="text"
-                placeholder="ファイター名で検索..."
-                className="w-full px-3 py-1.5 text-xs glass-input rounded-lg border border-white/5 bg-slate-900/60 text-slate-200"
-                value={oppSearch}
-                onChange={(e) => setOppSearch(e.target.value)}
-              />
-              <div className="overflow-y-auto pr-1 flex-grow grid grid-cols-5 gap-1.5">
-                {oppFilteredList.map(char => {
-                  const isSelected = selectedOpponentCharacter?.characterNo === char.characterNo;
-                  return (
-                    <button
-                      key={`all-opp-${char.characterNo}`}
-                      onClick={() => {
-                        setSelectedOpponentCharacter(char);
-                        setShowOppAll(false);
-                      }}
-                      className={`w-10 h-10 p-1.5 rounded-lg border bg-slate-900/30 flex items-center justify-center transition-all ${
-                        isSelected ? "border-blue-500 bg-blue-950/30 shadow-[0_0_8px_rgba(59,130,246,0.4)]" : "border-transparent"
-                      }`}
-                    >
-                      <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+        {/* 2. 相手のファイター */}
+        <CharacterSelector
+          label="相手のファイター"
+          color="blue"
+          selected={selectedOpponentCharacter}
+          onSelect={setSelectedOpponentCharacter}
+          favorites={oppFavorites}
+          showAll={showOppAll}
+          setShowAll={(v) => {
+            setShowOppAll(v);
+            if (v) setShowMyAll(false); // 片方だけ開く
+          }}
+          search={oppSearch}
+          setSearch={setOppSearch}
+          filteredList={oppFilteredList}
+          idPrefix="opp"
+        />
 
       </div>
 
-      {/* 🔴 下部: 巨大な「WIN」「LOSE」ボタン (親指にフィットする超巨大サイズ) */}
-      <div className="flex gap-4 justify-between items-center h-[20vh] min-h-[5.5rem] max-h-[7rem] mb-1">
+      {/* 🔴 下部: 巨大な「WIN」「LOSE」ボタン */}
+      <div className="flex gap-4 justify-between items-center h-[20vh] min-h-[5.5rem] max-h-[7rem] flex-shrink-0 mb-1">
         <button
           onClick={() => handleRecord("勝ち")}
           disabled={!bothCharactersSelected}

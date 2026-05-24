@@ -26,9 +26,19 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
 
-  // ▼ コピー通知State
-  const [copied, setCopied] = useState(false);
-  const [controllerCopied, setControllerCopied] = useState(false);
+
+
+  // ▼ URLを生成するユーティリティ
+  const getObsUrl = () => {
+    const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
+    const syncVal = user?.id || guestSyncKey;
+    return `${window.location.origin}${window.location.pathname}?mode=obs&sync=${syncVal}`;
+  };
+  const getControllerUrl = () => {
+    const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
+    const syncVal = user?.id || guestSyncKey;
+    return `${window.location.origin}${window.location.pathname}?mode=controller&sync=${syncVal}`;
+  };
 
   const STORAGE_KEY = "gameResults";
 
@@ -129,24 +139,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     setSelectedOpponentCharacter(null);
   };
 
-  // OBS配信URLコピー処理
-  const handleCopyObsUrl = () => {
-    const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
-    const syncVal = user?.id || guestSyncKey;
-    const obsUrl = `${window.location.origin}${window.location.pathname}?mode=obs&sync=${syncVal}`;
-    navigator.clipboard.writeText(obsUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // OBSウインドウを開く
+  const handleOpenObsWindow = () => {
+    window.open(getObsUrl(), 'obs_overlay', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
   };
 
-  // スマホコントローラー用URLコピー処理
-  const handleCopyControllerUrl = () => {
-    const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
-    const syncVal = user?.id || guestSyncKey;
-    const controllerUrl = `${window.location.origin}${window.location.pathname}?mode=controller&sync=${syncVal}`;
-    navigator.clipboard.writeText(controllerUrl);
-    setControllerCopied(true);
-    setTimeout(() => setControllerCopied(false), 2000);
+  // スマホコントローラーを別ウインドウで開く
+  const handleOpenControllerWindow = () => {
+    window.open(getControllerUrl(), 'mobile_controller', 'width=390,height=844,menubar=no,toolbar=no,location=no,status=no,resizable=yes');
   };
 
   return (
@@ -258,47 +258,25 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
               </p>
 
               <div className="flex flex-col gap-2 w-full max-w-[14rem]">
-                {/* OBSリンクコピー */}
+
+                {/* OBS配信用 --- 開くボタンのみ */}
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left">OBS配信用</p>
                 <button
-                  onClick={handleCopyObsUrl}
-                  className={`
-                    w-full py-2 px-4 rounded-xl text-xxs font-bold border transition-all flex items-center justify-center gap-1.5
-                    ${copied 
-                      ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]" 
-                      : "bg-slate-950/50 text-slate-400 border-white/5 hover:text-white hover:bg-slate-800/80 hover:border-white/10"}
-                  `}
+                  onClick={handleOpenObsWindow}
+                  className="w-full py-2 px-4 rounded-xl text-xxs font-bold border transition-all flex items-center justify-center gap-1.5 bg-slate-800/80 text-slate-200 border-white/10 hover:bg-slate-700 hover:border-white/20 shadow"
                 >
-                  {copied ? (
-                    <>
-                      <i className="fas fa-check text-emerald-400"></i> コピー完了！
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-copy"></i> OBS配信用URLをコピー
-                    </>
-                  )}
+                  <i className="fas fa-external-link-alt text-indigo-400"></i> 別ウインドウで開く
                 </button>
 
-                {/* スマホコントローラーリンクコピー */}
+                {/* スマホ用リモコン --- 開くボタンのみ */}
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left mt-1">スマホ用リモコン</p>
                 <button
-                  onClick={handleCopyControllerUrl}
-                  className={`
-                    w-full py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5
-                    ${controllerCopied 
-                      ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]" 
-                      : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-400/20"}
-                  `}
+                  onClick={handleOpenControllerWindow}
+                  className="w-full py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border-indigo-400/20"
                 >
-                  {controllerCopied ? (
-                    <>
-                      <i className="fas fa-check text-emerald-400"></i> コピー完了！
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-gamepad text-indigo-400"></i> スマホ用リモコンのURLをコピー
-                    </>
-                  )}
+                  <i className="fas fa-mobile-alt"></i> 別ウインドウで開く
                 </button>
+
               </div>
             </div>
 
