@@ -252,6 +252,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                   player={"あなた"}
                   onSelectCharacter={setSelectedMyCharacter}
                   selectedCharacter={selectedMyCharacter}
+                  matches={history.matches}
                 />
                 
                 <div className="flex items-center justify-center -my-2">
@@ -266,6 +267,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                   player={"相手"}
                   onSelectCharacter={setSelectedOpponentCharacter}
                   selectedCharacter={selectedOpponentCharacter}
+                  matches={history.matches}
                 />
               </div>
             </div>

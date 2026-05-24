@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 
-import { CharacterType } from '../types';
+import { CharacterType, MatchResult } from '../types';
 
 export const characterList: CharacterType[] = [
   { characterNo: 1, characterName: 'マリオ', imageUrl: `${import.meta.env.BASE_URL}fighter/mario.png` },
@@ -95,6 +95,7 @@ interface CharacterProps {
   player: string;
   onSelectCharacter: (character: CharacterType | null) => void;
   selectedCharacter: CharacterType | null;
+  matches: MatchResult[];
 }
 
 // ひらがなからカタカナへの変換ユーティリティ
@@ -104,43 +105,35 @@ const toKatakana = (str: string) => {
   });
 };
 
-export const Character: React.FC<CharacterProps> = ({ player, onSelectCharacter, selectedCharacter }) => {
+export const Character: React.FC<CharacterProps> = ({
+  player,
+  onSelectCharacter,
+  selectedCharacter,
+  matches
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [frequentCharacters, setFrequentCharacters] = useState<CharacterType[]>([]);
 
   const isYou = player === "あなた";
 
-  // ローカルストレージの履歴から「よく使うキャラ」を動的に集計
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("gameResults");
-      if (stored) {
-        const historyData = JSON.parse(stored);
-        const matches = historyData.matches || [];
-        
-        const counts: Record<number, number> = {};
-        matches.forEach((m: any) => {
-          const char = isYou ? m.player : m.opponentPlayer;
-          if (char && char.characterNo) {
-            counts[char.characterNo] = (counts[char.characterNo] || 0) + 1;
-          }
-        });
-
-        const sortedIds = Object.keys(counts)
-          .map(Number)
-          .sort((a, b) => counts[b] - counts[a])
-          .slice(0, 4);
-
-        const freqChars = sortedIds
-          .map(id => characterList.find(c => c.characterNo === id))
-          .filter((c): c is CharacterType => !!c);
-        
-        setFrequentCharacters(freqChars);
+  // 対戦履歴から「よく使うキャラ」を動的に集計
+  const frequentCharacters = useMemo(() => {
+    const counts: Record<number, number> = {};
+    matches.forEach((m) => {
+      const char = isYou ? m.player : m.opponentPlayer;
+      if (char && char.characterNo) {
+        counts[char.characterNo] = (counts[char.characterNo] || 0) + 1;
       }
-    } catch (e) {
-      console.error("Failed to load frequent characters:", e);
-    }
-  }, [player, selectedCharacter, isYou]);
+    });
+
+    const sortedIds = Object.keys(counts)
+      .map(Number)
+      .sort((a, b) => counts[b] - counts[a])
+      .slice(0, 4);
+
+    return sortedIds
+      .map(id => characterList.find(c => c.characterNo === id))
+      .filter((c): c is CharacterType => !!c);
+  }, [matches, isYou]);
 
   // 検索ワードでフィルタリング（ひらがなでもカタカナでも部分一致するように対応）
   const filteredList = characterList.filter(character => {

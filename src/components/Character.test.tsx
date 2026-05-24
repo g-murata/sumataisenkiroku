@@ -17,6 +17,7 @@ describe('Character', () => {
         player="あなた"
         onSelectCharacter={onSelect}
         selectedCharacter={null}
+        matches={[]}
       />
     );
     expect(screen.getByText(/あなた/)).toBeInTheDocument();
@@ -30,6 +31,7 @@ describe('Character', () => {
         player="相手"
         onSelectCharacter={onSelect}
         selectedCharacter={mockCharacter}
+        matches={[]}
       />
     );
     expect(screen.getByText(/相手の使用ファイター/)).toBeInTheDocument();
@@ -45,6 +47,7 @@ describe('Character', () => {
         player="あなた"
         onSelectCharacter={onSelect}
         selectedCharacter={null}
+        matches={[]}
       />
     );
     const marioImgs = screen.getAllByAltText('マリオ');
@@ -63,6 +66,7 @@ describe('Character', () => {
         player="あなた"
         onSelectCharacter={onSelect}
         selectedCharacter={mockCharacter}
+        matches={[]}
       />
     );
     const selectAgainButton = screen.getByRole('button', { name: /選び直す/ });
