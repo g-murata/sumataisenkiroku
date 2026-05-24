@@ -11,6 +11,7 @@ import { MatchDetailModal } from './components/MatchDetailModal';
 import { characterList } from './components/Character';
 // ★追加: フックをインポート
 import { useObsSync } from './hooks/useObsSync';
+import { ObsOverlay } from './components/ObsOverlay';
 
 const STORAGE_KEY = "gameResults";
 
@@ -270,27 +271,12 @@ export default function App() {
   }
 
   // =========================================================
-  // ★★★ OBSモード時の表示 (シンプル版) ★★★
+  // ★★★ OBSモード時の表示 (高機能オーバーレイ) ★★★
   // =========================================================
   if (isObsMode) {
-    const obsMatches = history.matches.map((m, i) => ({ match: m, originalIndex: i }));
-    
     return (
-      <div className="h-screen w-screen bg-white overflow-hidden relative">
-        <Result
-          filteredMatches={obsMatches}
-          history={history}
-          setHistory={() => {}}
-          haishin={true} // 配信用モードON (ヘッダーなし、メモなし)
-          
-          // フィルター機能は無効化
-          filterMyCharId={null} setFilterMyCharId={() => {}}
-          filterOppCharId={null} setFilterOppCharId={() => {}}
-          filterDateRange="all" setFilterDateRange={() => {}}
-          customStartDate="" setCustomStartDate={() => {}}
-          customEndDate="" setCustomEndDate={() => {}}
-          onRowClick={() => {}} // クリック無効
-        />
+      <div className="h-screen w-screen bg-transparent overflow-hidden relative flex items-start justify-start">
+        <ObsOverlay history={history} />
 
         {/* 信号を受け取ったらアニメーション発火！ */}
         {obsAnimResult && (
