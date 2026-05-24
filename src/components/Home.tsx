@@ -19,14 +19,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
   // ▼ UI用のState
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
   const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
-  const [selectedResult, setSelectedResult] = useState<"勝ち" | "負け">("勝ち");
   
   const bothCharactersSelected = (selectedMyCharacter !== null && selectedOpponentCharacter !== null);
-
-  // ▼ クイック記録モード用のState（ブラウザに保存）
-  const [isQuickRecord, setIsQuickRecord] = useState(() => {
-    return localStorage.getItem("isQuickRecord") !== "false";
-  });
 
   // ▼ フィルター用State
   const [filterMyCharId, setFilterMyCharId] = useState<number | null>(null);
@@ -202,25 +196,6 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     });
 
     setSelectedOpponentCharacter(null);
-    if (shouhai === "負け") {
-      setSelectedResult("勝ち");
-    }
-  };
-
-  // クイック記録トグル処理
-  const handleToggleQuickRecord = () => {
-    const newVal = !isQuickRecord;
-    setIsQuickRecord(newVal);
-    localStorage.setItem("isQuickRecord", String(newVal));
-  };
-
-  // 勝敗ボタンが押された際のハンドリング
-  const handleResultButtonClick = (result: "勝ち" | "負け") => {
-    setSelectedResult(result);
-    // クイック記録モードかつ両方選択されていれば、即座に記録
-    if (isQuickRecord && bothCharactersSelected) {
-      recordResult(result);
-    }
   };
 
   // OBS配信URLコピー処理
@@ -297,34 +272,15 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
 
             {/* --- 勝敗結果送信 (ゲームコントローラー風) --- */}
             <div className="glass-panel p-5 rounded-2xl flex flex-col gap-3">
-              {/* クイック記録トグルスイッチ */}
-              <div className="flex items-center justify-between px-3 py-2 bg-slate-950/40 border border-white/5 rounded-xl">
-                <div className="flex items-center gap-2">
-                  <span className="text-base">🕹️</span>
-                  <div>
-                    <span className="text-xs font-bold text-slate-200 block">クイック記録モード</span>
-                    <span className="text-[10px] text-slate-500 block">勝敗タップで即保存、連戦に最適</span>
-                  </div>
-                </div>
-                <button
-                  onClick={handleToggleQuickRecord}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${isQuickRecord ? 'bg-indigo-600' : 'bg-slate-700'}`}
-                >
-                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${isQuickRecord ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                </button>
-              </div>
-
-              {/* 勝敗ボタン */}
+              {/* 勝敗ボタン (即座に記録するアーケードスタイル) */}
               <div className="flex justify-center items-center gap-3">
                 <button
                   className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-sm text-white transition-all transform active:scale-95 flex items-center justify-center gap-1.5 ${
                     !bothCharactersSelected
                       ? "bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed"
-                      : selectedResult === "勝ち"
-                        ? "bg-red-600 hover:bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)] border border-red-400"
-                        : "bg-slate-900/60 hover:bg-slate-800 border border-white/10 text-slate-400 hover:text-slate-200"
+                      : "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 shadow-[0_4px_15px_rgba(239,68,68,0.3)] border border-red-400"
                   }`}
-                  onClick={() => handleResultButtonClick("勝ち")}
+                  onClick={() => recordResult("勝ち")}
                   disabled={!bothCharactersSelected}
                 >
                   <i className="fas fa-trophy text-amber-400"></i> 勝ち
@@ -333,31 +289,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                   className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-sm text-white transition-all transform active:scale-95 flex items-center justify-center gap-1.5 ${
                     !bothCharactersSelected
                       ? "bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed"
-                      : selectedResult === "負け"
-                        ? "bg-blue-600 hover:bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)] border border-blue-400"
-                        : "bg-slate-900/60 hover:bg-slate-800 border border-white/10 text-slate-400 hover:text-slate-200"
+                      : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-[0_4px_15px_rgba(59,130,246,0.3)] border border-blue-400"
                   }`}
-                  onClick={() => handleResultButtonClick("負け")}
+                  onClick={() => recordResult("負け")}
                   disabled={!bothCharactersSelected}
                 >
                   <i className="fas fa-times-circle text-sky-400"></i> 負け
                 </button>
               </div>
-
-              {/* 結果送信ボタン（クイック記録がOFFの場合のみ表示） */}
-              {!isQuickRecord && (
-                <button
-                  className={`w-full py-3 px-4 rounded-xl font-extrabold text-xs text-white transition-all transform active:scale-95 shadow-md flex items-center justify-center gap-2 animate-fadeIn ${
-                    bothCharactersSelected
-                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-[0_0_15px_rgba(16,185,129,0.2)] border border-emerald-500/30"
-                      : "bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5"
-                  }`}
-                  onClick={() => recordResult(selectedResult)}
-                  disabled={!bothCharactersSelected}
-                >
-                  <i className="fas fa-paper-plane"></i> 対戦結果を送信
-                </button>
-              )}
             </div>
           </div>
           

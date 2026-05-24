@@ -42,7 +42,6 @@ describe('Home', () => {
   beforeEach(() => {
     localStorage.clear();
     jest.spyOn(Storage.prototype, 'getItem').mockImplementation((key: string) => {
-      if (key === 'isQuickRecord') return 'false';
       if (key === STORAGE_KEY) return null;
       return null;
     });
@@ -54,21 +53,20 @@ describe('Home', () => {
     jest.restoreAllMocks();
   });
 
-  it('勝ち・負け・対戦結果を送信ボタンが表示される', () => {
+  it('勝ち・負けボタンが表示される（結果送信ボタンは非表示）', () => {
     render(<HomeWrapper />);
     expect(screen.getByRole('button', { name: '勝ち' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '負け' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '対戦結果を送信' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '対戦結果を送信' })).not.toBeInTheDocument();
   });
 
-  it('キャラ未選択時は勝ち・負け・対戦結果を送信が disabled', () => {
+  it('キャラ未選択時は勝ち・負けボタンが disabled', () => {
     render(<HomeWrapper />);
     expect(screen.getByRole('button', { name: '勝ち' })).toBeDisabled();
     expect(screen.getByRole('button', { name: '負け' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: '対戦結果を送信' })).toBeDisabled();
   });
 
-  it('あなた・相手の両方でキャラを選ぶとボタンが有効になる', () => {
+  it('あなた・相手の両方でキャラを選ぶと勝ち・負けボタンが有効になる', () => {
     render(<HomeWrapper />);
     const mySection = screen.getByText(/あなた/).closest('.glass-panel')?.parentElement;
     const myImgs = mySection?.querySelectorAll('img[alt="マリオ"]') ?? [];
@@ -82,10 +80,11 @@ describe('Home', () => {
       if (oppImgs.length > 0) fireEvent.click(oppImgs[0] as HTMLElement);
     });
 
-    expect(screen.getByRole('button', { name: '対戦結果を送信' })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: '勝ち' })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: '負け' })).not.toBeDisabled();
   });
 
-  it('対戦結果を送信（勝ち）で戦績が 1勝0敗 になる', () => {
+  it('勝ちボタンをクリックすると即座に戦績が 1 W - 0 L になる', () => {
     render(<HomeWrapper />);
     const mySection = screen.getByText(/あなた/).closest('.glass-panel')?.parentElement;
     const myImgs = mySection?.querySelectorAll('img[alt="マリオ"]') ?? [];
@@ -101,16 +100,13 @@ describe('Home', () => {
     act(() => {
       fireEvent.click(screen.getByRole('button', { name: '勝ち' }));
     });
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: '対戦結果を送信' }));
-    });
 
-    // 1 W - 0 L
+    // 1 W - 0 L (Result.tsx の表示仕様に準じる)
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByText('0')).toBeInTheDocument();
   });
 
-  it('対戦結果を送信（負け）で戦績が 0勝1敗 になる', () => {
+  it('負けボタンをクリックすると即座に戦績が 0 W - 1 L になる', () => {
     render(<HomeWrapper />);
     const mySection = screen.getByText(/あなた/).closest('.glass-panel')?.parentElement;
     const myImgs = mySection?.querySelectorAll('img[alt="マリオ"]') ?? [];
@@ -126,11 +122,8 @@ describe('Home', () => {
     act(() => {
       fireEvent.click(screen.getByRole('button', { name: '負け' }));
     });
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: '対戦結果を送信' }));
-    });
 
-    // 0 W - 1 L
+    // 0 W - 1 L (Result.tsx の表示仕様に準じる)
     expect(screen.getByText('0')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
   });
@@ -152,9 +145,6 @@ describe('Home', () => {
     });
     act(() => {
       fireEvent.click(screen.getByRole('button', { name: '勝ち' }));
-    });
-    act(() => {
-      fireEvent.click(screen.getByRole('button', { name: '対戦結果を送信' }));
     });
 
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -181,7 +171,6 @@ describe('Home', () => {
       if (myImgs.length > 0) fireEvent.click(myImgs[0] as HTMLElement);
       if (oppImgs.length > 0) fireEvent.click(oppImgs[0] as HTMLElement);
       fireEvent.click(screen.getByRole('button', { name: '勝ち' }));
-      fireEvent.click(screen.getByRole('button', { name: '対戦結果を送信' }));
     });
 
     act(() => {
