@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 
 import { supabase } from './supabaseClient';
@@ -51,6 +51,9 @@ export default function App() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState<number | null>(null);
+
+  // ▼ OBSへ現在見せているデータを保持するRef（新しい接続への応答用）
+  const currentFilteredHistoryRef = useRef<MatchHistory>(history);
 
   // ▼ データ取得関数
   const fetchMatches = async (userId: string) => {
@@ -126,25 +129,40 @@ export default function App() {
       setTimeout(() => setObsAnimResult(null), 3000); 
     },
     // ③ 現在のデータを要求された時の処理 (通常ブラウザ側が、OBS側からのデータ要求を受け取ったとき)
-    () => history
+    () => currentFilteredHistoryRef.current
   );
 
+
+  // --------------------------------------------------------------------------
+  // ★★★ 絞り込み同期機能のメモ化 ★★★
+  // --------------------------------------------------------------------------
+  const handleFilterHistoryChange = useCallback((filteredHistory: MatchHistory) => {
+    // 絞り込まれた戦績をRefに保持
+    currentFilteredHistoryRef.current = filteredHistory;
+    // 絞り込まれた戦績をOBSに直接送信する
+    notifyUpdate(filteredHistory);
+  }, [notifyUpdate]);
 
   // ▼ 初期化（コントローラー・OBSモードは認証不要のためスキップ）
   useEffect(() => {
     if (isControllerMode || isObsMode) return;
 
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-      if (currentUser) {
-        await fetchMatches(currentUser.id);
-      } else {
-        window.addEventListener('storage', reloadFromStorage);
+        if (currentUser) {
+          await fetchMatches(currentUser.id);
+        } else {
+          window.addEventListener('storage', reloadFromStorage);
+        }
+      } catch (e) {
+        console.error("初期化エラー:", e);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     init();
@@ -195,14 +213,10 @@ export default function App() {
         }]);
       
       if (!error) {
-        const updated = await fetchMatches(user.id); // IDなどを確定させるため再取得
-        // ★★★ OBS画面へ「DB更新したから読み込んで！」と送信 ★★★
-        if (updated) notifyUpdate(updated); 
+        await fetchMatches(user.id); // IDなどを確定させるため再取得
       }
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-      // ★★★ OBS画面へ「ストレージ更新したよ！」と送信 ★★★
-      notifyUpdate(newState);
     }
   };
 
@@ -238,13 +252,11 @@ export default function App() {
 
       if (error) console.error('更新エラー:', error);
       else {
-        const updated = await fetchMatches(user.id);
-        if (updated) notifyUpdate(updated); // ★通信: 更新通知
+        await fetchMatches(user.id);
       }
 
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-      notifyUpdate(newState); // ★通信: 更新通知
     }
   };
 
@@ -267,12 +279,10 @@ export default function App() {
       const { error } = await supabase.from('matches').delete().eq('id', targetMatch.id);
       if (error) console.error('削除エラー:', error);
       else {
-        const updated = await fetchMatches(user.id);
-        if (updated) notifyUpdate(updated); // ★通信: 更新通知
+        await fetchMatches(user.id);
       }
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-      notifyUpdate(newState); // ★通信: 更新通知
     }
   };
 
@@ -286,18 +296,12 @@ export default function App() {
       const { error } = await supabase.from('matches').delete().eq('user_id', user.id);
       if (error) console.error('全削除エラー:', error);
       else {
-        const updated = await fetchMatches(user.id);
-        if (updated) {
-          notifyUpdate(updated); // ★通信: 更新通知
-        } else {
-          notifyUpdate({ matches: [], winCount: 0, loseCount: 0 });
-        }
+        await fetchMatches(user.id);
       }
     } else {
       localStorage.removeItem(STORAGE_KEY);
       const emptyState = { matches: [], winCount: 0, loseCount: 0 };
       setHistory(emptyState);
-      notifyUpdate(emptyState); // ★通信: 更新通知
     }
   };
 
@@ -350,10 +354,7 @@ export default function App() {
         }}
         onClearResults={handleClearResults}
         user={user}
-        onFilterHistoryChange={(filteredHistory) => {
-          // 絞り込まれた戦績をOBSに直接送信する
-          notifyUpdate(filteredHistory);
-        }}
+        onFilterHistoryChange={handleFilterHistoryChange}
       />
       
       <MatchDetailModal
