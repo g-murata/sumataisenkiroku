@@ -22,6 +22,19 @@ export default function App() {
   // ▼ URLパラメータで「OBSモード」かどうか判定
   const searchParams = new URLSearchParams(window.location.search);
   const isObsMode = searchParams.get('mode') === 'obs';
+  const urlSyncKey = searchParams.get('sync');
+
+  // ゲスト用の一意な同期キーを管理 (未ログイン時のOBS同期に使用)
+  const [guestSyncKey] = useState<string>(() => {
+    const stored = localStorage.getItem("guestSyncKey");
+    if (stored) return stored;
+    const newKey = "guest_" + Math.random().toString(36).substring(2, 12);
+    localStorage.setItem("guestSyncKey", newKey);
+    return newKey;
+  });
+
+  // 接続に用いる同期キーを決定
+  const syncKey = urlSyncKey || user?.id || guestSyncKey;
 
   // ▼ OBS側のアニメーション制御用State
   const [obsAnimResult, setObsAnimResult] = useState<"勝ち"|"負け" | null>(null);
@@ -64,11 +77,14 @@ export default function App() {
       const win = formattedMatches.filter(m => m.shouhai === "勝ち").length;
       const lose = formattedMatches.filter(m => m.shouhai === "負け").length;
 
-      setHistory({
+      const updatedHistory = {
         matches: formattedMatches,
         winCount: win,
         loseCount: lose
-      });
+      };
+
+      setHistory(updatedHistory);
+      return updatedHistory; // ★ 最新の履歴を返す
     }
   };
   
@@ -84,20 +100,28 @@ export default function App() {
   // ★★★ 通信機能のセットアップ (ここが重要！) ★★★
   // --------------------------------------------------------------------------
   const { notifyUpdate, notifyAnimation } = useObsSync(
-    // ① データ更新命令が来た時の処理 (OBS画面で実行)
-    async () => {
-      if (user) {
-        await fetchMatches(user.id);
+    syncKey,
+    isObsMode,
+    // ① データ更新命令が来た時の処理 (OBS画面で受信したとき)
+    async (incomingHistory) => {
+      if (incomingHistory) {
+        setHistory(incomingHistory);
       } else {
-        reloadFromStorage();
+        if (user) {
+          await fetchMatches(user.id);
+        } else {
+          reloadFromStorage();
+        }
       }
     },
-    // ② アニメーション命令が来た時の処理 (OBS画面で実行)
+    // ② アニメーション命令が来た時の処理 (OBS画面で受信したとき)
     (result) => {
       setObsAnimResult(result);
       // 3秒後にアニメ表示を消す
       setTimeout(() => setObsAnimResult(null), 3000); 
-    }
+    },
+    // ③ 現在のデータを要求された時の処理 (通常ブラウザ側が、OBS側からのデータ要求を受け取ったとき)
+    () => history
   );
 
 
@@ -164,14 +188,14 @@ export default function App() {
         }]);
       
       if (!error) {
-        await fetchMatches(user.id); // IDなどを確定させるため再取得
+        const updated = await fetchMatches(user.id); // IDなどを確定させるため再取得
         // ★★★ OBS画面へ「DB更新したから読み込んで！」と送信 ★★★
-        notifyUpdate(); 
+        if (updated) notifyUpdate(updated); 
       }
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       // ★★★ OBS画面へ「ストレージ更新したよ！」と送信 ★★★
-      notifyUpdate();
+      notifyUpdate(newState);
     }
   };
 
@@ -207,13 +231,13 @@ export default function App() {
 
       if (error) console.error('更新エラー:', error);
       else {
-        await fetchMatches(user.id);
-        notifyUpdate(); // ★通信: 更新通知
+        const updated = await fetchMatches(user.id);
+        if (updated) notifyUpdate(updated); // ★通信: 更新通知
       }
 
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-      notifyUpdate(); // ★通信: 更新通知
+      notifyUpdate(newState); // ★通信: 更新通知
     }
   };
 
@@ -236,12 +260,12 @@ export default function App() {
       const { error } = await supabase.from('matches').delete().eq('id', targetMatch.id);
       if (error) console.error('削除エラー:', error);
       else {
-        await fetchMatches(user.id);
-        notifyUpdate(); // ★通信: 更新通知
+        const updated = await fetchMatches(user.id);
+        if (updated) notifyUpdate(updated); // ★通信: 更新通知
       }
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-      notifyUpdate(); // ★通信: 更新通知
+      notifyUpdate(newState); // ★通信: 更新通知
     }
   };
 
@@ -255,13 +279,18 @@ export default function App() {
       const { error } = await supabase.from('matches').delete().eq('user_id', user.id);
       if (error) console.error('全削除エラー:', error);
       else {
-        await fetchMatches(user.id);
-        notifyUpdate(); // ★通信: 更新通知
+        const updated = await fetchMatches(user.id);
+        if (updated) {
+          notifyUpdate(updated); // ★通信: 更新通知
+        } else {
+          notifyUpdate({ matches: [], winCount: 0, loseCount: 0 });
+        }
       }
     } else {
       localStorage.removeItem(STORAGE_KEY);
-      setHistory({ matches: [], winCount: 0, loseCount: 0 });
-      notifyUpdate(); // ★通信: 更新通知
+      const emptyState = { matches: [], winCount: 0, loseCount: 0 };
+      setHistory(emptyState);
+      notifyUpdate(emptyState); // ★通信: 更新通知
     }
   };
 

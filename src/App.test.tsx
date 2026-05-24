@@ -1,11 +1,28 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import App from './App';
 
-jest.mock('./supabaseClient', () => ({
+vi.mock('./supabaseClient', () => ({
   supabase: {
-    auth: { getUser: () => Promise.resolve({ data: { user: null } }) },
-    from: () => ({ insert: () => Promise.resolve({ error: null }) }),
+    auth: { 
+      getUser: () => Promise.resolve({ data: { user: null } }),
+      getSession: () => Promise.resolve({ data: { session: null } }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+    },
+    from: () => ({ 
+      select: () => ({ order: () => Promise.resolve({ data: [], error: null }) }),
+      insert: () => Promise.resolve({ error: null }),
+      update: () => Promise.resolve({ error: null }),
+      delete: () => Promise.resolve({ error: null })
+    }),
+    channel: () => ({
+      on: () => ({
+        subscribe: () => {}
+      }),
+      send: () => {}
+    }),
+    removeChannel: () => {}
   },
 }));
 

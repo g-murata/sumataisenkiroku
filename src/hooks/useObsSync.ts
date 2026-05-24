@@ -1,60 +1,109 @@
 import { useEffect, useCallback, useRef } from 'react';
-
-// 通信チャンネル名
-const CHANNEL_NAME = 'smash-record-sync';
+import { supabase } from '../supabaseClient';
+import { MatchHistory } from '../types';
 
 // メッセージ型定義
 type SyncMessage = 
-  | { type: 'UPDATE_DATA' }
-  | { type: 'TRIGGER_ANIMATION', result: "勝ち" | "負け" };
+  | { type: 'UPDATE_DATA'; history: MatchHistory }
+  | { type: 'TRIGGER_ANIMATION'; result: "勝ち" | "負け" }
+  | { type: 'REQUEST_CURRENT_DATA' };
 
 export const useObsSync = (
-  onUpdateData?: () => void,
-  onTriggerAnimation?: (result: "勝ち" | "負け") => void
+  syncKey: string | null,
+  isObsMode: boolean,
+  onUpdateData?: (history?: MatchHistory) => void,
+  onTriggerAnimation?: (result: "勝ち" | "負け") => void,
+  getCurrentHistory?: () => MatchHistory
 ) => {
   // 最新の関数を保持するためのRef (これでuseEffectの再実行を防ぐ)
   const onUpdateDataRef = useRef(onUpdateData);
   const onTriggerAnimationRef = useRef(onTriggerAnimation);
+  const getCurrentHistoryRef = useRef(getCurrentHistory);
+  const channelRef = useRef<any>(null);
 
   // 関数が更新されたらRefも更新
   useEffect(() => {
     onUpdateDataRef.current = onUpdateData;
     onTriggerAnimationRef.current = onTriggerAnimation;
-  }, [onUpdateData, onTriggerAnimation]);
+    getCurrentHistoryRef.current = getCurrentHistory;
+  }, [onUpdateData, onTriggerAnimation, getCurrentHistory]);
 
-  // ▼ 受信側 (OBS画面用)
+  // ▼ Supabase Realtime チャンネルのセットアップ
   useEffect(() => {
-    const channel = new BroadcastChannel(CHANNEL_NAME);
-    
-    channel.onmessage = (event) => {
-      const msg = event.data as SyncMessage;
-      
-      // データ更新命令
-      if (msg.type === 'UPDATE_DATA' && onUpdateDataRef.current) {
-        onUpdateDataRef.current();
-      }
-      // アニメーション命令
-      if (msg.type === 'TRIGGER_ANIMATION' && onTriggerAnimationRef.current) {
-        onTriggerAnimationRef.current(msg.result);
-      }
-    };
+    if (!syncKey) return;
+
+    // 混線を避けるために syncKey を含めたチャンネル名を設定
+    const channelName = `obs-sync-${syncKey}`;
+    const channel = supabase.channel(channelName, {
+      config: {
+        broadcast: { self: false }, // 自分自身には送信イベントを戻さない
+      },
+    });
+
+    channelRef.current = channel;
+
+    // イベントの受信ハンドラを登録
+    channel
+      .on('broadcast', { event: 'sync-message' }, (payload) => {
+        const msg = payload.payload as SyncMessage;
+
+        // ① データ更新命令を受信
+        if (msg.type === 'UPDATE_DATA' && onUpdateDataRef.current) {
+          onUpdateDataRef.current(msg.history);
+        }
+        // ② アニメーション命令を受信
+        else if (msg.type === 'TRIGGER_ANIMATION' && onTriggerAnimationRef.current) {
+          onTriggerAnimationRef.current(msg.result);
+        }
+        // ③ データ要求を受信 (通常ブラウザ側が、OBS側からのデータ要求を受け取ったとき)
+        else if (msg.type === 'REQUEST_CURRENT_DATA') {
+          if (!isObsMode && getCurrentHistoryRef.current) {
+            const currentHistory = getCurrentHistoryRef.current();
+            if (currentHistory) {
+              channel.send({
+                type: 'broadcast',
+                event: 'sync-message',
+                payload: { type: 'UPDATE_DATA', history: currentHistory }
+              });
+            }
+          }
+        }
+      })
+      .subscribe((status) => {
+        // OBSモードの場合、購読完了時に通常ブラウザ側へ「現在のデータを送って」と要求する
+        if (status === 'SUBSCRIBED' && isObsMode) {
+          channel.send({
+            type: 'broadcast',
+            event: 'sync-message',
+            payload: { type: 'REQUEST_CURRENT_DATA' }
+          });
+        }
+      });
 
     return () => {
-      channel.close();
+      supabase.removeChannel(channel);
     };
-  }, []); // 依存配列を空にして、接続を維持する
+  }, [syncKey, isObsMode]);
 
   // ▼ 送信側 (メイン操作画面用)
-  const notifyUpdate = useCallback(() => {
-    const channel = new BroadcastChannel(CHANNEL_NAME);
-    channel.postMessage({ type: 'UPDATE_DATA' });
-    channel.close();
+  const notifyUpdate = useCallback((history: MatchHistory) => {
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'sync-message',
+        payload: { type: 'UPDATE_DATA', history }
+      });
+    }
   }, []);
 
   const notifyAnimation = useCallback((result: "勝ち" | "負け") => {
-    const channel = new BroadcastChannel(CHANNEL_NAME);
-    channel.postMessage({ type: 'TRIGGER_ANIMATION', result });
-    channel.close();
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'sync-message',
+        payload: { type: 'TRIGGER_ANIMATION', result }
+      });
+    }
   }, []);
 
   return { notifyUpdate, notifyAnimation };

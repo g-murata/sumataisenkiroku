@@ -200,7 +200,9 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
 
   // OBS配信URLコピー処理
   const handleCopyObsUrl = () => {
-    const obsUrl = `${window.location.origin}${window.location.pathname}?mode=obs`;
+    const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
+    const syncVal = user?.id || guestSyncKey;
+    const obsUrl = `${window.location.origin}${window.location.pathname}?mode=obs&sync=${syncVal}`;
     navigator.clipboard.writeText(obsUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

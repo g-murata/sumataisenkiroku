@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import { Home } from './Home';
 import { MatchHistory, MatchResult } from '../types';
 
-jest.mock('../supabaseClient', () => ({
+vi.mock('../supabaseClient', () => ({
   supabase: {
     auth: { getUser: () => Promise.resolve({ data: { user: null } }) },
-    from: () => ({ insert: () => Promise.resolve({ error: null }) }),
+    from: () => ({ 
+      insert: () => Promise.resolve({ error: null }),
+      select: () => ({ order: () => Promise.resolve({ data: [], error: null }) })
+    }),
   },
 }));
 
@@ -41,16 +45,16 @@ function HomeWrapper() {
 describe('Home', () => {
   beforeEach(() => {
     localStorage.clear();
-    jest.spyOn(Storage.prototype, 'getItem').mockImplementation((key: string) => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key: string) => {
       if (key === STORAGE_KEY) return null;
       return null;
     });
-    jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
-    jest.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('勝ち・負けボタンが表示される（結果送信ボタンは非表示）', () => {
@@ -129,7 +133,7 @@ describe('Home', () => {
   });
 
   it('「全対戦記録の一括削除」で confirm が呼ばれ、OK で戦績がリセットされる', () => {
-    window.confirm = jest.fn().mockReturnValue(true);
+    window.confirm = vi.fn().mockReturnValue(true);
     render(<HomeWrapper />);
 
     const mySection = screen.getByText(/あなた/).closest('.glass-panel')?.parentElement;
@@ -159,7 +163,7 @@ describe('Home', () => {
   });
 
   it('「全対戦記録の一括削除」で confirm をキャンセルするとリセットされない', () => {
-    window.confirm = jest.fn().mockReturnValue(false);
+    window.confirm = vi.fn().mockReturnValue(false);
     render(<HomeWrapper />);
 
     const mySection = screen.getByText(/あなた/).closest('.glass-panel')?.parentElement;
