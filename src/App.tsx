@@ -232,14 +232,23 @@ export default function App() {
   const handleUpdateMatch = async (updatedMatch: MatchResult) => {
     if (selectedMatchIndex === null) return;
 
-    const newMatches = [...history.matches];
-    newMatches[selectedMatchIndex] = updatedMatch;
-    newMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
-    const newWinCount = newMatches.filter(m => m.shouhai === "勝ち").length;
-    const newLoseCount = newMatches.filter(m => m.shouhai === "負け").length;
-    const newState = { matches: newMatches, winCount: newWinCount, loseCount: newLoseCount };
+    setHistory(prev => {
+      const newMatches = [...prev.matches];
+      newMatches[selectedMatchIndex] = updatedMatch;
+      // 日付順で並び替え
+      newMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
+      
+      // 全件から勝敗数を再計算（これが最も確実）
+      const win = newMatches.filter(m => m.shouhai === "勝ち").length;
+      const lose = newMatches.filter(m => m.shouhai === "負け").length;
+      
+      const newState = { matches: newMatches, winCount: win, loseCount: lose };
+      if (!user) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      }
+      return newState;
+    });
 
-    setHistory(newState);
     setIsModalOpen(false);
 
     if (user && updatedMatch.id) {
@@ -257,12 +266,7 @@ export default function App() {
         .eq('id', updatedMatch.id);
 
       if (error) console.error('更新エラー:', error);
-      else {
-        await fetchMatches(user.id);
-      }
-
-    } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      // fetchMatchesは呼ばず、手元の正確なデータを優先する
     }
   };
 
@@ -273,22 +277,25 @@ export default function App() {
     if (selectedMatchIndex === null) return;
     const targetMatch = history.matches[selectedMatchIndex];
 
-    const newMatches = history.matches.filter((_, i) => i !== selectedMatchIndex);
-    const newWin = targetMatch.shouhai === "勝ち" ? history.winCount - 1 : history.winCount;
-    const newLose = targetMatch.shouhai === "負け" ? history.loseCount - 1 : history.loseCount;
-    const newState = { matches: newMatches, winCount: newWin, loseCount: newLose };
+    setHistory(prev => {
+      const newMatches = prev.matches.filter((_, i) => i !== selectedMatchIndex);
+      
+      // 全件から勝敗数を再計算
+      const win = newMatches.filter(m => m.shouhai === "勝ち").length;
+      const lose = newMatches.filter(m => m.shouhai === "負け").length;
+      
+      const newState = { matches: newMatches, winCount: win, loseCount: lose };
+      if (!user) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      }
+      return newState;
+    });
 
-    setHistory(newState);
     setIsModalOpen(false);
 
     if (user && targetMatch.id) {
       const { error } = await supabase.from('matches').delete().eq('id', targetMatch.id);
       if (error) console.error('削除エラー:', error);
-      else {
-        await fetchMatches(user.id);
-      }
-    } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
     }
   };
 
