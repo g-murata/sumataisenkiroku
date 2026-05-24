@@ -428,6 +428,13 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                     </>
                   )}
                 </button>
+
+                {/* 連動に関するヘルプテキスト */}
+                <p className="text-[9px] text-slate-500 mt-2 text-left leading-relaxed border-t border-white/5 pt-2">
+                  <i className="fas fa-info-circle text-indigo-400/80 mr-1"></i>
+                  <strong>リアルタイム連動の注意:</strong><br />
+                  勝敗スコアやスタンプアニメを即時同期するには、「専用ウィンドウ」を開いておく必要があります。邪魔な場合はウィンドウを最小サイズに縮小し、画面の端や裏側に置いておけばOKです！
+                </p>
               </div>
             </div>
 
