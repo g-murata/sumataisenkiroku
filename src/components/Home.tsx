@@ -11,9 +11,18 @@ interface HomeProps {
   onClearResults: () => void;
   user: any;
   onFilterHistoryChange?: (filteredHistory: MatchHistory) => void;
+  isRemoteUpdate?: boolean;
 }
 
-export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults, user, onFilterHistoryChange }) => {
+export const Home: React.FC<HomeProps> = ({ 
+  history, 
+  onAddResult, 
+  onRowClick, 
+  onClearResults, 
+  user, 
+  onFilterHistoryChange,
+  isRemoteUpdate 
+}) => {
   // ▼ UI用のState
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
   const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
@@ -77,7 +86,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
   // ▼ 絞り込み結果をOBSへ同期するロジック
   // ----------------------------------------------------------------------
   useEffect(() => {
-    if (!onFilterHistoryChange) return;
+    // 外部からの更新（他の端末での操作）による変化なら、自分からは放送しない
+    if (!onFilterHistoryChange || isRemoteUpdate) return;
 
     // 現在の絞り込み条件に基づいた MatchHistory オブジェクトを作成
     const filteredMatches = filteredMatchesWithIndex.map(m => m.match);

@@ -52,6 +52,9 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState<number | null>(null);
 
+  // ▼ 他の端末からの更新を受信中かどうかを追跡するフラグ
+  const [isRemoteUpdate, setIsRemoteUpdate] = useState(false);
+
   // ▼ OBSへ現在見せているデータを保持するRef（新しい接続への応答用）
   const currentFilteredHistoryRef = useRef<MatchHistory>(history);
 
@@ -111,11 +114,18 @@ export default function App() {
     // ① データ更新命令が来た時の処理 (受信したとき)
     async (incomingHistory, isFiltered) => {
       if (incomingHistory) {
+        // ★ 外部からの更新であることを記録（これによりHome画面の自動放送を止める）
+        setIsRemoteUpdate(true);
         setHistory(incomingHistory);
-        // 絞り込みデータでなければ、Refも更新（次にOBSが繋がった時用）
+        
+        // 絞り込みデータでなければ、Refも更新
         if (!isFiltered) {
           currentFilteredHistoryRef.current = incomingHistory;
         }
+
+        // 次のレンダリングサイクルでフラグを戻す
+        setTimeout(() => setIsRemoteUpdate(false), 100);
+
       } else {
         if (user) {
           await fetchMatches(user.id);
@@ -351,6 +361,7 @@ export default function App() {
         onClearResults={handleClearResults}
         user={user}
         onFilterHistoryChange={handleFilterHistoryChange}
+        isRemoteUpdate={isRemoteUpdate}
       />
       <MatchDetailModal
         isOpen={isModalOpen}
