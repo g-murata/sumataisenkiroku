@@ -350,6 +350,10 @@ export default function App() {
         }}
         onClearResults={handleClearResults}
         user={user}
+        onFilterHistoryChange={(filteredHistory) => {
+          // 絞り込まれた戦績をOBSに直接送信する
+          notifyUpdate(filteredHistory);
+        }}
       />
       
       <MatchDetailModal

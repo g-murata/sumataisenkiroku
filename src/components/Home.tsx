@@ -10,9 +10,10 @@ interface HomeProps {
   onRowClick: (index: number) => void;
   onClearResults: () => void;
   user: any;
+  onFilterHistoryChange?: (filteredHistory: MatchHistory) => void;
 }
 
-export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults, user }) => {
+export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, onClearResults, user, onFilterHistoryChange }) => {
   // ▼ UI用のState
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
   const [selectedOpponentCharacter, setSelectedOpponentCharacter] = useState<CharacterType | null>(null);
@@ -71,6 +72,35 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
       }
       return isMyCharMatch && isOppCharMatch && isDateMatch;
     });
+
+  // ----------------------------------------------------------------------
+  // ▼ 絞り込み結果をOBSへ同期するロジック
+  // ----------------------------------------------------------------------
+  useEffect(() => {
+    if (!onFilterHistoryChange) return;
+
+    // 現在の絞り込み条件に基づいた MatchHistory オブジェクトを作成
+    const filteredMatches = filteredMatchesWithIndex.map(m => m.match);
+    const win = filteredMatches.filter(m => m.shouhai === "勝ち").length;
+    const lose = filteredMatches.filter(m => m.shouhai === "負け").length;
+
+    const filteredHistory: MatchHistory = {
+      matches: filteredMatches,
+      winCount: win,
+      loseCount: lose
+    };
+
+    // OBSへ通知
+    onFilterHistoryChange(filteredHistory);
+  }, [
+    filterMyCharId, 
+    filterOppCharId, 
+    filterDateRange, 
+    customStartDate, 
+    customEndDate, 
+    history.matches, 
+    onFilterHistoryChange
+  ]);
 
   // ----------------------------------------------------------------------
   // ▼ データ移行ロジック
