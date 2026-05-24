@@ -36,8 +36,6 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
       setShouhai(match.shouhai);
       setMyCharId(match.player?.characterNo || 0);
       setOppCharId(match.opponentPlayer?.characterNo || 0);
-
-      // 初期表示用の日付文字列をセット
       setDateStr(toDateTimeInputStr(match.nichiji));
     }
   }, [match, isOpen]);
@@ -56,7 +54,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
 
     onSave({
       ...match,
-      nichiji: finalDate, // 判定後の日付を使う
+      nichiji: finalDate,
       memo: memo,
       shouhai: shouhai,
       player: newMyChar || null,
@@ -70,124 +68,145 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
     }
   };
 
+  const isWin = shouhai === "勝ち";
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden animate-fadeIn max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex justify-center items-center z-50 p-4" onClick={onClose}>
+      <div 
+        className="bg-slate-900 border border-white/10 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.8)] w-full max-w-lg overflow-hidden animate-fadeIn max-h-[90vh] overflow-y-auto hide-scrollbar" 
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* ヘッダー */}
-        <div className="bg-blue-400 text-white p-4 flex justify-between items-center sticky top-0 z-10">
-          <h2 className="text-xl font-bold">対戦詳細・編集</h2>
-          {/* 閉じるボタン */}
-          <button onClick={onClose} className="text-white hover:text-gray-200">
-            <i className="fas fa-times text-xl"></i>
+        <div className="bg-slate-950/80 px-5 py-4 border-b border-white/10 flex justify-between items-center sticky top-0 z-10">
+          <h2 className="text-sm font-extrabold text-slate-200 flex items-center gap-2">
+            📝 対戦ログの編集・確認
+          </h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+            <i className="fas fa-times text-lg"></i>
           </button>
         </div>
 
         {/* ボディ */}
-        <div className="p-6">
+        <div className="p-5 flex flex-col gap-5">
           
-          {/* 勝敗の変更 */}
-          <div className="flex justify-center mb-6 gap-4">
+          {/* 勝敗のトグル */}
+          <div className="flex justify-center gap-4">
             <button
               onClick={() => setShouhai("勝ち")}
-              className={`py-2 px-8 rounded font-bold border-2 ${shouhai === "勝ち" ? "bg-red-500 text-white border-red-500" : "bg-white text-gray-400 border-gray-200"}`}
+              className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all border ${
+                isWin 
+                  ? "bg-red-600 text-white border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
+                  : "bg-slate-950/40 text-slate-500 border-white/5 hover:text-slate-300"
+              }`}
             >
-              勝ち
+              👑 勝ち (WIN)
             </button>
             <button
               onClick={() => setShouhai("負け")}
-              className={`py-2 px-8 rounded font-bold border-2 ${shouhai === "負け" ? "bg-blue-500 text-white border-blue-500" : "bg-white text-gray-400 border-gray-200"}`}
+              className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all border ${
+                !isWin 
+                  ? "bg-blue-600 text-white border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]" 
+                  : "bg-slate-950/40 text-slate-500 border-white/5 hover:text-slate-300"
+              }`}
             >
-              負け
+              ❌ 負け (LOSE)
             </button>
           </div>
 
-          <div className="space-y-4">
-            {/* キャラ変更エリア */}
-            <div className="grid grid-cols-2 gap-4">
-               <div>
-                 <label className="block text-sm font-bold text-gray-700 mb-1">自分</label>
-                 <select 
-                    className="w-full border rounded p-2 text-sm bg-gray-50"
-                    value={myCharId}
-                    onChange={(e) => setMyCharId(Number(e.target.value))}
-                 >
-                    {characterList.map(c => (
-                      <option key={`my-edit-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
-                    ))}
-                 </select>
-                 <div className="flex justify-center mt-2">
-                    <img 
-                      src={characterList.find(c => c.characterNo === myCharId)?.imageUrl} 
-                      className="h-16 w-16 object-contain"
-                      alt="my char"
-                    />
-                 </div>
+          {/* キャラ変更エリア */}
+          <div className="grid grid-cols-2 gap-4">
+             {/* 自分 */}
+             <div className="p-3 bg-slate-950/30 border border-white/5 rounded-xl flex flex-col items-center gap-3">
+               <label className="text-[10px] font-bold text-slate-400 self-start uppercase tracking-wider">👤 あなたのキャラ</label>
+               <select 
+                  className="w-full glass-input text-xs"
+                  value={myCharId}
+                  onChange={(e) => setMyCharId(Number(e.target.value))}
+               >
+                  {characterList.map(c => (
+                    <option key={`my-edit-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
+                  ))}
+               </select>
+               <div className={`w-16 h-16 rounded-full bg-slate-950 border flex items-center justify-center p-1.5 mt-1 shadow-inner ${
+                 isWin ? "border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-slate-800"
+               }`}>
+                  <img 
+                    src={characterList.find(c => c.characterNo === myCharId)?.imageUrl} 
+                    className="w-full h-full object-contain"
+                    alt="my char"
+                  />
                </div>
+             </div>
 
-               <div>
-                 <label className="block text-sm font-bold text-gray-700 mb-1">相手</label>
-                 <select 
-                    className="w-full border rounded p-2 text-sm bg-gray-50"
-                    value={oppCharId}
-                    onChange={(e) => setOppCharId(Number(e.target.value))}
-                 >
-                    {characterList.map(c => (
-                      <option key={`opp-edit-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
-                    ))}
-                 </select>
-                 <div className="flex justify-center mt-2">
-                    <img 
-                      src={characterList.find(c => c.characterNo === oppCharId)?.imageUrl} 
-                      className="h-16 w-16 object-contain"
-                      alt="opp char"
-                    />
-                 </div>
+             {/* 相手 */}
+             <div className="p-3 bg-slate-950/30 border border-white/5 rounded-xl flex flex-col items-center gap-3">
+               <label className="text-[10px] font-bold text-slate-400 self-start uppercase tracking-wider">⚔️ 相手のキャラ</label>
+               <select 
+                  className="w-full glass-input text-xs"
+                  value={oppCharId}
+                  onChange={(e) => setOppCharId(Number(e.target.value))}
+               >
+                  {characterList.map(c => (
+                    <option key={`opp-edit-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
+                  ))}
+               </select>
+               <div className={`w-16 h-16 rounded-full bg-slate-950 border flex items-center justify-center p-1.5 mt-1 shadow-inner ${
+                 isWin ? "border-slate-800" : "border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]"
+               }`}>
+                  <img 
+                    src={characterList.find(c => c.characterNo === oppCharId)?.imageUrl} 
+                    className="w-full h-full object-contain"
+                    alt="opp char"
+                  />
                </div>
-            </div>
+             </div>
+          </div>
 
-            <hr className="my-4"/>
-
-            {/* 日時とメモ */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700">日時</label>
+          <div className="flex flex-col gap-4 bg-slate-950/30 p-4 border border-white/5 rounded-xl">
+            {/* 日時 */}
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">📅 対戦日時</label>
               <input
                 type="datetime-local"
                 value={dateStr}
                 onChange={(e) => setDateStr(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+                className="w-full glass-input text-xs bg-slate-950/50"
               />
             </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700">メモ</label>
+            
+            {/* メモ */}
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">📝 対戦メモ・振り返り</label>
               <textarea
                 rows={3}
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
-                placeholder="対戦の振り返りを入力..."
+                className="w-full glass-input text-xs bg-slate-950/50 resize-none"
+                placeholder="立ち回りや反省点、対戦相手の特徴などを入力..."
               />
             </div>
           </div>
         </div>
 
-        {/* フッター */}
-        <div className="bg-gray-100 p-4 flex justify-between sticky bottom-0">
+        {/* フッターアクション */}
+        <div className="bg-slate-950/60 p-4 border-t border-white/10 flex justify-between sticky bottom-0 z-10">
           <button 
             onClick={handleDeleteClick}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded text-sm"
+            className="bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 text-red-400 hover:text-red-300 font-extrabold py-2 px-4 rounded-xl text-xs transition-all"
           >
-            削除
+            <i className="fas fa-trash-alt mr-1.5"></i>削除
           </button>
+          
           <div className="flex gap-2">
             <button 
               onClick={onClose}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded text-sm"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-extrabold py-2 px-4 rounded-xl text-xs transition-all border border-white/5"
             >
               キャンセル
             </button>
             <button 
               onClick={handleSaveClick}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2 px-5 rounded-xl text-xs shadow-[0_0_15px_rgba(16,185,129,0.2)] border border-emerald-400/20 transition-all"
             >
               保存する
             </button>

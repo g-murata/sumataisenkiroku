@@ -1,4 +1,4 @@
-// import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { CharacterType } from '../types';
 
@@ -97,41 +97,191 @@ interface CharacterProps {
   selectedCharacter: CharacterType | null;
 }
 
+// ひらがなからカタカナへの変換ユーティリティ
+const toKatakana = (str: string) => {
+  return str.replace(/[\u3041-\u3096]/g, (match) => {
+    return String.fromCharCode(match.charCodeAt(0) + 0x60);
+  });
+};
+
 export const Character: React.FC<CharacterProps> = ({ player, onSelectCharacter, selectedCharacter }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [frequentCharacters, setFrequentCharacters] = useState<CharacterType[]>([]);
+
+  const isYou = player === "あなた";
+
+  // ローカルストレージの履歴から「よく使うキャラ」を動的に集計
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("gameResults");
+      if (stored) {
+        const historyData = JSON.parse(stored);
+        const matches = historyData.matches || [];
+        
+        const counts: Record<number, number> = {};
+        matches.forEach((m: any) => {
+          const char = isYou ? m.player : m.opponentPlayer;
+          if (char && char.characterNo) {
+            counts[char.characterNo] = (counts[char.characterNo] || 0) + 1;
+          }
+        });
+
+        const sortedIds = Object.keys(counts)
+          .map(Number)
+          .sort((a, b) => counts[b] - counts[a])
+          .slice(0, 4);
+
+        const freqChars = sortedIds
+          .map(id => characterList.find(c => c.characterNo === id))
+          .filter((c): c is CharacterType => !!c);
+        
+        setFrequentCharacters(freqChars);
+      }
+    } catch (e) {
+      console.error("Failed to load frequent characters:", e);
+    }
+  }, [player, selectedCharacter, isYou]);
+
+  // 検索ワードでフィルタリング（ひらがなでもカタカナでも部分一致するように対応）
+  const filteredList = characterList.filter(character => {
+    if (!searchTerm) return true;
+    const query = toKatakana(searchTerm.trim().toLowerCase());
+    const name = toKatakana(character.characterName.toLowerCase());
+    return name.includes(query);
+  });
+
+  const activeBorderClass = isYou
+    ? "border-red-500 bg-red-950/40 shadow-[0_0_12px_rgba(239,68,68,0.6)] scale-105"
+    : "border-blue-500 bg-blue-950/40 shadow-[0_0_12px_rgba(59,130,246,0.6)] scale-105";
+
+  const hoverBorderColor = isYou ? "hover:border-red-400" : "hover:border-blue-400";
+  const headingIcon = isYou ? "👤" : "⚔️";
+  const accentText = isYou ? "text-red-400" : "text-blue-400";
+
   return (
-    <>
-      <div className="w-80 md:w-full">
-        <div className="h-20">
-          <h1>{player}の使用ファイター：</h1>
-          {selectedCharacter ?
+    <div className="w-80 md:w-full flex flex-col gap-3">
+      {/* --- 現在の選択キャラ表示パネル --- */}
+      <div className={`p-3 rounded-xl border border-white/5 glass-panel flex items-center justify-between min-h-[5.5rem] transition-all duration-300`}>
+        <div className="flex items-center gap-3">
+          {selectedCharacter ? (
             <>
-              <div className="flex">
+              <div className={`w-14 h-14 rounded-lg bg-slate-950/40 border-2 flex items-center justify-center p-1 ${isYou ? 'border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]'}`}>
                 <img
-                  className="cursor-pointer"
+                  className="w-full h-full object-contain"
                   src={selectedCharacter.imageUrl}
                   alt={selectedCharacter.characterName}
                 />
-                <h1>{`${selectedCharacter.characterName}`}</h1>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400 block font-semibold">{headingIcon} {player}の使用ファイター</span>
+                <span className={`text-lg font-bold block leading-tight ${accentText}`}>
+                  {selectedCharacter.characterName}
+                </span>
               </div>
             </>
-            :
-            <span>キャラクターを選んでね。</span>
-          }
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-lg border-2 border-dashed border-slate-700 flex items-center justify-center text-slate-600 text-xl font-bold">
+                ?
+              </div>
+              <div>
+                <span className="text-xs text-gray-500 block font-semibold">{headingIcon} {player}</span>
+                <span className="text-sm text-slate-400 block">ファイターを選択してね</span>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="p-3 bg-white border border-gray-200 rounded-lg shadow overflow-y-auto hide-scrollbar h-20vh md:h-25vh">
-          <div className="flex flex-wrap">
-            {characterList.map(character => (
-              <img
-                key={character.characterNo}
-                className={`${selectedCharacter?.characterNo === character?.characterNo ? "bg-red-500" : ""} cursor-pointer`}
-                onClick={() => selectedCharacter?.characterNo === character?.characterNo ? onSelectCharacter(null) : onSelectCharacter(character)}
-                src={character.imageUrl}
-                alt={character.characterName}
-              />
-            ))}
+        {selectedCharacter && (
+          <button 
+            onClick={() => onSelectCharacter(null)}
+            className="text-xs text-gray-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 p-1.5 rounded-lg border border-white/10 transition-colors"
+            title="選択を解除"
+          >
+            <i className="fas fa-times"></i> 解除
+          </button>
+        )}
+      </div>
+
+      {/* --- よく使うキャラ（お気に入り）クイックパネル --- */}
+      {frequentCharacters.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xxs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1">
+            ⭐ {isYou ? "よく使う" : "よく対戦する"}ファイター
+          </span>
+          <div className="flex gap-2">
+            {frequentCharacters.map(char => {
+              const isSelected = selectedCharacter?.characterNo === char.characterNo;
+              return (
+                <button
+                  key={`freq-${char.characterNo}`}
+                  onClick={() => isSelected ? onSelectCharacter(null) : onSelectCharacter(char)}
+                  className={`w-11 h-11 p-1 rounded-full border-2 bg-slate-900/60 char-quick-badge flex items-center justify-center ${
+                    isSelected 
+                      ? (isYou ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] scale-105" : "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105") 
+                      : "border-white/10 hover:border-slate-400"
+                  }`}
+                  title={char.characterName}
+                >
+                  <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* --- 検索＆選択グリッド --- */}
+      <div className="flex flex-col gap-2">
+        <div className="relative">
+          <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input
+            type="text"
+            placeholder="ファイター名で検索..."
+            className="w-full pl-8 pr-8 py-1.5 text-xs glass-input rounded-lg border border-white/10 bg-slate-950/40 text-slate-200"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-200 text-xs"
+            >
+              <i className="fas fa-times-circle"></i>
+            </button>
+          )}
+        </div>
+
+        <div className="p-2 bg-slate-950/40 border border-white/5 rounded-xl overflow-y-auto hide-scrollbar h-[16vh] md:h-[22vh]">
+          <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-6 lg:grid-cols-7 gap-1">
+            {filteredList.map(character => {
+              const isSelected = selectedCharacter?.characterNo === character.characterNo;
+              return (
+                <div
+                  key={character.characterNo}
+                  className={`w-10 h-10 p-1.5 rounded-lg border bg-slate-900/30 flex items-center justify-center transition-all duration-200 cursor-pointer object-contain ${
+                    isSelected 
+                      ? activeBorderClass 
+                      : `border-transparent ${hoverBorderColor} hover:bg-slate-800/40 hover:scale-110`
+                  }`}
+                  onClick={() => isSelected ? onSelectCharacter(null) : onSelectCharacter(character)}
+                  title={character.characterName}
+                >
+                  <img
+                    className="w-full h-full object-contain pointer-events-none"
+                    src={character.imageUrl}
+                    alt={character.characterName}
+                  />
+                </div>
+              );
+            })}
+            {filteredList.length === 0 && (
+              <div className="col-span-full text-center py-6 text-xs text-slate-500">
+                該当するファイターがいません
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </>
-  )
+    </div>
+  );
 }

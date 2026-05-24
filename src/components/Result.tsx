@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { MatchHistory, MatchResult } from '../types';
 import { characterList } from "./Character";
-// ★削除: MatchDetailModalのimportは不要になりました
 
 interface ResultProps {
-  // 親で計算済みのリストを受け取る
   filteredMatches: { match: MatchResult; originalIndex: number }[];
   history: MatchHistory;
   setHistory: any;
@@ -38,22 +36,19 @@ export const Result: React.FC<ResultProps> = ({
   filterDateRange, setFilterDateRange,
   customStartDate, setCustomStartDate,
   customEndDate, setCustomEndDate,
-  onRowClick // ★受け取り
+  onRowClick
 }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null);
   
-  // ★削除: ここにあった isModalOpen や handleModalSave などのロジックは全て削除しました。
-
   // ▼ 勝敗数の計算
   const filteredWinCount = filteredMatches.filter(item => item.match.shouhai === "勝ち").length;
   const filteredLoseCount = filteredMatches.filter(item => item.match.shouhai === "負け").length;
   const totalFilteredMatches = filteredWinCount + filteredLoseCount;
   
   // ▼ 勝率の計算
-  const winRate = totalFilteredMatches > 0 
-    ? ((filteredWinCount / totalFilteredMatches) * 100).toFixed(1)
-    : "0.0";
+  const winRateNum = totalFilteredMatches > 0 ? (filteredWinCount / totalFilteredMatches) * 100 : 0;
+  const winRate = winRateNum.toFixed(1);
 
   // ▼ 連勝数を計算
   const calculateStreak = () => {
@@ -79,28 +74,65 @@ export const Result: React.FC<ResultProps> = ({
     return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
   };
 
+  const streakCount = calculateStreak();
 
   return (
-    <>
-      <div className="flex justify-between items-end mb-2">
-        <div className="flex items-center">
-          <span className="px-5 font-bold text-lg whitespace-nowrap">
-            {filteredWinCount}勝{filteredLoseCount}敗
-            <span className="ml-2 text-gray-600 text-sm">({winRate}%)</span>
-          </span>
-          <span className={`${calculateStreak() >= 2 ? 'inline-block' : 'hidden'} font-bold text-red-600 animate-bounce ml-2`}>
-            {calculateStreak()}連勝!
-          </span>
+    <div className="flex flex-col h-full gap-3">
+      {/* --- 戦績統計ヘッダー --- */}
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-between items-center px-1">
+          <div className="flex items-baseline gap-2">
+            <span className="text-base font-extrabold text-slate-200">
+              <span className="text-red-400 font-black">{filteredWinCount}</span> 
+              <span className="text-slate-400 text-xs mx-1">W</span>
+              <span className="text-slate-500 text-xs">-</span>
+              <span className="text-blue-400 font-black ml-1">{filteredLoseCount}</span> 
+              <span className="text-slate-400 text-xs mx-1">L</span>
+            </span>
+            <span className="text-xs font-bold text-slate-400">({winRate}%)</span>
+          </div>
+
+          {streakCount >= 2 && (
+            <div className="flex items-center gap-1 bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded-full animate-bounce">
+              <span className="text-xs">🔥</span>
+              <span className="text-[10px] font-black tracking-wider neon-text-gold">
+                {streakCount}連勝中!
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* --- ネオンスプリットプログレスバー --- */}
+        <div className="w-full h-2.5 bg-slate-950/60 rounded-full border border-white/5 overflow-hidden flex relative">
+          {totalFilteredMatches > 0 ? (
+            <>
+              <div 
+                className="h-full winrate-gradient-win transition-all duration-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" 
+                style={{ width: `${winRateNum}%` }}
+              ></div>
+              <div 
+                className="h-full winrate-gradient-lose transition-all duration-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" 
+                style={{ width: `${100 - winRateNum}%` }}
+              ></div>
+              {/* スプリット中点光るインジケータ */}
+              <div 
+                className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_rgba(255,255,255,1)] z-10 transition-all duration-500"
+                style={{ left: `${winRateNum}%` }}
+              ></div>
+            </>
+          ) : (
+            <div className="w-full h-full bg-slate-800 transition-all duration-500"></div>
+          )}
         </div>
       </div>
 
       {/* ▼ フィルターUIエリア (配信モードでは非表示) */}
       {!haishin && (
-        <div className="flex flex-col gap-2 mb-2 px-2 bg-gray-100 p-2 rounded">
+        <div className="flex flex-col gap-2 p-3 bg-slate-950/40 border border-white/5 rounded-xl">
           {/* 日付フィルター */}
           <div className="flex flex-col gap-2 w-full">
              <select
-                className="border rounded p-1 text-sm bg-white w-full font-bold text-gray-700 cursor-pointer hover:bg-gray-50"
+                className="glass-input text-xs w-full font-bold cursor-pointer"
                 value={filterDateRange}
                 onChange={(e) => setFilterDateRange(e.target.value as any)}
              >
@@ -112,17 +144,17 @@ export const Result: React.FC<ResultProps> = ({
 
              {/* ▼ 期間指定が選ばれた時だけ表示される日付ピッカー */}
              {filterDateRange === "custom" && (
-                <div className="flex items-center gap-1 bg-white p-1 rounded border animate-fadeIn">
+                <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-white/5 animate-fadeIn">
                   <input 
                     type="date" 
-                    className="border rounded px-1 text-sm w-full"
+                    className="glass-input py-1 px-1.5 text-xxs w-full bg-transparent border-none text-slate-200"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
                   />
-                  <span className="text-gray-500">~</span>
+                  <span className="text-slate-600 text-xs">~</span>
                   <input 
                     type="date" 
-                    className="border rounded px-1 text-sm w-full"
+                    className="glass-input py-1 px-1.5 text-xxs w-full bg-transparent border-none text-slate-200"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
                   />
@@ -133,22 +165,22 @@ export const Result: React.FC<ResultProps> = ({
           {/* キャラフィルター */}
           <div className="flex gap-2 w-full items-center">
             <select 
-              className="border rounded p-1 text-sm bg-white w-1/2 cursor-pointer hover:bg-gray-50"
+              className="glass-input text-xxs w-1/2 cursor-pointer"
               value={filterMyCharId || ""}
               onChange={(e) => setFilterMyCharId(e.target.value ? Number(e.target.value) : null)}
             >
-              <option value="">自分の全キャラ</option>
+              <option value="">👤 自分の全キャラ</option>
               {characterList.map(c => (
                 <option key={`my-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
               ))}
             </select>
-            <span className="text-gray-400 text-xs">vs</span>
+            <span className="text-slate-600 text-[10px] font-bold">vs</span>
             <select 
-              className="border rounded p-1 text-sm bg-white w-1/2 cursor-pointer hover:bg-gray-50"
+              className="glass-input text-xxs w-1/2 cursor-pointer"
               value={filterOppCharId || ""}
               onChange={(e) => setFilterOppCharId(e.target.value ? Number(e.target.value) : null)}
             >
-              <option value="">相手の全キャラ</option>
+              <option value="">⚔️ 相手の全キャラ</option>
               {characterList.map(c => (
                 <option key={`opp-${c.characterNo}`} value={c.characterNo}>{c.characterName}</option>
               ))}
@@ -157,69 +189,93 @@ export const Result: React.FC<ResultProps> = ({
         </div>
       )}
 
-      {/* ▼ 結果リスト表示 */}
-      <div className={`${haishin ? 'h-auto' : 'h-80 md:h-4/5'} flex`}>
-        <div className={`${haishin ? 'h-38' : 'h-full'} w-full bg-white border rounded-lg shadow-inner overflow-y-auto hide-scrollbar md:w-full`}>
-          <table className="w-full table-fixed">
-            <thead className="bg-gray-600 text-white text-xs">
-              {!haishin && <th className="sticky top-0 bg-gray-600 z-10 w-16 py-2">日時</th>}
-              <th className="sticky top-0 bg-gray-600 z-10 w-12">自分</th>
-              <th className="sticky top-0 bg-gray-600 z-10 w-12">相手</th>
-              <th className="sticky top-0 bg-gray-600 z-10 w-12">結果</th>
-              {!haishin && <th className="sticky top-0 bg-gray-600 z-10">メモ</th>}
-            </thead>
-            <tbody>
-              {filteredMatches.map(({ match, originalIndex }, loopIndex) => (
-                <tr className={`group cursor-pointer border-b border-gray-100 ${(hoverRowIndex === loopIndex) ? 'bg-blue-50' : ''}`}
-                  key={originalIndex}
-                  onMouseEnter={() => setHoverRowIndex(loopIndex)}
-                  onMouseLeave={() => setHoverRowIndex(null)}
-                  // ★修正: ここで親から渡された関数を実行！
-                  onClick={() => onRowClick(originalIndex)}
-                >
-                  {!haishin &&
-                    <td className="text-center text-xxs py-2 text-gray-500">
-                      {formatJST(match.nichiji)}
-                    </td>
-                  }
+      {/* ▼ タイムライン / 対戦結果カードリスト */}
+      <div className={`flex-grow overflow-hidden ${haishin ? 'h-[160px]' : 'h-full md:max-h-[50vh] lg:max-h-[60vh]'} flex flex-col`}>
+        <div className="flex-grow overflow-y-auto hide-scrollbar pr-1 flex flex-col gap-2">
+          {filteredMatches.map(({ match, originalIndex }, loopIndex) => {
+            const isWin = match.shouhai === "勝ち";
+            const borderGlow = isWin
+              ? "border-red-500/10 hover:border-red-500/40 bg-red-950/5"
+              : "border-blue-500/10 hover:border-blue-500/40 bg-blue-950/5";
 
-                  <td className="py-1 text-center">
-                    <img src={match.player?.imageUrl} alt={match.player?.characterName} className="h-8 w-8 mx-auto object-contain"/>
-                  </td>
+            return (
+              <div 
+                key={originalIndex}
+                className={`p-2.5 rounded-xl glass-panel flex items-center justify-between border cursor-pointer transition-all duration-200 ${borderGlow} ${
+                  hoverRowIndex === loopIndex ? 'scale-[1.01] bg-slate-900/60' : ''
+                }`}
+                onMouseEnter={() => setHoverRowIndex(loopIndex)}
+                onMouseLeave={() => setHoverRowIndex(null)}
+                onClick={() => onRowClick(originalIndex)}
+              >
+                {/* 左側: ファイターアバター対面 */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center -space-x-1.5">
+                    {/* 自分アバター */}
+                    <div className={`w-8 h-8 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 z-10 ${
+                      isWin ? "border-red-500/50 shadow-[0_0_8px_rgba(239,68,68,0.3)]" : "border-slate-800"
+                    }`}>
+                      <img src={match.player?.imageUrl} alt={match.player?.characterName} className="w-full h-full object-contain" />
+                    </div>
+                    
+                    <span className="text-[8px] text-slate-500 font-extrabold bg-slate-950 border border-white/5 px-1 rounded-md z-20 scale-90">VS</span>
 
-                  <td className="py-1 text-center">
-                    <img src={match.opponentPlayer?.imageUrl} alt={match.opponentPlayer?.characterName} className="h-8 w-8 mx-auto object-contain"/>
-                  </td>
+                    {/* 相手アバター */}
+                    <div className={`w-8 h-8 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 ${
+                      isWin ? "border-slate-800" : "border-blue-500/50 shadow-[0_0_8px_rgba(59,130,246,0.3)]"
+                    }`}>
+                      <img src={match.opponentPlayer?.imageUrl} alt={match.opponentPlayer?.characterName} className="w-full h-full object-contain" />
+                    </div>
+                  </div>
 
-                  <td className={`text-center font-bold text-sm ${match.shouhai === "勝ち" ? "text-red-500" : "text-blue-500"} p-1`}>
-                    {match.shouhai}
-                  </td>
+                  {/* キャラクター名 & 日時 (配信モードでは非表示) */}
+                  {!haishin && (
+                    <div className="flex flex-col">
+                      <div className="text-[10px] font-bold text-slate-200 leading-tight">
+                        {match.player?.characterName} <span className="text-slate-600 font-normal">vs</span> {match.opponentPlayer?.characterName}
+                      </div>
+                      <div className="text-[8px] text-slate-500 mt-0.5">
+                        {formatJST(match.nichiji)}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-                  {!haishin &&
-                    <td className="py-2 px-2">
-                       <p className="text-xs text-gray-600 truncate">{match.memo}</p>
-                    </td>
-                  }
-                </tr>
-              ))}
-              {filteredMatches.length === 0 && (
-                <tr>
-                  <td 
-                    colSpan={haishin ? 3 : 5} 
-                    className="text-center py-10 text-gray-400 text-sm"
-                  >
-                    {filterDateRange === "custom" && (!customStartDate || !customEndDate) 
-                      ? "期間を指定してください" 
-                      : "条件に一致する記録がありません"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                {/* メモプレビュー (配信モードでは非表示) */}
+                {!haishin && match.memo && (
+                  <div className="hidden sm:block flex-grow mx-4 max-w-[40%] text-left">
+                    <p className="text-[9px] text-slate-400 truncate bg-slate-950/40 px-2 py-0.5 rounded border border-white/5">
+                      📝 {match.memo}
+                    </p>
+                  </div>
+                )}
+
+                {/* 右側: 結果バッジ */}
+                <div className="text-right flex-shrink-0">
+                  <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                    isWin 
+                      ? "bg-red-500/10 text-red-400 border-red-500/30 neon-text-win" 
+                      : "bg-blue-500/10 text-blue-400 border-blue-500/30 neon-text-lose"
+                  }`}>
+                    {isWin ? "WIN" : "LOSE"}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+
+          {filteredMatches.length === 0 && (
+            <div className="glass-panel border-dashed border-white/5 py-12 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2">
+              <span className="text-lg">📭</span>
+              <span>
+                {filterDateRange === "custom" && (!customStartDate || !customEndDate) 
+                  ? "期間を指定してください" 
+                  : "条件に一致する対戦記録がありません"}
+              </span>
+            </div>
+          )}
         </div>
       </div>
-      
-      {/* ★削除: MatchDetailModal の配置も削除 */}
-    </>
-  )
-}
+    </div>
+  );
+};
