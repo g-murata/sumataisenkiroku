@@ -185,20 +185,15 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                 <div className={`rounded-full bg-slate-950 flex items-center justify-center transition-all duration-300 z-20 relative ${
                   isWin 
                     ? "w-14 h-14 border-2 border-red-500 p-1 shadow-[0_0_20px_rgba(239,68,68,0.6)]" 
-                    : "w-9 h-9 border border-slate-700 opacity-30 grayscale rotate-[-6deg]" // 負け: 傾けて不透明度を下げる
+                    : "w-9 h-9 border border-slate-700 opacity-30 grayscale rotate-[-6deg]"
                 }`}>
                   <img src={m.player?.imageUrl} alt="Me" className="w-full h-full object-contain" />
                   
-                  {/* 自分側の勝敗マーカー */}
-                  <div className={`absolute -top-1 -left-1 w-5 h-5 rounded-full border border-slate-900 flex items-center justify-center text-[8px] font-black z-30 shadow-lg ${
-                    isWin ? "bg-red-600 text-white" : "bg-slate-700 text-slate-300"
-                  }`}>
-                    {isWin ? "勝" : "敗"}
-                  </div>
-
-                  {/* 敗北時のみアイコンに「×」を薄く重ねる */}
-                  {!isWin && (
-                    <div className="absolute inset-0 flex items-center justify-center text-red-500/30 text-2xl font-black pointer-events-none">✕</div>
+                  {/* 自分側のマーカー: 勝った時だけ赤背景で「勝」 */}
+                  {isWin ? (
+                    <div className="absolute -top-1 -left-1 w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-red-600 text-white shadow-lg">勝</div>
+                  ) : (
+                    <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full border border-slate-900 flex items-center justify-center text-[7px] font-black z-30 bg-slate-700 text-slate-400 opacity-50">敗</div>
                   )}
                 </div>
 
@@ -214,13 +209,15 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                 <div className={`rounded-full bg-slate-900 border flex items-center justify-center transition-all duration-300 z-10 relative ${
                   !isWin 
                     ? "w-14 h-14 border-2 border-blue-500 p-1 shadow-[0_0_20px_rgba(59,130,246,0.6)]" 
-                    : "w-9 h-9 border border-slate-700 opacity-30 grayscale rotate-[6deg]" // 負け: 傾けて不透明度を下げる
+                    : "w-9 h-9 border border-slate-700 opacity-30 grayscale rotate-[6deg]"
                 }`}>
                   <img src={m.opponentPlayer?.imageUrl} alt="Opponent" className="w-full h-full object-contain" />
                   
-                  {/* 相手側の敗北時にも「×」を薄く重ねる */}
-                  {isWin && (
-                    <div className="absolute inset-0 flex items-center justify-center text-red-500/30 text-2xl font-black pointer-events-none">✕</div>
+                  {/* 相手側のマーカー: 勝った時だけ青背景で「勝」 */}
+                  {!isWin ? (
+                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-blue-600 text-white shadow-lg">勝</div>
+                  ) : (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border border-slate-900 flex items-center justify-center text-[7px] font-black z-30 bg-slate-700 text-slate-400 opacity-50">敗</div>
                   )}
                 </div>
               </div>
