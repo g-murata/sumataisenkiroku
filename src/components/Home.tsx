@@ -30,20 +30,9 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
 
   // ▼ URLを生成するユーティリティ
   const getObsUrl = () => {
-    const url = new URL(window.location.href);
-    // 既存の検索パラメータをクリア
-    url.search = "";
-    
     const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
     const syncVal = user?.id || guestSyncKey;
-
-    url.searchParams.set("mode", "obs");
-    url.searchParams.set("sync", syncVal);
-    url.searchParams.set("layout", "compact");
-    url.searchParams.set("trans", "true");
-    url.searchParams.set("width", "full");
-
-    return url.toString();
+    return `${window.location.origin}${window.location.pathname}?mode=obs&sync=${syncVal}&layout=compact&trans=true&width=full`;
   };
   const getControllerUrl = () => {
     const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
