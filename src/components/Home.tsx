@@ -112,7 +112,7 @@ export const Home: React.FC<HomeProps> = ({
     onFilterHistoryChange
   ]);
 
-  // ----------------------------------------------------------------------
+  /* ----------------------------------------------------------------------
   // ▼ データ移行ロジック
   const migrateData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -164,6 +164,7 @@ export const Home: React.FC<HomeProps> = ({
       window.location.reload();
     }
   };
+  */
 
   // ----------------------------------------------------------------------
   // ▼ 記録ロジック
@@ -344,6 +345,7 @@ export const Home: React.FC<HomeProps> = ({
                 <i className="fas fa-trash-alt"></i> 全対戦記録の一括削除
               </button>
               
+              {/* 
               {user && localStorage.getItem(STORAGE_KEY) && (
                 <button 
                   className="py-2 px-4 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xxs font-bold transition-all w-full shadow-md flex items-center justify-center gap-1.5 border border-orange-500/30 animate-pulse"
@@ -352,6 +354,7 @@ export const Home: React.FC<HomeProps> = ({
                   <i className="fas fa-laptop-medical"></i> ローカル履歴をクラウドDBへ移行する
                 </button>
               )}
+              */}
             </div>
           </div>
         </div>
