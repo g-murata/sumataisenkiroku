@@ -32,7 +32,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
   const getObsUrl = () => {
     const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
     const syncVal = user?.id || guestSyncKey;
-    return `${window.location.origin}${window.location.pathname}?mode=obs&sync=${syncVal}`;
+    // デフォルトでコンパクトレイアウト、透過、幅フル設定を付与
+    return `${window.location.origin}${window.location.pathname}?mode=obs&sync=${syncVal}&layout=compact&trans=true&width=full`;
   };
   const getControllerUrl = () => {
     const guestSyncKey = localStorage.getItem("guestSyncKey") || "";

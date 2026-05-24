@@ -177,7 +177,54 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   }
 
   // =========================================================
-  // 3. 縦型レイアウト (標準: 800x600のOBSキャンバスに完全フィットするプロ仕様カード)
+  // 3. コンパクト・アイコンモード (画面の隅に置くのに最適)
+  // =========================================================
+  if (layout === 'compact') {
+    return (
+      <div className={`p-4 w-max animate-fadeIn flex flex-col gap-4 ${justifyClass === 'justify-end' ? 'items-end' : (justifyClass === 'justify-center' ? 'items-center' : 'items-start')}`}>
+        {/* トータルスコア (巨大) */}
+        <div className="flex items-baseline gap-2 font-black drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+          <span className="text-4xl text-red-400 drop-shadow-[0_0_12px_rgba(239,68,68,0.7)]">{stats.win}</span>
+          <span className="text-xs text-slate-400">勝</span>
+          <span className="text-2xl text-slate-500 mx-0.5">-</span>
+          <span className="text-4xl text-blue-400 drop-shadow-[0_0_12px_rgba(59,130,246,0.7)]">{stats.lose}</span>
+          <span className="text-xs text-slate-400">敗</span>
+        </div>
+
+        {/* 履歴スタック (アイコンのみ) */}
+        <div className="flex flex-col gap-3">
+          {stats.recentMatches.map((m, idx) => {
+            const isWin = m.shouhai === "勝ち";
+            return (
+              <div 
+                key={`compact-v-${idx}`}
+                className={`relative group transition-all duration-300 hover:scale-110`}
+              >
+                {/* 相手ファイターの顔アイコンを巨大化 */}
+                <div className={`w-16 h-16 rounded-full bg-slate-900 border-[3px] flex items-center justify-center p-1 shadow-2xl ${
+                  isWin 
+                    ? "border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]" 
+                    : "border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                }`}>
+                  <img src={m.opponentPlayer?.imageUrl} alt="Opponent" className="w-full h-full object-contain" />
+                  
+                  {/* 右下に小さく勝敗バッジ */}
+                  <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black ${
+                    isWin ? "bg-red-600 text-white" : "bg-blue-600 text-white"
+                  }`}>
+                    {isWin ? "勝" : "敗"}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================
+  // 4. 縦型レイアウト (標準: 800x600のOBSキャンバスに完全フィットするプロ仕様カード)
   // =========================================================
   
   // align パラメータによる左右配置クラスの設定
