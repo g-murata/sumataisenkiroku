@@ -15,12 +15,6 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   onAnimationComplete
 }) => {
   // URLパラメータから各種表示オプションを取得
-  // layout: 'vertical' | 'horizontal' | 'minimal' (既定値は 'vertical')
-  // limit: 履歴の最大表示数 (既定値は 3)
-  // w / width: カードの横幅 (既定値は 340)
-  // zoom / scale: 全体のスケール倍率 (既定値は 1)
-  // trans / transparent: 背景・境界線の完全透過フラグ (既定値は false)
-  // align: カードの水平配置位置 'left' | 'right' | 'center' (既定値は 'left')
   const searchParams = new URLSearchParams(window.location.search);
   const layout = searchParams.get('layout') || 'vertical';
   
@@ -30,7 +24,6 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   const widthParam = searchParams.get('w') || searchParams.get('width') || '340';
   const zoomParam = searchParams.get('zoom') || searchParams.get('scale') || '1';
   const isTransparent = searchParams.get('trans') === 'true' || searchParams.get('transparent') === 'true';
-  const isGreenBack = searchParams.get('gb') === 'true';
   const align = searchParams.get('align') || 'left';
 
   // 履歴データから算出する戦績データ
@@ -59,7 +52,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
       rate,
       winRateNum,
       streak,
-      recentMatches: matches.slice(0, layout === 'horizontal' ? 3 : limit), // レイアウトやパラメータに応じて制限
+      recentMatches: matches.slice(0, layout === 'horizontal' ? 3 : limit),
     };
   }, [history, layout, limit]);
 
@@ -71,6 +64,11 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
     const min = String(d.getMinutes()).padStart(2, '0');
     return `${hh}:${min}`;
   };
+
+  // align パラメータによる左右配置クラスの設定
+  let justifyClass = "justify-start";
+  if (align === 'right') justifyClass = "justify-end";
+  if (align === 'center') justifyClass = "justify-center";
 
   // =========================================================
   // 1. ミニマルレイアウト (極小のスコア表示・名札横など)
@@ -224,14 +222,9 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   }
 
   // =========================================================
-  // 4. 縦型レイアウト (標準: 800x600のOBSキャンバスに完全フィットするプロ仕様カード)
+  // 4. 縦型レイアウト (標準)
   // =========================================================
   
-  // align パラメータによる左右配置クラスの設定
-  let justifyClass = "justify-start";
-  if (align === 'right') justifyClass = "justify-end";
-  if (align === 'center') justifyClass = "justify-center";
-
   // 配信枠ジャストフィット用のインラインスタイルの設定
   const cardStyle: React.CSSProperties = {
     width: widthParam === 'full' ? '100%' : `${widthParam}px`,
