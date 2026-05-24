@@ -61,7 +61,7 @@ describe('Result Component', () => {
   test('勝敗数と勝率が正しく表示されること', () => {
     render(<Result {...defaultProps} />);
     // 新デザイン: "1 W - 1 L" と "(50.0%)" を個別に確認
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText('(50.0%)')).toBeInTheDocument();
   });
 
