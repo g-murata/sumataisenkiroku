@@ -139,9 +139,14 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     setSelectedOpponentCharacter(null);
   };
 
-  // OBSウインドウを開く
-  const handleOpenObsWindow = () => {
-    window.open(getObsUrl(), 'obs_overlay', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
+  // ▼ コピー通知State
+  const [obsCopied, setObsCopied] = useState(false);
+
+  // OBS用URLをコピー
+  const handleCopyObsUrl = () => {
+    navigator.clipboard.writeText(getObsUrl());
+    setObsCopied(true);
+    setTimeout(() => setObsCopied(false), 2000);
   };
 
   // スマホコントローラーを別ウインドウで開く
@@ -259,7 +264,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
 
               <div className="flex flex-col gap-2 w-full max-w-[14rem]">
 
-                {/* スマホ用リモコン --- 開くボタンのみ（メイン） */}
+                {/* スマホ用リモコン --- 別ウインドウで開く */}
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left">スマホ用リモコン</p>
                 <button
                   onClick={handleOpenControllerWindow}
@@ -268,13 +273,20 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                   <i className="fas fa-mobile-alt"></i> 別ウインドウで開く
                 </button>
 
-                {/* OBS配信用 --- 開くボタンのみ */}
+                {/* OBS配信用 --- URLコピー */}
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left mt-1">OBS配信用</p>
                 <button
-                  onClick={handleOpenObsWindow}
-                  className="w-full py-2 px-4 rounded-xl text-xxs font-bold border transition-all flex items-center justify-center gap-1.5 bg-slate-800/80 text-slate-200 border-white/10 hover:bg-slate-700 hover:border-white/20 shadow"
+                  onClick={handleCopyObsUrl}
+                  className={`w-full py-2 px-4 rounded-xl text-xxs font-bold border transition-all flex items-center justify-center gap-1.5 ${
+                    obsCopied
+                      ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                      : "bg-slate-800/80 text-slate-200 border-white/10 hover:bg-slate-700 hover:border-white/20 shadow"
+                  }`}
                 >
-                  <i className="fas fa-external-link-alt text-indigo-400"></i> 別ウインドウで開く
+                  {obsCopied
+                    ? <><i className="fas fa-check text-emerald-400"></i> コピーしました！</>
+                    : <><i className="fas fa-copy text-indigo-400"></i> OBS用URLをコピー</>
+                  }
                 </button>
 
               </div>
