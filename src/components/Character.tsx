@@ -226,7 +226,7 @@ export const Character: React.FC<CharacterProps> = ({
 
       {/* --- よく使うキャラ（お気に入り）クイックパネル --- */}
       {(frequentCharacters.length > 0 || excludedIds.length > 0) && (
-        <div className={`flex flex-col gap-1 ${selectedCharacter ? 'hidden md:flex' : ''}`}>
+        <div className={`flex flex-col gap-1 ${selectedCharacter ? 'hidden' : ''}`}>
           <div className="flex items-center justify-between">
             <span className="text-xxs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1">
               ⭐ {isYou ? "最近よく使う" : "よく対戦する"}ファイター

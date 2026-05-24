@@ -305,16 +305,11 @@ export default function App() {
   if (isObsMode) {
     return (
       <div className="h-screen w-screen bg-transparent overflow-hidden relative flex items-start justify-start">
-        <ObsOverlay history={history} />
-
-        {/* 信号を受け取ったらアニメーション発火！ */}
-        {obsAnimResult && (
-           <ResultAnimation 
-             result={obsAnimResult} 
-             mode="fixed"
-             onComplete={() => setObsAnimResult(null)}
-           />
-        )}
+        <ObsOverlay 
+          history={history} 
+          animationResult={obsAnimResult}
+          onAnimationComplete={() => setObsAnimResult(null)}
+        />
       </div>
     );
   }

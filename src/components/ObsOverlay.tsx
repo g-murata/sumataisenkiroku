@@ -1,16 +1,36 @@
 import React, { useMemo } from 'react';
 import { MatchHistory, MatchResult } from '../types';
 import { characterList } from './Character';
+import { ResultAnimation } from './ResultAnimation';
 
 interface ObsOverlayProps {
   history: MatchHistory;
+  animationResult?: "勝ち" | "負け" | null;
+  onAnimationComplete?: () => void;
 }
 
-export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
-  // URLパラメータからレイアウトタイプを取得 (既定値は 'vertical')
-  // 値: 'vertical' | 'horizontal' | 'minimal'
+export const ObsOverlay: React.FC<ObsOverlayProps> = ({ 
+  history,
+  animationResult,
+  onAnimationComplete
+}) => {
+  // URLパラメータから各種表示オプションを取得
+  // layout: 'vertical' | 'horizontal' | 'minimal' (既定値は 'vertical')
+  // limit: 履歴の最大表示数 (既定値は 3)
+  // w / width: カードの横幅 (既定値は 340)
+  // zoom / scale: 全体のスケール倍率 (既定値は 1)
+  // trans / transparent: 背景・境界線の完全透過フラグ (既定値は false)
+  // align: カードの水平配置位置 'left' | 'right' | 'center' (既定値は 'left')
   const searchParams = new URLSearchParams(window.location.search);
   const layout = searchParams.get('layout') || 'vertical';
+  
+  const limitParam = searchParams.get('limit');
+  const limit = limitParam !== null ? parseInt(limitParam, 10) : 3;
+
+  const widthParam = searchParams.get('w') || searchParams.get('width') || '340';
+  const zoomParam = searchParams.get('zoom') || searchParams.get('scale') || '1';
+  const isTransparent = searchParams.get('trans') === 'true' || searchParams.get('transparent') === 'true';
+  const align = searchParams.get('align') || 'left';
 
   // 履歴データから算出する戦績データ
   const stats = useMemo(() => {
@@ -38,9 +58,9 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
       rate,
       winRateNum,
       streak,
-      recentMatches: matches.slice(0, layout === 'horizontal' ? 3 : 5), // レイアウトに応じて件数を制限
+      recentMatches: matches.slice(0, layout === 'horizontal' ? 3 : limit), // レイアウトやパラメータに応じて制限
     };
-  }, [history, layout]);
+  }, [history, layout, limit]);
 
   // 日付のシンプルフォーマット (時:分 のみ)
   const formatTimeOnly = (dateStr: string) => {
@@ -156,12 +176,47 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
   }
 
   // =========================================================
-  // 3. 縦型レイアウト (標準: 画面の隅に綺麗に収まるフロートカード)
+  // 3. 縦型レイアウト (標準: 800x600のOBSキャンバスに完全フィットするプロ仕様カード)
   // =========================================================
+  
+  // align パラメータによる左右配置クラスの設定
+  let justifyClass = "justify-start";
+  if (align === 'right') justifyClass = "justify-end";
+  if (align === 'center') justifyClass = "justify-center";
+
+  // 配信枠ジャストフィット用のインラインスタイルの設定
+  const cardStyle: React.CSSProperties = {
+    width: widthParam === 'full' ? '100%' : `${widthParam}px`,
+    height: widthParam === 'full' ? '100%' : 'auto',
+    transform: zoomParam !== '1' ? `scale(${zoomParam})` : undefined,
+    // ズーム時に配置が右端や中央からズレないよう、Originを配置位置に追従させる
+    transformOrigin: align === 'right' ? 'top right' : (align === 'center' ? 'top center' : 'top left'),
+  };
+
+  // 背景透過・枠線除去フラグに応じたCSSクラスの出し分け
+  const cardBaseClass = isTransparent
+    ? "bg-transparent border-transparent shadow-none"
+    : "glass-panel bg-slate-950/75 border border-white/10 shadow-2xl backdrop-blur-md rounded-[2rem]";
+
   return (
-    <div className="p-4 w-[320px] animate-fadeIn">
-      <div className="glass-panel p-5 rounded-3xl bg-slate-950/75 border border-white/10 shadow-2xl backdrop-blur-md flex flex-col gap-4">
+    <div className={`w-[800px] h-[600px] bg-transparent overflow-hidden relative flex items-start ${justifyClass} p-6 box-border font-sans select-none animate-fadeIn`}>
+      {/* 800x600内のメインフロートカード */}
+      <div 
+        className={`${cardBaseClass} p-6 flex flex-col gap-4.5 box-border relative overflow-hidden`}
+        style={cardStyle}
+      >
         
+        {/* Win / Lose Stamp Overlay (カードの範囲内に出力) */}
+        {animationResult && (
+          <div className="absolute inset-0 bg-[#07070d]/85 backdrop-blur-xs flex items-center justify-center animate-fadeIn z-50 rounded-[2rem]">
+            <ResultAnimation 
+              result={animationResult} 
+              mode="absolute"
+              onComplete={onAnimationComplete}
+            />
+          </div>
+        )}
+
         {/* ヘッダー: 戦績統計 */}
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center">
@@ -212,11 +267,13 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
           )}
         </div>
 
-        {/* 直近の対戦履歴タイムライン */}
-        {stats.recentMatches.length > 0 && (
+        {/* 直近の対戦履歴タイムライン (limit > 0 のときのみ表示) */}
+        {limit > 0 && (
           <div className="flex flex-col gap-2 mt-1">
             <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 border-b border-white/5 pb-1">RECENT MATCHES</span>
             <div className="flex flex-col gap-1.5">
+              
+              {/* 1. 実際の対戦履歴リスト */}
               {stats.recentMatches.map((m, idx) => {
                 const isWin = m.shouhai === "勝ち";
                 const borderGlow = isWin
@@ -226,23 +283,24 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
                 return (
                   <div 
                     key={`recent-v-${idx}`}
-                    className={`p-2 rounded-xl flex items-center justify-between border ${borderGlow}`}
+                    className={`p-2 rounded-xl flex items-center justify-between border ${borderGlow} transition-all`}
+                    style={{ height: '50px' }}
                   >
                     {/* 左側: ファイターアバター対面 */}
                     <div className="flex items-center gap-2">
                       <div className="flex items-center -space-x-1.5">
-                        {/* 自分アバター */}
-                        <div className={`w-7 h-7 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 z-10 ${
-                          isWin ? "border-red-500/50 shadow-[0_0_6px_rgba(239,68,68,0.3)]" : "border-slate-800"
+                        {/* 自分アバター (w-8 h-8 にリサイズ) */}
+                        <div className={`w-8 h-8 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 z-10 ${
+                          isWin ? "border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.4)]" : "border-slate-800"
                         }`}>
                           <img src={m.player?.imageUrl} alt="My Fighter" className="w-full h-full object-contain" />
                         </div>
                         
                         <span className="text-[7px] text-slate-500 font-extrabold bg-slate-950 border border-white/5 px-0.5 rounded scale-75 z-20">VS</span>
 
-                        {/* 相手アバター */}
-                        <div className={`w-7 h-7 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 ${
-                          isWin ? "border-slate-800" : "border-blue-500/50 shadow-[0_0_6px_rgba(59,130,246,0.3)]"
+                        {/* 相手アバター (w-8 h-8 にリサイズ) */}
+                        <div className={`w-8 h-8 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 ${
+                          isWin ? "border-slate-800" : "border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.4)]"
                         }`}>
                           <img src={m.opponentPlayer?.imageUrl} alt="Opp Fighter" className="w-full h-full object-contain" />
                         </div>
@@ -270,6 +328,28 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
                   </div>
                 );
               })}
+
+              {/* 2. 空スロットの補填（ダミー枠による縦サイズ完全固定） */}
+              {Array.from({ length: Math.max(0, limit - stats.recentMatches.length) }).map((_, idx) => (
+                <div 
+                  key={`empty-v-${idx}`}
+                  className="p-2 rounded-xl flex items-center justify-between border border-dashed border-white/5 bg-white/[0.01] opacity-25 select-none transition-all"
+                  style={{ height: '50px' }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center -space-x-1.5 opacity-20">
+                      <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600">-</div>
+                      <span className="text-[7px] text-slate-700 font-extrabold bg-slate-950 border border-white/5 px-0.5 rounded scale-75 z-20">VS</span>
+                      <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600">-</div>
+                    </div>
+                    <span className="text-[9px] font-bold text-slate-500 tracking-wider">NO MATCH RECORDED</span>
+                  </div>
+                  <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border border-white/5 text-slate-600">
+                    READY
+                  </span>
+                </div>
+              ))}
+
             </div>
           </div>
         )}
