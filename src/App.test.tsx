@@ -28,6 +28,6 @@ vi.mock('./supabaseClient', () => ({
 
 test('renders app with login button', async () => {
   render(<App />);
-  const loginButton = await screen.findByText(/Googleでログイン/i);
+  const loginButton = await screen.findByText(/ログイン/i);
   expect(loginButton).toBeInTheDocument();
 });

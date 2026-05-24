@@ -12,6 +12,7 @@ import { characterList } from './components/Character';
 // ★追加: フックをインポート
 import { useObsSync } from './hooks/useObsSync';
 import { ObsOverlay } from './components/ObsOverlay';
+import { MobileController } from './components/MobileController';
 
 const STORAGE_KEY = "gameResults";
 
@@ -19,9 +20,10 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // ▼ URLパラメータで「OBSモード」かどうか判定
+  // ▼ URLパラメータで「OBSモード」または「リモコンモード」かどうか判定
   const searchParams = new URLSearchParams(window.location.search);
   const isObsMode = searchParams.get('mode') === 'obs';
+  const isControllerMode = searchParams.get('mode') === 'controller';
   const urlSyncKey = searchParams.get('sync');
 
   // ゲスト用の一意な同期キーを管理 (未ログイン時のOBS同期に使用)
@@ -297,6 +299,19 @@ export default function App() {
 
   if (isLoading) {
     return <div className="h-screen w-screen bg-white" />;
+  }
+
+  // =========================================================
+  // ★★★ スマホコントローラー（リモコン）モード時の表示 ★★★
+  // =========================================================
+  if (isControllerMode) {
+    return (
+      <MobileController 
+        history={history}
+        onAddResult={handleAddResult}
+        user={user}
+      />
+    );
   }
 
   // =========================================================

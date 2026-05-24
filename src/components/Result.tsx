@@ -189,8 +189,8 @@ export const Result: React.FC<ResultProps> = ({
         </div>
       )}
 
-      {/* ▼ タイムライン / 対戦結果カードリスト */}
-      <div className={`flex-grow overflow-hidden ${haishin ? 'h-[160px]' : 'h-full md:max-h-[50vh] lg:max-h-[60vh]'} flex flex-col`}>
+      {/* ▼ タイムライン / 対戦結果カードリスト (スマホ時 max-h-[35vh] に制限) */}
+      <div className={`flex-grow overflow-hidden ${haishin ? 'h-[160px]' : 'h-full max-h-[35vh] md:max-h-[50vh] lg:max-h-[60vh]'} flex flex-col`}>
         <div className="flex-grow overflow-y-auto hide-scrollbar pr-1 flex flex-col gap-2">
           {filteredMatches.map(({ match, originalIndex }, loopIndex) => {
             const isWin = match.shouhai === "勝ち";

@@ -28,6 +28,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
 
   // ▼ コピー通知State
   const [copied, setCopied] = useState(false);
+  const [controllerCopied, setControllerCopied] = useState(false);
 
   const STORAGE_KEY = "gameResults";
 
@@ -138,6 +139,16 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // スマホコントローラー用URLコピー処理
+  const handleCopyControllerUrl = () => {
+    const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
+    const syncVal = user?.id || guestSyncKey;
+    const controllerUrl = `${window.location.origin}${window.location.pathname}?mode=controller&sync=${syncVal}`;
+    navigator.clipboard.writeText(controllerUrl);
+    setControllerCopied(true);
+    setTimeout(() => setControllerCopied(false), 2000);
+  };
+
   return (
     <>
       <div className="flex flex-col justify-center items-center py-4 px-2 md:px-6">
@@ -206,7 +217,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
           
           {/* --- 📊 戦績タイムライン / 履歴 (中央カラム) --- */}
           <div className="w-full md:w-[35%] flex flex-col" id="win-lose-area">
-            <div className="glass-panel p-5 rounded-2xl flex flex-col h-full min-h-[50vh] md:max-h-[85vh]">
+            {/* スマホ時は max-h-[50vh] min-h-[35vh] で高さを制限し、リストを内部スクロール可能にする */}
+            <div className="glass-panel p-5 rounded-2xl flex flex-col h-full min-h-[35vh] max-h-[50vh] md:max-h-[85vh] overflow-hidden">
               <Result
                 filteredMatches={filteredMatchesWithIndex}
                 history={history}
@@ -239,10 +251,10 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                 <i className="fas fa-desktop text-2xl text-indigo-400 group-hover:scale-110 transition-transform"></i>
               </div>
 
-              <h3 className="text-slate-200 font-extrabold text-base mb-1.5">OBS配信モード</h3>
+              <h3 className="text-slate-200 font-extrabold text-base mb-1.5">OBS配信 ＆ スマホ操作</h3>
               <p className="text-xxs text-slate-400 mb-5 leading-relaxed max-w-[15rem]">
-                オーバーレイとして配信画面に直接配置できる、<br/>
-                勝敗数同期型の画面のURLをコピーします。
+                配信用のオーバーレイ画面や、<br/>
+                手元のスマホから遠隔操作できるリモコンのURLをコピーします。
               </p>
 
               <div className="flex flex-col gap-2 w-full max-w-[14rem]">
@@ -250,10 +262,10 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                 <button
                   onClick={handleCopyObsUrl}
                   className={`
-                    w-full py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5
+                    w-full py-2 px-4 rounded-xl text-xxs font-bold border transition-all flex items-center justify-center gap-1.5
                     ${copied 
                       ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]" 
-                      : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-400/20"}
+                      : "bg-slate-950/50 text-slate-400 border-white/5 hover:text-white hover:bg-slate-800/80 hover:border-white/10"}
                   `}
                 >
                   {copied ? (
@@ -263,6 +275,27 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                   ) : (
                     <>
                       <i className="fas fa-copy"></i> OBS配信用URLをコピー
+                    </>
+                  )}
+                </button>
+
+                {/* スマホコントローラーリンクコピー */}
+                <button
+                  onClick={handleCopyControllerUrl}
+                  className={`
+                    w-full py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5
+                    ${controllerCopied 
+                      ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]" 
+                      : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-400/20"}
+                  `}
+                >
+                  {controllerCopied ? (
+                    <>
+                      <i className="fas fa-check text-emerald-400"></i> コピー完了！
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-gamepad text-indigo-400"></i> スマホ用リモコンのURLをコピー
                     </>
                   )}
                 </button>
