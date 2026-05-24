@@ -203,9 +203,9 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                   </div>
 
                   {/* 中央: VS + 時間 */}
-                  <div className="flex flex-col items-center gap-0 min-w-[32px]">
+                  <div className="flex flex-col items-center gap-0 min-w-[36px]">
                     <span className="text-[10px] font-black text-white/20 leading-none italic">VS</span>
-                    <span className="text-[9px] font-black text-white/40 tracking-tighter mt-1">
+                    <span className="text-[13px] font-black text-white/70 tracking-tighter mt-1">
                       {formatTimeOnly(m.nichiji)}
                     </span>
                   </div>
@@ -302,7 +302,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                       </div>
                     </div>
                     <div className="flex flex-col items-center ml-2">
-                       <span className="text-[12px] font-black text-slate-400">{formatTimeOnly(m.nichiji)}</span>
+                       <span className="text-[16px] font-black text-slate-300 drop-shadow-sm">{formatTimeOnly(m.nichiji)}</span>
                     </div>
                     <span className={`text-[13px] font-black tracking-widest px-4 py-2 rounded-xl border ${isWin ? "bg-red-500/15 text-red-400 border-red-500/40" : "bg-blue-500/15 text-blue-400 border-blue-500/40"}`}>{isWin ? "勝ち" : "負け"}</span>
                   </div>
