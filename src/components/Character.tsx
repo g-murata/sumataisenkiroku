@@ -112,15 +112,44 @@ export const Character: React.FC<CharacterProps> = ({
   matches
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-
   const isYou = player === "あなた";
+
+  // クイック表示除外リストの状態管理
+  const [excludedIds, setExcludedIds] = useState<number[]>(() => {
+    try {
+      const stored = localStorage.getItem(isYou ? "excludedFighters_you" : "excludedFighters_opp");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // 除外処理
+  const handleExcludeCharacter = (id: number) => {
+    const newExcluded = [...excludedIds, id];
+    setExcludedIds(newExcluded);
+    localStorage.setItem(isYou ? "excludedFighters_you" : "excludedFighters_opp", JSON.stringify(newExcluded));
+  };
+
+  // 除外リセット処理
+  const handleResetExclusion = () => {
+    setExcludedIds([]);
+    localStorage.removeItem(isYou ? "excludedFighters_you" : "excludedFighters_opp");
+  };
 
   // 対戦履歴から「よく使うキャラ」を動的に集計
   const frequentCharacters = useMemo(() => {
     const counts: Record<number, number> = {};
-    matches.forEach((m) => {
+    
+    // 「あなた」の場合は「最近よく使う」にするため、直近30試合に絞る
+    // 「相手」の場合は全体の対戦履歴（制限なし）とする
+    const targetMatches = isYou ? matches.slice(0, 30) : matches;
+
+    targetMatches.forEach((m) => {
       const char = isYou ? m.player : m.opponentPlayer;
       if (char && char.characterNo) {
+        // 除外リストに入っているIDは省く
+        if (excludedIds.includes(char.characterNo)) return;
         counts[char.characterNo] = (counts[char.characterNo] || 0) + 1;
       }
     });
@@ -133,7 +162,7 @@ export const Character: React.FC<CharacterProps> = ({
     return sortedIds
       .map(id => characterList.find(c => c.characterNo === id))
       .filter((c): c is CharacterType => !!c);
-  }, [matches, isYou]);
+  }, [matches, isYou, excludedIds]);
 
   // 検索ワードでフィルタリング（ひらがなでもカタカナでも部分一致するように対応）
   const filteredList = characterList.filter(character => {
@@ -198,25 +227,49 @@ export const Character: React.FC<CharacterProps> = ({
       {/* --- よく使うキャラ（お気に入り）クイックパネル --- */}
       {frequentCharacters.length > 0 && (
         <div className={`flex flex-col gap-1 ${selectedCharacter ? 'hidden md:flex' : ''}`}>
-          <span className="text-xxs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1">
-            ⭐ {isYou ? "よく使う" : "よく対戦する"}ファイター
-          </span>
-          <div className="flex gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xxs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1">
+              ⭐ {isYou ? "最近よく使う" : "よく対戦する"}ファイター
+            </span>
+            {excludedIds.length > 0 && (
+              <button
+                onClick={handleResetExclusion}
+                className="text-[9px] text-slate-500 hover:text-indigo-400 transition-colors font-semibold"
+                title="除外したファイターを再表示します"
+              >
+                <i className="fas fa-undo mr-0.5"></i> 元に戻す
+              </button>
+            )}
+          </div>
+          <div className="flex gap-2.5">
             {frequentCharacters.map(char => {
               const isSelected = selectedCharacter?.characterNo === char.characterNo;
               return (
-                <button
-                  key={`freq-${char.characterNo}`}
-                  onClick={() => isSelected ? onSelectCharacter(null) : onSelectCharacter(char)}
-                  className={`w-11 h-11 p-1 rounded-full border-2 bg-slate-900/60 char-quick-badge flex items-center justify-center ${
-                    isSelected 
-                      ? (isYou ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] scale-105" : "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105") 
-                      : "border-white/10 hover:border-slate-400"
-                  }`}
-                  title={char.characterName}
-                >
-                  <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain" />
-                </button>
+                <div key={`freq-container-${char.characterNo}`} className="relative group">
+                  <button
+                    onClick={() => isSelected ? onSelectCharacter(null) : onSelectCharacter(char)}
+                    className={`w-11 h-11 p-1 rounded-full border-2 bg-slate-900/60 char-quick-badge flex items-center justify-center transition-all duration-200 ${
+                      isSelected 
+                        ? (isYou ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] scale-105" : "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105") 
+                        : "border-white/10 hover:border-slate-400"
+                    }`}
+                    title={char.characterName}
+                  >
+                    <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
+                  </button>
+                  
+                  {/* リストから除外するボタン */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleExcludeCharacter(char.characterNo);
+                    }}
+                    className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-slate-950/90 text-[7px] text-slate-400 hover:text-red-400 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md cursor-pointer"
+                    title="このリストから除外する"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
               );
             })}
           </div>
