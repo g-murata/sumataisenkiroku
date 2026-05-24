@@ -232,16 +232,16 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
-            <span className="text-[7px] font-black tracking-widest text-emerald-400 uppercase">REMOTE LIVE</span>
+            <span className="text-[7px] font-black tracking-widest text-emerald-400 uppercase">連携中</span>
           </div>
 
           {/* スコア（中央） */}
           <div className="flex items-baseline gap-1 font-black">
             <span className="text-lg text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">{history.winCount}</span>
-            <span className="text-[9px] text-slate-500">W</span>
+            <span className="text-[9px] text-slate-500">勝</span>
             <span className="text-slate-600 mx-0.5">-</span>
             <span className="text-lg text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">{history.loseCount}</span>
-            <span className="text-[9px] text-slate-500">L</span>
+            <span className="text-[9px] text-slate-500">敗</span>
             <span className="text-[9px] text-slate-400 ml-1">({winRate}%)</span>
           </div>
 
@@ -281,8 +281,8 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
             style={{ height: 'clamp(100px, 24vh, 140px)' }}
           >
             <span className="text-2xl">🏆</span>
-            <span className="text-xl tracking-wide">WIN</span>
-            <span className="text-[10px] font-semibold opacity-75">勝ち</span>
+            <span className="text-xl tracking-wide">勝ち</span>
+            <span className="text-[10px] font-semibold opacity-75">WIN</span>
           </button>
 
           <button
@@ -296,8 +296,8 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
             style={{ height: 'clamp(100px, 24vh, 140px)' }}
           >
             <span className="text-2xl">⚔️</span>
-            <span className="text-xl tracking-wide">LOSE</span>
-            <span className="text-[10px] font-semibold opacity-75">負け</span>
+            <span className="text-xl tracking-wide">負け</span>
+            <span className="text-[10px] font-semibold opacity-75">LOSE</span>
           </button>
         </div>
 

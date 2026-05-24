@@ -163,7 +163,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
           <div className="w-full md:w-[35%] flex flex-col gap-4">
             <div className="glass-panel p-5 rounded-2xl flex flex-col gap-4">
               <h2 className="text-sm font-extrabold text-slate-300 border-b border-white/5 pb-2 flex items-center gap-2">
-                🎮 ファイターエントリー
+                🎮 ファイター選択
               </h2>
               
               <div className="flex flex-col gap-4">
@@ -256,10 +256,10 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                 <i className="fas fa-desktop text-2xl text-indigo-400 group-hover:scale-110 transition-transform"></i>
               </div>
 
-              <h3 className="text-slate-200 font-extrabold text-base mb-1.5">OBS配信 ＆ スマホ操作</h3>
+              <h3 className="text-slate-200 font-extrabold text-base mb-1.5">配信・外部連携ツール</h3>
               <p className="text-xxs text-slate-400 mb-5 leading-relaxed max-w-[15rem]">
-                配信用のオーバーレイ画面や、<br/>
-                手元のスマホから遠隔操作できるリモコンのURLをコピーします。
+                OBS配信用の画面や、<br/>
+                別のデバイスから操作するための設定です。
               </p>
 
               <div className="flex flex-col gap-2 w-full max-w-[14rem]">
