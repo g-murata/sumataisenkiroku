@@ -56,7 +56,7 @@ describe('Character', () => {
     );
   });
 
-  it('選択中の同じキャラをクリックすると null が渡される', () => {
+  it('「解除」ボタンをクリックすると onSelectCharacter(null) が呼ばれる', () => {
     const onSelect = jest.fn();
     render(
       <Character
@@ -65,10 +65,9 @@ describe('Character', () => {
         selectedCharacter={mockCharacter}
       />
     );
-    // 選択中の表示用画像と、リスト内の画像の2つがある
-    const marioImgs = screen.getAllByAltText('マリオ');
+    const cancelButton = screen.getByRole('button', { name: /解除/ });
     act(() => {
-      fireEvent.click(marioImgs[1]);
+      fireEvent.click(cancelButton);
     });
     expect(onSelect).toHaveBeenCalledWith(null);
   });

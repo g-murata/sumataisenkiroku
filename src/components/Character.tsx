@@ -204,7 +204,7 @@ export const Character: React.FC<CharacterProps> = ({ player, onSelectCharacter,
 
       {/* --- よく使うキャラ（お気に入り）クイックパネル --- */}
       {frequentCharacters.length > 0 && (
-        <div className="flex flex-col gap-1">
+        <div className={`flex flex-col gap-1 ${selectedCharacter ? 'hidden' : ''}`}>
           <span className="text-xxs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1">
             ⭐ {isYou ? "よく使う" : "よく対戦する"}ファイター
           </span>
@@ -231,7 +231,7 @@ export const Character: React.FC<CharacterProps> = ({ player, onSelectCharacter,
       )}
 
       {/* --- 検索＆選択グリッド --- */}
-      <div className="flex flex-col gap-2">
+      <div className={`flex flex-col gap-2 ${selectedCharacter ? 'hidden' : ''}`}>
         <div className="relative">
           <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 text-xs"></i>
           <input
