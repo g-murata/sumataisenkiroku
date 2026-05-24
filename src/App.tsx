@@ -189,18 +189,25 @@ export default function App() {
   // 4. 新規登録 (Create)
   // ---------------------------------------------------------
   const handleAddResult = async (newMatch: MatchResult) => {
-    // 画面の即時更新
-    const newMatches = [newMatch, ...history.matches];
-    const newWin = newMatch.shouhai === "勝ち" ? history.winCount + 1 : history.winCount;
-    const newLose = newMatch.shouhai === "負け" ? history.loseCount + 1 : history.loseCount;
-    const newState = { matches: newMatches, winCount: newWin, loseCount: newLose };
-    
-    setHistory(newState);
+    // ★ 関数型アップデートを使って、最新の state に基づいて更新する
+    setHistory(prev => {
+      const newMatches = [newMatch, ...prev.matches];
+      const newWin = newMatch.shouhai === "勝ち" ? prev.winCount + 1 : prev.winCount;
+      const newLose = newMatch.shouhai === "負け" ? prev.loseCount + 1 : prev.loseCount;
+      const newState = { matches: newMatches, winCount: newWin, loseCount: newLose };
+      
+      // ゲスト時はローカルストレージも更新
+      if (!user) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      }
+      return newState;
+    });
 
-    // ★★★ OBS画面へ「アニメーション出せ！」と送信 ★★★
+    // ★ アニメーションは即座に通知
     notifyAnimation(newMatch.shouhai);
 
     if (user) {
+      // クラウド保存は「投げっぱなし」でOK（画面は既に更新されているため）
       const { error } = await supabase.from('matches').insert([{
           user_id: user.id,
           my_char_id: newMatch.player?.characterNo,
@@ -212,11 +219,10 @@ export default function App() {
           memo: newMatch.memo
         }]);
       
-      if (!error) {
-        await fetchMatches(user.id); // IDなどを確定させるため再取得
+      if (error) {
+        console.error('クラウド保存エラー:', error);
+        // 必要に応じてここでリトライや警告を出す
       }
-    } else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
     }
   };
 
