@@ -59,8 +59,8 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
     try {
       // @ts-ignore
       const win = await window.documentPictureInPicture.requestWindow({
-        width: 320,
-        height: 240,
+        width: 260,
+        height: 180,
       });
 
       win.document.title = "スマ対戦記録（OBS配信枠）";
@@ -398,16 +398,70 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
             
             {/* PiPウインドウへの転送ポータル */}
             {pipWindow && createPortal(
-              <div className="h-full bg-[#0a0a12] text-white flex flex-col overflow-hidden relative">
-                <div className="h-2 bg-[#0a0a12] w-full flex-shrink-0"></div>
-                 {renderResult(true)}
-                 {showResultAnimation && (
+              <div className="h-full bg-[#07070d] text-white flex flex-col justify-between p-3.5 overflow-hidden relative select-none font-sans border border-white/5 box-border">
+                {/* 🟢 Live Sync Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,1)]"></span>
+                    </span>
+                    <span className="text-[8px] font-black tracking-widest text-emerald-400 uppercase animate-pulse">
+                      LIVE SYNC ACTIVE
+                    </span>
+                  </div>
+                  {/* 連勝インジケータ */}
+                  {(() => {
+                    let streak = 0;
+                    for (const m of history.matches || []) {
+                      if (m.shouhai === "勝ち") streak++;
+                      else break;
+                    }
+                    return streak >= 2 ? (
+                      <div className="flex items-center gap-0.5 bg-amber-950/40 border border-amber-500/30 px-1.5 py-0.5 rounded-md text-[8px] font-black text-amber-400 drop-shadow-[0_0_4px_rgba(245,158,11,0.5)] animate-pulse">
+                        🔥 {streak}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+
+                {/* 📊 Score display (Big and beautiful) */}
+                <div className="flex flex-col items-center justify-center my-1">
+                  <div className="flex items-baseline gap-1 font-black leading-none">
+                    <span className="text-3xl text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                      {history.winCount ?? 0}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-bold mx-0.5">W</span>
+                    <span className="text-slate-600 text-lg">-</span>
+                    <span className="text-3xl text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)] ml-1">
+                      {history.loseCount ?? 0}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-bold mx-0.5">L</span>
+                  </div>
+                  <span className="text-[9px] font-bold text-slate-400 mt-1 block">
+                    WIN RATE: {(() => {
+                      const total = (history.winCount ?? 0) + (history.loseCount ?? 0);
+                      return total > 0 ? (((history.winCount ?? 0) / total) * 100).toFixed(1) : "0.0";
+                    })()}%
+                  </span>
+                </div>
+
+                {/* ⚠️ Warning and guide message */}
+                <div className="bg-slate-950/60 border border-white/5 p-1.5 rounded-lg text-[8px] text-slate-500 text-center leading-relaxed">
+                  <i className="fas fa-info-circle text-indigo-400 mr-0.5 animate-pulse"></i>
+                  連動用ウィンドウです。裏側か端に置いてください。
+                </div>
+
+                {/* Win / Lose Stamp Overlay */}
+                {showResultAnimation && (
+                  <div className="absolute inset-0 bg-[#07070d]/80 backdrop-blur-xs flex items-center justify-center animate-fadeIn z-50">
                     <ResultAnimation 
                       result={lastResultForAnim} 
                       mode="absolute"
                     />
-                  )}
-              </div>, 
+                  </div>
+                )}
+              </div>,
               pipWindow.document.body
             )}
           </div>
