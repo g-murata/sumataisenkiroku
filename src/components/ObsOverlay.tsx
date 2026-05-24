@@ -157,72 +157,76 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   // 3. コンパクト・アイコンモード
   // =========================================================
   if (layout === 'compact') {
+    // コンパクトモード用のスケーリングスタイル
+    const compactStyle: React.CSSProperties = {
+      transform: zoomParam !== '1' ? `scale(${zoomParam})` : undefined,
+      transformOrigin: 'top center',
+    };
+
     return (
-      <div className={`p-4 w-max animate-fadeIn flex flex-col items-center gap-5`}>
-        {/* トータルスコア (極限までコンパクト) */}
-        <div className="flex items-center gap-4 font-black drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]">{stats.win}</span>
-            <span className="text-[10px] text-red-400/80 font-bold">勝</span>
+      <div className="w-full h-full overflow-hidden flex flex-col items-center p-4 box-border animate-fadeIn">
+        <div style={compactStyle} className="flex flex-col items-center gap-5">
+          {/* トータルスコア (極限までコンパクト) */}
+          <div className="flex items-center gap-4 font-black drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]">{stats.win}</span>
+              <span className="text-[10px] text-red-400/80 font-bold">勝</span>
+            </div>
+            <span className="text-2xl text-slate-600/50 italic">/</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]">{stats.lose}</span>
+              <span className="text-[10px] text-blue-400/80 font-bold">敗</span>
+            </div>
           </div>
-          <span className="text-2xl text-slate-700/50 italic">/</span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.6)]">{stats.lose}</span>
-            <span className="text-[10px] text-blue-400/80 font-bold">敗</span>
+
+          <div className="flex flex-col gap-3 items-center">
+            {stats.recentMatches.map((m, idx) => {
+              const isWin = m.shouhai === "勝ち";
+              const glowColor = isWin ? "rgba(239,68,68,0.4)" : "rgba(59,130,246,0.4)";
+              
+              return (
+                <div key={`compact-v-${idx}`} className="relative flex items-center justify-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-950/20 border border-white/5 group">
+                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-20" style={{ backgroundColor: glowColor }}></div>
+                  
+                  {/* 自分 (左) */}
+                  <div className={`rounded-full flex items-center justify-center transition-all duration-300 z-20 relative ${
+                    isWin 
+                      ? "w-14 h-14 border-2 border-red-500 p-1 shadow-[0_0_20px_rgba(239,68,68,0.6)] bg-slate-950" 
+                      : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900"
+                  }`}>
+                    <img src={m.player?.imageUrl} alt="Me" className="w-full h-full object-contain" />
+                    {isWin ? (
+                      <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-red-600 text-white shadow-lg">勝</div>
+                    ) : (
+                      <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[7px] font-black z-30 bg-white/10 text-white/40">敗</div>
+                    )}
+                  </div>
+
+                  {/* 中央: VS + 時間 */}
+                  <div className="flex flex-col items-center gap-0 min-w-[32px]">
+                    <span className="text-[10px] font-black text-white/20 leading-none italic">VS</span>
+                    <span className="text-[7px] font-black text-white/40 tracking-tighter mt-1">
+                      {formatTimeOnly(m.nichiji)}
+                    </span>
+                  </div>
+
+                  {/* 相手 (右) */}
+                  <div className={`rounded-full bg-slate-900 border flex items-center justify-center transition-all duration-300 z-10 relative ${
+                    !isWin 
+                      ? "w-14 h-14 border-2 border-blue-500 p-1 shadow-[0_0_20px_rgba(59,130,246,0.6)] bg-slate-950" 
+                      : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900"
+                  }`}>
+                    <img src={m.opponentPlayer?.imageUrl} alt="Opponent" className="w-full h-full object-contain" />
+                    {!isWin ? (
+                      <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-blue-600 text-white shadow-lg">勝</div>
+                    ) : (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[7px] font-black z-30 bg-white/10 text-white/40">敗</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-
-        <div className="flex flex-col gap-3 items-center">
-          {stats.recentMatches.map((m, idx) => {
-            const isWin = m.shouhai === "勝ち";
-            const glowColor = isWin ? "rgba(239,68,68,0.4)" : "rgba(59,130,246,0.4)";
-            
-            return (
-              <div key={`compact-v-${idx}`} className="relative flex items-center justify-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-950/20 border border-white/5 group">
-                <div className="absolute inset-0 rounded-2xl blur-xl opacity-20" style={{ backgroundColor: glowColor }}></div>
-                
-                {/* 自分 (左) */}
-                <div className={`rounded-full flex items-center justify-center transition-all duration-300 z-20 relative ${
-                  isWin 
-                    ? "w-14 h-14 border-2 border-red-500 p-1 shadow-[0_0_25px_rgba(239,68,68,0.7)] bg-slate-950" 
-                    : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900" // グレーから白の透過枠へ
-                }`}>
-                  <img src={m.player?.imageUrl} alt="Me" className="w-full h-full object-contain" />
-                  
-                  {/* 自分側のマーカー: 勝った時は鮮やかに、負けた時は控えめに */}
-                  {isWin ? (
-                    <div className="absolute -top-1 -left-1 w-6 h-6 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-red-600 text-white shadow-[0_2px_8px_rgba(220,38,38,0.5)]">勝</div>
-                  ) : (
-                    <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[7px] font-black z-30 bg-white/10 text-white/40">敗</div>
-                  )}
-                </div>
-
-                {/* 中央: VS + 時間 */}
-                <div className="flex flex-col items-center gap-0 min-w-[32px]">
-                  <span className="text-[10px] font-black text-white/20 leading-none italic">VS</span>
-                  <span className="text-[7px] font-black text-white/40 tracking-tighter mt-1">
-                    {formatTimeOnly(m.nichiji)}
-                  </span>
-                </div>
-
-                {/* 相手 (右) */}
-                <div className={`rounded-full flex items-center justify-center transition-all duration-300 z-10 relative ${
-                  !isWin 
-                    ? "w-14 h-14 border-2 border-blue-500 p-1 shadow-[0_0_25px_rgba(59,130,246,0.7)] bg-slate-950" 
-                    : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900" // グレーから白の透過枠へ
-                }`}>
-                  <img src={m.opponentPlayer?.imageUrl} alt="Opponent" className="w-full h-full object-contain" />
-                  
-                  {/* 相手側のマーカー: 勝った時だけ青背景で「勝」 */}
-                  {!isWin ? (
-                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-blue-600 text-white shadow-[0_2px_8px_rgba(37,99,235,0.5)]">勝</div>
-                  ) : (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[7px] font-black z-30 bg-white/10 text-white/40">敗</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     );
