@@ -372,7 +372,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                 <p className="text-[9px] text-slate-500 mt-2 text-left leading-relaxed border-t border-white/5 pt-2">
                   <i className="fas fa-info-circle text-indigo-400/80 mr-1"></i>
                   <strong>リアルタイム連動の注意:</strong><br />
-                  勝敗スコアやスタンプアニメを即時同期するには、「専用ウィンドウ」を開いておく必要があります。邪魔な場合はウィンドウを最小サイズに縮小し、画面の端や裏側に置いておけばOKです！
+                  勝敗スコアやスタンプアニメを即時同期するには、「専用ウィンドウ」を開いておく必要があります。邪魔な場合はウィンドウを最小サイズに縮小し、画面の端などに置いておけばOKです！
                 </p>
               </div>
             </div>
@@ -449,7 +449,7 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                 {/* ⚠️ Warning and guide message */}
                 <div className="bg-slate-950/60 border border-white/5 p-1.5 rounded-lg text-[8px] text-slate-500 text-center leading-relaxed">
                   <i className="fas fa-info-circle text-indigo-400 mr-0.5 animate-pulse"></i>
-                  連動用ウィンドウです。裏側か端に置いてください。
+                  連動用ウィンドウです。画面の端等に縮めて置いてください。
                 </div>
 
                 {/* Win / Lose Stamp Overlay */}
