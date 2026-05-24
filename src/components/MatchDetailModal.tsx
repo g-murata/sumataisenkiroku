@@ -63,9 +63,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ isOpen, onCl
   };
 
   const handleDeleteClick = () => {
-    if (window.confirm("本当にこの対戦記録を削除しますか？")) {
-      onDelete();
-    }
+    onDelete();
   };
 
   const isWin = shouhai === "勝ち";
