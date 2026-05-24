@@ -229,7 +229,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
                     className={`p-2 rounded-xl flex items-center justify-between border ${borderGlow}`}
                   >
                     {/* 左側: ファイターアバター対面 */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2">
                       <div className="flex items-center -space-x-1.5">
                         {/* 自分アバター */}
                         <div className={`w-7 h-7 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 z-10 ${
@@ -254,22 +254,8 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({ history }) => {
                       </span>
                     </div>
 
-                    {/* 中央: 点線スペーサー ＆ メモ表示 */}
-                    <div className="flex-grow flex items-center mx-3 overflow-hidden min-w-[20px] relative">
-                      <div className="w-full border-b border-dashed border-slate-700/40 relative flex justify-center">
-                        {m.memo && (
-                          <span 
-                            className="absolute -top-2 bg-slate-950 px-1.5 text-[7px] text-slate-400 font-medium truncate max-w-[65px] border border-white/5 rounded-md leading-none py-0.5 opacity-90 shadow-sm"
-                            title={m.memo}
-                          >
-                            📝 {m.memo}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
                     {/* 右側: 結果バッジと時間 */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2">
                       <span className="text-[8px] text-slate-500 font-medium">
                         {formatTimeOnly(m.nichiji)}
                       </span>
