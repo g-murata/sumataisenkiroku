@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { CharacterType, MatchHistory, MatchResult } from '../types';
 import { characterList } from './Character';
 
@@ -38,7 +38,6 @@ const CharacterPickerOverlay = ({
   idPrefix: string;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { inputRef.current?.focus(); }, []);
 
   const accentBorder = color === "red"
     ? "border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]"

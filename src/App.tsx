@@ -334,7 +334,7 @@ export default function App() {
   // =========================================================
   return (    
     <div>
-      <Header user={user} />
+      <Header user={user} syncKey={syncKey} />
       <Home 
         history={history}
         onAddResult={handleAddResult}
