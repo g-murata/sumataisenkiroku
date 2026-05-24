@@ -61,7 +61,7 @@ export default function App() {
       .from('matches')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false }); // 作成順の降順
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('データ取得エラー:', error);
@@ -79,7 +79,6 @@ export default function App() {
         opponentPlayer: characterList.find(c => c.characterNo === d.opp_char_id) || null,
       }));
 
-      // 日付順ソート (念のため)
       formattedMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
 
       const win = formattedMatches.filter(m => m.shouhai === "勝ち").length;
@@ -92,11 +91,10 @@ export default function App() {
       };
 
       setHistory(updatedHistory);
-      return updatedHistory; // ★ 最新の履歴を返す
+      return updatedHistory;
     }
   };
   
-  // ▼ ゲスト時の再読込用
   const reloadFromStorage = () => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -105,15 +103,19 @@ export default function App() {
   };
 
   // --------------------------------------------------------------------------
-  // ★★★ 通信機能のセットアップ (ここが重要！) ★★★
+  // ★★★ 通信機能のセットアップ ★★★
   // --------------------------------------------------------------------------
   const { notifyUpdate, notifyAnimation } = useObsSync(
     syncKey,
     isObsMode,
-    // ① データ更新命令が来た時の処理 (OBS画面で受信したとき)
-    async (incomingHistory) => {
+    // ① データ更新命令が来た時の処理 (受信したとき)
+    async (incomingHistory, isFiltered) => {
       if (incomingHistory) {
         setHistory(incomingHistory);
+        // 絞り込みデータでなければ、Refも更新（次にOBSが繋がった時用）
+        if (!isFiltered) {
+          currentFilteredHistoryRef.current = incomingHistory;
+        }
       } else {
         if (user) {
           await fetchMatches(user.id);
@@ -122,13 +124,12 @@ export default function App() {
         }
       }
     },
-    // ② アニメーション命令が来た時の処理 (OBS画面で受信したとき)
+    // ② アニメーション命令が来た時の処理
     (result) => {
       setObsAnimResult(result);
-      // 3秒後にアニメ表示を消す
       setTimeout(() => setObsAnimResult(null), 3000); 
     },
-    // ③ 現在のデータを要求された時の処理 (通常ブラウザ側が、OBS側からのデータ要求を受け取ったとき)
+    // ③ 現在のデータを要求された時の処理
     () => currentFilteredHistoryRef.current
   );
 
@@ -139,11 +140,11 @@ export default function App() {
   const handleFilterHistoryChange = useCallback((filteredHistory: MatchHistory) => {
     // 絞り込まれた戦績をRefに保持
     currentFilteredHistoryRef.current = filteredHistory;
-    // 絞り込まれた戦績をOBSに直接送信する
-    notifyUpdate(filteredHistory);
+    // ★ OBSだけに通知する（isFiltered=true）
+    notifyUpdate(filteredHistory, true);
   }, [notifyUpdate]);
 
-  // ▼ 初期化（コントローラー・OBSモードは認証不要のためスキップ）
+  // ▼ 初期化
   useEffect(() => {
     if (isControllerMode || isObsMode) return;
 
@@ -189,25 +190,23 @@ export default function App() {
   // 4. 新規登録 (Create)
   // ---------------------------------------------------------
   const handleAddResult = async (newMatch: MatchResult) => {
-    // ★ 関数型アップデートを使って、最新の state に基づいて更新する
     setHistory(prev => {
       const newMatches = [newMatch, ...prev.matches];
       const newWin = newMatch.shouhai === "勝ち" ? prev.winCount + 1 : prev.winCount;
       const newLose = newMatch.shouhai === "負け" ? prev.loseCount + 1 : prev.loseCount;
       const newState = { matches: newMatches, winCount: newWin, loseCount: newLose };
       
-      // ゲスト時はローカルストレージも更新
       if (!user) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       }
+      // ★ 本当のデータ更新なので、全員に通知する（isFiltered=false）
+      notifyUpdate(newState, false);
       return newState;
     });
 
-    // ★ アニメーションは即座に通知
     notifyAnimation(newMatch.shouhai);
 
     if (user) {
-      // クラウド保存は「投げっぱなし」でOK（画面は既に更新されているため）
       const { error } = await supabase.from('matches').insert([{
           user_id: user.id,
           my_char_id: newMatch.player?.characterNo,
@@ -219,10 +218,7 @@ export default function App() {
           memo: newMatch.memo
         }]);
       
-      if (error) {
-        console.error('クラウド保存エラー:', error);
-        // 必要に応じてここでリトライや警告を出す
-      }
+      if (error) console.error('クラウド保存エラー:', error);
     }
   };
 
@@ -235,10 +231,8 @@ export default function App() {
     setHistory(prev => {
       const newMatches = [...prev.matches];
       newMatches[selectedMatchIndex] = updatedMatch;
-      // 日付順で並び替え
       newMatches.sort((a, b) => new Date(b.nichiji).getTime() - new Date(a.nichiji).getTime());
       
-      // 全件から勝敗数を再計算（これが最も確実）
       const win = newMatches.filter(m => m.shouhai === "勝ち").length;
       const lose = newMatches.filter(m => m.shouhai === "負け").length;
       
@@ -246,13 +240,15 @@ export default function App() {
       if (!user) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       }
+      // ★ 全員に通知
+      notifyUpdate(newState, false);
       return newState;
     });
 
     setIsModalOpen(false);
 
     if (user && updatedMatch.id) {
-      const { error } = await supabase
+      await supabase
         .from('matches')
         .update({
           my_char_id: updatedMatch.player?.characterNo,
@@ -264,9 +260,6 @@ export default function App() {
           memo: updatedMatch.memo
         })
         .eq('id', updatedMatch.id);
-
-      if (error) console.error('更新エラー:', error);
-      // fetchMatchesは呼ばず、手元の正確なデータを優先する
     }
   };
 
@@ -279,23 +272,22 @@ export default function App() {
 
     setHistory(prev => {
       const newMatches = prev.matches.filter((_, i) => i !== selectedMatchIndex);
-      
-      // 全件から勝敗数を再計算
       const win = newMatches.filter(m => m.shouhai === "勝ち").length;
       const lose = newMatches.filter(m => m.shouhai === "負け").length;
-      
       const newState = { matches: newMatches, winCount: win, loseCount: lose };
+      
       if (!user) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       }
+      // ★ 全員に通知
+      notifyUpdate(newState, false);
       return newState;
     });
 
     setIsModalOpen(false);
 
     if (user && targetMatch.id) {
-      const { error } = await supabase.from('matches').delete().eq('id', targetMatch.id);
-      if (error) console.error('削除エラー:', error);
+      await supabase.from('matches').delete().eq('id', targetMatch.id);
     }
   };
 
@@ -307,22 +299,19 @@ export default function App() {
 
     if (user) {
       const { error } = await supabase.from('matches').delete().eq('user_id', user.id);
-      if (error) console.error('全削除エラー:', error);
-      else {
+      if (!error) {
         await fetchMatches(user.id);
+        // fetchMatches内で notifyUpdate を呼ばないので、ここで呼ぶ必要があるかもしれないが、
+        // fetchMatchesが再レンダリングを走らせ、Home画面のuseEffectが動くので自動で同期されます。
       }
     } else {
       localStorage.removeItem(STORAGE_KEY);
       const emptyState = { matches: [], winCount: 0, loseCount: 0 };
       setHistory(emptyState);
+      notifyUpdate(emptyState, false);
     }
   };
 
-
-  // =========================================================
-  // ★★★ スマホコントローラー（リモコン）モード時の表示 ★★★
-  // ★ 認証なしで即レンダリング（制限ブラウザ対策）
-  // =========================================================
   if (isControllerMode) {
     return (
       <MobileController 
@@ -337,9 +326,6 @@ export default function App() {
     return <div className="h-screen w-screen bg-[#07070d]" />;
   }
 
-  // =========================================================
-  // ★★★ OBSモード時の表示 (高機能オーバーレイ) ★★★
-  // =========================================================
   if (isObsMode) {
     return (
       <div className="h-screen w-screen bg-transparent overflow-hidden relative flex items-start justify-start">
@@ -352,9 +338,6 @@ export default function App() {
     );
   }
 
-  // =========================================================
-  // ★★★ 通常モード時の表示 ★★★
-  // =========================================================
   return (    
     <div>
       <Header user={user} syncKey={syncKey} />
@@ -369,7 +352,6 @@ export default function App() {
         user={user}
         onFilterHistoryChange={handleFilterHistoryChange}
       />
-      
       <MatchDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
