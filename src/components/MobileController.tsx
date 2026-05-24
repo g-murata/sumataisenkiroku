@@ -151,13 +151,13 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
     const icon = color === "red" ? "fas fa-user" : "fas fa-times";
 
     return (
-      <div className="bg-slate-900/50 border border-white/5 rounded-2xl px-3 pt-2 pb-3 flex flex-col gap-2">
+      <div className="bg-slate-900/50 border border-white/5 rounded-2xl px-3 pt-1.5 pb-2 flex flex-col gap-1.5">
         {/* 上行: ラベル左 / 選択キャラ名右 */}
         <div className="flex items-center justify-between">
-          <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${labelCol}`}>
-            <i className={`${icon} text-[9px]`}></i> {label}
+          <span className={`text-[9px] font-black uppercase tracking-wider flex items-center gap-1 ${labelCol}`}>
+            <i className={`${icon} text-[8px]`}></i> {label}
           </span>
-          <span className="text-[11px] font-bold text-slate-300">
+          <span className="text-[10px] font-bold text-slate-300">
             {selected?.characterName || <span className="text-slate-600 font-normal">未選択</span>}
           </span>
         </div>
@@ -167,18 +167,18 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
           {/* 選択中キャラ（大きめ） */}
           <button
             onClick={() => selected ? onSelect(null) : onOpenOverlay()}
-            className={`w-12 h-12 flex-shrink-0 rounded-full border-2 p-0.5 bg-slate-950/70 flex items-center justify-center transition-all active:scale-90 ${
+            className={`w-11 h-11 flex-shrink-0 rounded-full border-2 p-0.5 bg-slate-950/70 flex items-center justify-center transition-all active:scale-90 ${
               selected ? glow : "border-white/10 border-dashed"
             }`}
           >
             {selected
               ? <img src={selected.imageUrl} alt={selected.characterName} className="w-full h-full object-contain pointer-events-none" />
-              : <span className="text-slate-600 text-xl">?</span>
+              : <span className="text-slate-600 text-lg">?</span>
             }
           </button>
 
           {/* セパレーター */}
-          <div className="w-px h-8 bg-white/5 flex-shrink-0"></div>
+          <div className="w-px h-7 bg-white/5 flex-shrink-0"></div>
 
           {/* ファボ一覧 */}
           <div className="flex gap-1.5 items-center overflow-x-auto hide-scrollbar flex-1">
@@ -190,7 +190,7 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
               return (
                 <button key={`fav-${color}-${char.characterNo}`}
                   onClick={() => isSel ? onSelect(null) : onSelect(char)}
-                  className={`w-10 h-10 flex-shrink-0 rounded-full border-2 p-0.5 bg-slate-950/70 flex items-center justify-center transition-all active:scale-90 ${
+                  className={`w-9 h-9 flex-shrink-0 rounded-full border-2 p-0.5 bg-slate-950/70 flex items-center justify-center transition-all active:scale-90 ${
                     isSel ? favGlow : "border-white/10"
                   }`}>
                   <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
@@ -201,8 +201,8 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
 
           {/* 検索ボタン */}
           <button onClick={onOpenOverlay}
-            className="w-9 h-9 rounded-full flex-shrink-0 border border-white/10 bg-slate-800/60 flex items-center justify-center text-slate-500 active:scale-90 transition-all">
-            <i className="fas fa-search text-[11px]"></i>
+            className="w-8 h-8 rounded-full flex-shrink-0 border border-white/10 bg-slate-800/60 flex items-center justify-center text-slate-500 active:scale-90 transition-all">
+            <i className="fas fa-search text-[10px]"></i>
           </button>
         </div>
       </div>
@@ -225,38 +225,38 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
       <div className="h-screen w-screen bg-[#07070d] text-white flex flex-col overflow-hidden select-none font-sans box-border">
 
         {/* ヘッダー */}
-        <div className="px-3 py-2 flex items-center justify-between border-b border-white/5 bg-slate-950/60 flex-shrink-0">
+        <div className="px-3 py-1.5 flex items-center justify-between border-b border-white/5 bg-slate-950/60 flex-shrink-0">
           {/* LIVE */}
-          <div className="flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-500/20 px-2 py-1 rounded-full">
+          <div className="flex items-center gap-1 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-full">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
-            <span className="text-[8px] font-black tracking-widest text-emerald-400 uppercase">REMOTE LIVE</span>
+            <span className="text-[7px] font-black tracking-widest text-emerald-400 uppercase">REMOTE LIVE</span>
           </div>
 
           {/* スコア（中央） */}
           <div className="flex items-baseline gap-1 font-black">
-            <span className="text-xl text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">{history.winCount}</span>
-            <span className="text-[10px] text-slate-500">W</span>
-            <span className="text-slate-600 mx-1">-</span>
-            <span className="text-xl text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">{history.loseCount}</span>
-            <span className="text-[10px] text-slate-500">L</span>
-            <span className="text-[10px] text-slate-400 ml-1.5">({winRate}%)</span>
+            <span className="text-lg text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">{history.winCount}</span>
+            <span className="text-[9px] text-slate-500">W</span>
+            <span className="text-slate-600 mx-0.5">-</span>
+            <span className="text-lg text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">{history.loseCount}</span>
+            <span className="text-[9px] text-slate-500">L</span>
+            <span className="text-[9px] text-slate-400 ml-1">({winRate}%)</span>
           </div>
 
           {/* 連勝 or アイコン */}
           {streak >= 2 ? (
-            <div className="text-[9px] font-black text-amber-400 bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded-lg animate-pulse">
+            <div className="text-[8px] font-black text-amber-400 bg-amber-950/40 border border-amber-500/30 px-1.5 py-0.5 rounded-lg animate-pulse">
               🔥{streak}
             </div>
           ) : (
-            <div className="w-7 h-7 rounded-lg bg-slate-900 border border-white/5 flex items-center justify-center text-sm opacity-40">🎮</div>
+            <div className="w-6 h-6 rounded-lg bg-slate-900 border border-white/5 flex items-center justify-center text-xs opacity-40">🎮</div>
           )}
         </div>
 
         {/* キャラ選択 */}
-        <div className="flex flex-col gap-2.5 px-3 pt-3 flex-shrink-0">
+        <div className="flex flex-col gap-2 px-3 pt-2 flex-shrink-0">
           <CharRow label="あなた" color="red"
             selected={myChar} onSelect={setMyChar} favs={myFavs}
             onOpenOverlay={() => setOverlay("my")} />
@@ -269,7 +269,7 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
         <div className="flex-1 min-h-0"></div>
 
         {/* WIN / LOSE ボタン */}
-        <div className="px-3 pb-4 pt-2 flex gap-3 flex-shrink-0">
+        <div className="px-3 pb-3 pt-1 flex gap-2.5 flex-shrink-0">
           <button
             onClick={() => handleRecord("勝ち")}
             disabled={!bothSelected}
@@ -278,11 +278,11 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
                 ? "bg-slate-900 border border-white/5 text-slate-600 cursor-not-allowed"
                 : "bg-gradient-to-br from-red-500 to-rose-700 text-white border-2 border-red-400/50 shadow-[0_4px_30px_rgba(239,68,68,0.4)]"
             }`}
-            style={{ height: 'clamp(110px, 26vh, 160px)' }}
+            style={{ height: 'clamp(100px, 24vh, 140px)' }}
           >
-            <span className="text-3xl">🏆</span>
-            <span className="text-2xl tracking-wide">WIN</span>
-            <span className="text-sm font-semibold opacity-75">勝ち</span>
+            <span className="text-2xl">🏆</span>
+            <span className="text-xl tracking-wide">WIN</span>
+            <span className="text-[10px] font-semibold opacity-75">勝ち</span>
           </button>
 
           <button
@@ -293,11 +293,11 @@ export const MobileController: React.FC<MobileControllerProps> = ({ history, onA
                 ? "bg-slate-900 border border-white/5 text-slate-600 cursor-not-allowed"
                 : "bg-gradient-to-br from-blue-500 to-indigo-700 text-white border-2 border-blue-400/50 shadow-[0_4px_30px_rgba(59,130,246,0.4)]"
             }`}
-            style={{ height: 'clamp(110px, 26vh, 160px)' }}
+            style={{ height: 'clamp(100px, 24vh, 140px)' }}
           >
-            <span className="text-3xl">⚔️</span>
-            <span className="text-2xl tracking-wide">LOSE</span>
-            <span className="text-sm font-semibold opacity-75">負け</span>
+            <span className="text-2xl">⚔️</span>
+            <span className="text-xl tracking-wide">LOSE</span>
+            <span className="text-[10px] font-semibold opacity-75">負け</span>
           </button>
         </div>
 

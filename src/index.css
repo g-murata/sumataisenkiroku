@@ -4,10 +4,10 @@
 
 @layer base {
   body {
-    background: radial-gradient(circle at 50% 50%, #16162a 0%, #0a0a12 100%);
+    background: radial-gradient(circle at 50% 50%, #1a1a35 0%, #08080f 100%);
     background-attachment: fixed;
     color: #e2e8f0;
-    font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Outfit', 'Noto Sans JP', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }

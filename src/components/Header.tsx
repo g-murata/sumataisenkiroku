@@ -32,13 +32,13 @@ export const Header: React.FC<HeaderProps> = ({ user, syncKey }) => {
         </div>
 
         {/* 🎮 スマホ限定: リモコンボタン（中央） */}
-        <a
+        {/* <a
           href={controllerUrl}
           className="md:hidden flex items-center gap-1.5 bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-400/30 px-3 py-1.5 rounded-xl text-[10px] font-black text-white shadow-[0_0_10px_rgba(99,102,241,0.3)] transition-all active:scale-95"
         >
           <i className="fas fa-gamepad text-xs"></i>
           リモコン
-        </a>
+        </a> */}
 
         {/* ログイン・ユーザー情報 (右寄せ・absolute 排除) */}
         <div className="flex items-center flex-shrink-0 z-10">

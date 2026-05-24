@@ -30,6 +30,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   const widthParam = searchParams.get('w') || searchParams.get('width') || '340';
   const zoomParam = searchParams.get('zoom') || searchParams.get('scale') || '1';
   const isTransparent = searchParams.get('trans') === 'true' || searchParams.get('transparent') === 'true';
+  const isGreenBack = searchParams.get('gb') === 'true';
   const align = searchParams.get('align') || 'left';
 
   // 履歴データから算出する戦績データ
@@ -194,9 +195,13 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   };
 
   // 背景透過・枠線除去フラグに応じたCSSクラスの出し分け
-  const cardBaseClass = isTransparent
+  let cardBaseClass = isTransparent
     ? "bg-transparent border-transparent shadow-none"
     : "glass-panel bg-slate-950/75 border border-white/10 shadow-2xl backdrop-blur-md rounded-[2rem]";
+  
+  if (isGreenBack) {
+    cardBaseClass = "bg-[#00ff00] border-none shadow-none rounded-[2rem]";
+  }
 
   return (
     <div className={`w-[800px] h-[600px] bg-transparent overflow-hidden relative flex items-start ${justifyClass} p-6 box-border font-sans select-none animate-fadeIn`}>
@@ -208,7 +213,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
         
         {/* Win / Lose Stamp Overlay (カードの範囲内に出力) */}
         {animationResult && (
-          <div className="absolute inset-0 bg-[#07070d]/85 backdrop-blur-xs flex items-center justify-center animate-fadeIn z-50 rounded-[2rem]">
+          <div className={`absolute inset-0 ${isGreenBack ? 'bg-[#00ff00]' : 'bg-[#07070d]/85'} backdrop-blur-xs flex items-center justify-center animate-fadeIn z-50 rounded-[2rem]`}>
             <ResultAnimation 
               result={animationResult} 
               mode="absolute"
@@ -221,21 +226,21 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
         <div className="flex items-center justify-between">
           {/* スコア: 小さくまとめる */}
           <div className="flex items-center gap-2">
-            <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400/70">RECORD</span>
+            <span className={`text-[9px] font-black uppercase tracking-widest ${isGreenBack ? 'text-indigo-900' : 'text-indigo-400/70'}`}>RECORD</span>
             <div className="flex items-baseline gap-1 font-black">
               <span className="text-base text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.5)]">{stats.win}</span>
-              <span className="text-[9px] text-slate-500">W</span>
-              <span className="text-slate-600 text-xs mx-0.5">-</span>
+              <span className={`text-[9px] ${isGreenBack ? 'text-slate-800' : 'text-slate-500'}`}>W</span>
+              <span className={`text-xs mx-0.5 ${isGreenBack ? 'text-slate-800' : 'text-slate-600'}`}>-</span>
               <span className="text-base text-blue-400 drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]">{stats.lose}</span>
-              <span className="text-[9px] text-slate-500">L</span>
-              <span className="text-[9px] text-slate-500 ml-1">({stats.rate}%)</span>
+              <span className={`text-[9px] ${isGreenBack ? 'text-slate-800' : 'text-slate-500'}`}>L</span>
+              <span className={`text-[9px] ml-1 ${isGreenBack ? 'text-slate-800' : 'text-slate-500'}`}>({stats.rate}%)</span>
             </div>
           </div>
 
           {/* 連勝インジケータ */}
           {stats.streak >= 2 && (
-            <div className="flex items-center gap-1 bg-amber-950/40 border border-amber-500/30 px-2.5 py-1 rounded-full animate-bounce">
-              <span className="text-[11px] text-amber-400 font-extrabold drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">
+            <div className={`flex items-center gap-1 ${isGreenBack ? 'bg-amber-500/80 border-amber-600' : 'bg-amber-950/40 border-amber-500/30'} border px-2.5 py-1 rounded-full animate-bounce`}>
+              <span className={`text-[11px] font-extrabold drop-shadow-[0_0_8px_rgba(245,158,11,0.6)] ${isGreenBack ? 'text-white' : 'text-amber-400'}`}>
                 🔥 {stats.streak}連勝中!
               </span>
             </div>
@@ -243,7 +248,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
         </div>
 
         {/* 光るネオンスプリットプログレスバー（太く） */}
-        <div className="w-full h-3 bg-slate-950/60 rounded-full border border-white/5 overflow-hidden flex relative">
+        <div className={`w-full h-3 rounded-full border border-white/5 overflow-hidden flex relative ${isGreenBack ? 'bg-slate-800/40' : 'bg-slate-950/60'}`}>
           {stats.total > 0 ? (
             <>
               <div 
@@ -268,15 +273,15 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
         {/* 直近の対戦履歴タイムライン (limit > 0 のときのみ表示) */}
         {limit > 0 && (
           <div className="flex flex-col gap-2 mt-1">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 border-b border-white/5 pb-1">RECENT MATCHES</span>
+            <span className={`text-[9px] font-bold uppercase tracking-wider border-b border-white/5 pb-1 ${isGreenBack ? 'text-slate-800' : 'text-slate-500'}`}>RECENT MATCHES</span>
             <div className="flex flex-col gap-1.5">
               
               {/* 1. 実際の対戦履歴リスト */}
               {stats.recentMatches.map((m, idx) => {
                 const isWin = m.shouhai === "勝ち";
                 const borderGlow = isWin
-                  ? "border-red-500/10 bg-red-950/5 shadow-[0_0_6px_rgba(239,68,68,0.05)]"
-                  : "border-blue-500/10 bg-blue-950/5 shadow-[0_0_6px_rgba(59,130,246,0.05)]";
+                  ? `${isGreenBack ? 'bg-red-500/20 border-red-500/40' : 'border-red-500/10 bg-red-950/5 shadow-[0_0_6px_rgba(239,68,68,0.05)]'}`
+                  : `${isGreenBack ? 'bg-blue-500/20 border-blue-500/40' : 'border-blue-500/10 bg-blue-950/5 shadow-[0_0_6px_rgba(59,130,246,0.05)]'}`;
 
                 return (
                   <div 
@@ -301,6 +306,13 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                       }`}>
                         <img src={m.opponentPlayer?.imageUrl} alt="Opp Fighter" className="w-full h-full object-contain" />
                       </div>
+                    </div>
+
+                    {/* 中央: 時間表示 */}
+                    <div className="flex flex-col items-center ml-2">
+                       <span className={`text-[10px] font-black ${isGreenBack ? 'text-slate-800' : 'text-slate-400'}`}>
+                         {formatTimeOnly(m.nichiji)}
+                       </span>
                     </div>
 
                     {/* 右側: WIN/LOSEバッジ（さらに巨大化） */}

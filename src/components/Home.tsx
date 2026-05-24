@@ -265,13 +265,13 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
               <div className="flex flex-col gap-2 w-full max-w-[14rem]">
 
                 {/* スマホ用リモコン --- スマホ画面のみ表示 */}
-                <p className="md:hidden text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left">スマホ用リモコン</p>
+                {/* <p className="md:hidden text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left">スマホ用リモコン</p>
                 <button
                   onClick={handleOpenControllerWindow}
                   className="md:hidden w-full py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border-indigo-400/20"
                 >
                   <i className="fas fa-mobile-alt"></i> リモコンを開く
-                </button>
+                </button> */}
 
                 {/* OBS配信用 --- URLコピー */}
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left mt-1">OBS配信用</p>
