@@ -182,42 +182,42 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                 <div className="absolute inset-0 rounded-2xl blur-xl opacity-20" style={{ backgroundColor: glowColor }}></div>
                 
                 {/* 自分 (左) */}
-                <div className={`rounded-full bg-slate-950 flex items-center justify-center transition-all duration-300 z-20 relative ${
+                <div className={`rounded-full flex items-center justify-center transition-all duration-300 z-20 relative ${
                   isWin 
-                    ? "w-14 h-14 border-2 border-red-500 p-1 shadow-[0_0_20px_rgba(239,68,68,0.6)]" 
-                    : "w-9 h-9 border border-slate-700 opacity-30 grayscale rotate-[-6deg]"
+                    ? "w-14 h-14 border-2 border-red-500 p-1 shadow-[0_0_25px_rgba(239,68,68,0.7)] bg-slate-950" 
+                    : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900" // グレーから白の透過枠へ
                 }`}>
                   <img src={m.player?.imageUrl} alt="Me" className="w-full h-full object-contain" />
                   
-                  {/* 自分側のマーカー: 勝った時だけ赤背景で「勝」 */}
+                  {/* 自分側のマーカー: 勝った時は鮮やかに、負けた時は控えめに */}
                   {isWin ? (
-                    <div className="absolute -top-1 -left-1 w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-red-600 text-white shadow-lg">勝</div>
+                    <div className="absolute -top-1 -left-1 w-6 h-6 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-red-600 text-white shadow-[0_2px_8px_rgba(220,38,38,0.5)]">勝</div>
                   ) : (
-                    <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full border border-slate-900 flex items-center justify-center text-[7px] font-black z-30 bg-slate-700 text-slate-400 opacity-50">敗</div>
+                    <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[7px] font-black z-30 bg-white/10 text-white/40">敗</div>
                   )}
                 </div>
 
                 {/* 中央: VS + 時間 */}
                 <div className="flex flex-col items-center gap-0 min-w-[32px]">
-                  <span className="text-[10px] font-black text-slate-700 leading-none">VS</span>
-                  <span className="text-[7px] font-bold text-slate-500 tracking-tighter opacity-60 mt-0.5">
+                  <span className="text-[10px] font-black text-white/20 leading-none italic">VS</span>
+                  <span className="text-[7px] font-black text-white/40 tracking-tighter mt-1">
                     {formatTimeOnly(m.nichiji)}
                   </span>
                 </div>
 
                 {/* 相手 (右) */}
-                <div className={`rounded-full bg-slate-900 border flex items-center justify-center transition-all duration-300 z-10 relative ${
+                <div className={`rounded-full flex items-center justify-center transition-all duration-300 z-10 relative ${
                   !isWin 
-                    ? "w-14 h-14 border-2 border-blue-500 p-1 shadow-[0_0_20px_rgba(59,130,246,0.6)]" 
-                    : "w-9 h-9 border border-slate-700 opacity-30 grayscale rotate-[6deg]"
+                    ? "w-14 h-14 border-2 border-blue-500 p-1 shadow-[0_0_25px_rgba(59,130,246,0.7)] bg-slate-950" 
+                    : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900" // グレーから白の透過枠へ
                 }`}>
                   <img src={m.opponentPlayer?.imageUrl} alt="Opponent" className="w-full h-full object-contain" />
                   
                   {/* 相手側のマーカー: 勝った時だけ青背景で「勝」 */}
                   {!isWin ? (
-                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-blue-600 text-white shadow-lg">勝</div>
+                    <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-blue-600 text-white shadow-[0_2px_8px_rgba(37,99,235,0.5)]">勝</div>
                   ) : (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border border-slate-900 flex items-center justify-center text-[7px] font-black z-30 bg-slate-700 text-slate-400 opacity-50">敗</div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[7px] font-black z-30 bg-white/10 text-white/40">敗</div>
                   )}
                 </div>
               </div>
