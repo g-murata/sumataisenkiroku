@@ -225,7 +225,7 @@ export const Character: React.FC<CharacterProps> = ({
       </div>
 
       {/* --- よく使うキャラ（お気に入り）クイックパネル --- */}
-      {frequentCharacters.length > 0 && (
+      {(frequentCharacters.length > 0 || excludedIds.length > 0) && (
         <div className={`flex flex-col gap-1 ${selectedCharacter ? 'hidden md:flex' : ''}`}>
           <div className="flex items-center justify-between">
             <span className="text-xxs font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1">
@@ -241,38 +241,44 @@ export const Character: React.FC<CharacterProps> = ({
               </button>
             )}
           </div>
-          <div className="flex gap-2.5">
-            {frequentCharacters.map(char => {
-              const isSelected = selectedCharacter?.characterNo === char.characterNo;
-              return (
-                <div key={`freq-container-${char.characterNo}`} className="relative group">
-                  <button
-                    onClick={() => isSelected ? onSelectCharacter(null) : onSelectCharacter(char)}
-                    className={`w-11 h-11 p-1 rounded-full border-2 bg-slate-900/60 char-quick-badge flex items-center justify-center transition-all duration-200 ${
-                      isSelected 
-                        ? (isYou ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] scale-105" : "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105") 
-                        : "border-white/10 hover:border-slate-400"
-                    }`}
-                    title={char.characterName}
-                  >
-                    <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
-                  </button>
-                  
-                  {/* リストから除外するボタン */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleExcludeCharacter(char.characterNo);
-                    }}
-                    className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-slate-950/90 text-[7px] text-slate-400 hover:text-red-400 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md cursor-pointer"
-                    title="このリストから除外する"
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+          {frequentCharacters.length > 0 ? (
+            <div className="flex gap-2.5">
+              {frequentCharacters.map(char => {
+                const isSelected = selectedCharacter?.characterNo === char.characterNo;
+                return (
+                  <div key={`freq-container-${char.characterNo}`} className="relative group">
+                    <button
+                      onClick={() => isSelected ? onSelectCharacter(null) : onSelectCharacter(char)}
+                      className={`w-11 h-11 p-1 rounded-full border-2 bg-slate-900/60 char-quick-badge flex items-center justify-center transition-all duration-200 ${
+                        isSelected 
+                          ? (isYou ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] scale-105" : "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] scale-105") 
+                          : "border-white/10 hover:border-slate-400"
+                      }`}
+                      title={char.characterName}
+                    >
+                      <img src={char.imageUrl} alt={char.characterName} className="w-full h-full object-contain pointer-events-none" />
+                    </button>
+                    
+                    {/* リストから除外するボタン */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleExcludeCharacter(char.characterNo);
+                      }}
+                      className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-slate-950/90 text-[7px] text-slate-400 hover:text-red-400 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md cursor-pointer"
+                      title="このリストから除外する"
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-[10px] text-slate-500 italic py-1 pl-1">
+              すべてのファイターが除外されています
+            </div>
+          )}
         </div>
       )}
 
