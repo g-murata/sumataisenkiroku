@@ -318,6 +318,9 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
                     : <><i className="fas fa-copy text-indigo-400"></i> OBS用URLをコピー</>
                   }
                 </button>
+                <p className="text-[10px] text-slate-500 mt-1 font-medium">
+                  ※おすすめサイズ: 幅200 / 高さ350
+                </p>
 
               </div>
             </div>
