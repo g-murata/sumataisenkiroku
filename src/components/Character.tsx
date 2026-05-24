@@ -194,10 +194,10 @@ export const Character: React.FC<CharacterProps> = ({ player, onSelectCharacter,
         {selectedCharacter && (
           <button 
             onClick={() => onSelectCharacter(null)}
-            className="text-xs text-gray-400 hover:text-white bg-slate-800/80 hover:bg-slate-700 p-1.5 rounded-lg border border-white/10 transition-colors"
-            title="選択を解除"
+            className="text-[10px] text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 px-2 py-1.5 rounded-lg border border-white/10 transition-colors flex items-center gap-1 font-bold"
+            title="ファイターを選び直す"
           >
-            <i className="fas fa-times"></i> 解除
+            <i className="fas fa-sync-alt text-slate-400"></i> 選び直す
           </button>
         )}
       </div>

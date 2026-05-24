@@ -56,7 +56,7 @@ describe('Character', () => {
     );
   });
 
-  it('「解除」ボタンをクリックすると onSelectCharacter(null) が呼ばれる', () => {
+  it('「選び直す」ボタンをクリックすると onSelectCharacter(null) が呼ばれる', () => {
     const onSelect = jest.fn();
     render(
       <Character
@@ -65,9 +65,9 @@ describe('Character', () => {
         selectedCharacter={mockCharacter}
       />
     );
-    const cancelButton = screen.getByRole('button', { name: /解除/ });
+    const selectAgainButton = screen.getByRole('button', { name: /選び直す/ });
     act(() => {
-      fireEvent.click(cancelButton);
+      fireEvent.click(selectAgainButton);
     });
     expect(onSelect).toHaveBeenCalledWith(null);
   });
