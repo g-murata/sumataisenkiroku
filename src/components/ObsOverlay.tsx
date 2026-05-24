@@ -9,7 +9,7 @@ interface ObsOverlayProps {
   onAnimationComplete?: () => void;
 }
 
-export const ObsOverlay: React.FC<ObsOverlayProps> = ({ 
+export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   history,
   animationResult,
   onAnimationComplete
@@ -17,7 +17,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   // URLパラメータから各種表示オプションを取得
   const searchParams = new URLSearchParams(window.location.search);
   const layout = searchParams.get('layout') || 'vertical';
-  
+
   const limitParam = searchParams.get('limit');
   const limit = limitParam !== null ? parseInt(limitParam, 10) : 3;
 
@@ -71,6 +71,90 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   if (align === 'center') justifyClass = "justify-center";
 
   // =========================================================
+  // 🎉 勝敗記録時のコンパクトな absolute アニメーションオーバーレイ（全レイアウト共通）
+  // =========================================================
+  const RenderResultOverlay = () => {
+    if (!animationResult) return null;
+    const latestMatch = stats.recentMatches[0];
+    const playerUrl = latestMatch?.player?.imageUrl || "";
+    const oppUrl = latestMatch?.opponentPlayer?.imageUrl || "";
+    const playerName = latestMatch?.player?.characterName || "あなた";
+    const oppName = latestMatch?.opponentPlayer?.characterName || "相手";
+
+    return (
+      <div className="absolute inset-0 z-50 pointer-events-none flex items-start justify-center pt-20 p-3 bg-black/45 backdrop-blur-[2px] animate-fadeIn rounded-inherit">
+        {animationResult === "勝ち" ? (
+          <div
+            onAnimationEnd={(e) => {
+              if (e.target === e.currentTarget && onAnimationComplete) onAnimationComplete();
+            }}
+            className="animate-record-pop bg-gradient-to-b from-slate-900/98 to-slate-950/98 border border-amber-500/80 shadow-[0_4px_20px_rgba(245,158,11,0.4)] rounded-2xl p-3 flex flex-col items-center gap-2 text-center w-[90%] max-w-[190px]"
+          >
+            <div className="w-10 h-10 bg-amber-500/10 border border-amber-400 rounded-full flex items-center justify-center text-xl animate-bounce shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+              🏆
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[7px] uppercase tracking-widest text-amber-400 font-black">RECORDED</span>
+              <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-300 drop-shadow-[0_1px_4px_rgba(245,158,11,0.3)]">
+                VICTORY!
+              </span>
+            </div>
+            <div className="w-full h-px bg-white/10"></div>
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-8 h-8 rounded-full border border-red-500 bg-slate-950 p-0.5 shadow-[0_0_6px_rgba(239,68,68,0.3)]">
+                  {playerUrl ? <img src={playerUrl} alt={playerName} className="w-full h-full object-contain" /> : <span className="text-[8px]">?</span>}
+                </div>
+                <span className="text-[7px] font-bold text-red-400 max-w-[45px] truncate">{playerName}</span>
+              </div>
+              <span className="text-slate-500 text-[9px] font-black">VS</span>
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-8 h-8 rounded-full border border-white/10 bg-slate-950 p-0.5">
+                  {oppUrl ? <img src={oppUrl} alt={oppName} className="w-full h-full object-contain opacity-50" /> : <span className="text-[8px]">?</span>}
+                </div>
+                <span className="text-[7px] font-bold text-slate-500 max-w-[45px] truncate">{oppName}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            onAnimationEnd={(e) => {
+              if (e.target === e.currentTarget && onAnimationComplete) onAnimationComplete();
+            }}
+            className="animate-record-pop bg-gradient-to-b from-slate-900/98 to-slate-950/98 border border-blue-500/80 shadow-[0_4px_20px_rgba(59,130,246,0.4)] rounded-2xl p-3 flex flex-col items-center gap-2 text-center w-[90%] max-w-[190px]"
+          >
+            <div className="w-10 h-10 bg-blue-500/10 border border-blue-400 rounded-full flex items-center justify-center text-xl animate-pulse shadow-[0_0_12px_rgba(59,130,246,0.2)]">
+              ⚔️
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[7px] uppercase tracking-widest text-blue-400 font-black">RECORDED</span>
+              <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-indigo-300 drop-shadow-[0_1px_4px_rgba(59,130,246,0.3)]">
+                LOSE
+              </span>
+            </div>
+            <div className="w-full h-px bg-white/10"></div>
+            <div className="flex items-center justify-center gap-2">
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-8 h-8 rounded-full border border-white/10 bg-slate-950 p-0.5">
+                  {playerUrl ? <img src={playerUrl} alt={playerName} className="w-full h-full object-contain opacity-50" /> : <span className="text-[8px]">?</span>}
+                </div>
+                <span className="text-[7px] font-bold text-slate-500 max-w-[45px] truncate">{playerName}</span>
+              </div>
+              <span className="text-slate-500 text-[9px] font-black">VS</span>
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-8 h-8 rounded-full border-2 border-blue-500 bg-slate-950 p-0.5 shadow-[0_0_6px_rgba(59,130,246,0.3)]">
+                  {oppUrl ? <img src={oppUrl} alt={oppName} className="w-full h-full object-contain" /> : <span className="text-[8px]">?</span>}
+                </div>
+                <span className="text-[7px] font-bold text-blue-400 max-w-[45px] truncate">{oppName}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // =========================================================
   // 1. ミニマルレイアウト
   // =========================================================
   if (layout === 'minimal') {
@@ -102,8 +186,9 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   // =========================================================
   if (layout === 'horizontal') {
     return (
-      <div className="p-3 w-max max-w-full overflow-hidden animate-fadeIn">
-        <div className="glass-panel px-5 py-3 rounded-2xl flex items-center gap-6 bg-slate-950/75 border border-white/10 shadow-2xl backdrop-blur-md">
+      <div className="p-3 w-max max-w-full overflow-hidden animate-fadeIn relative">
+        <div className="glass-panel px-5 py-3 rounded-2xl flex items-center gap-6 bg-slate-950/75 border border-white/10 shadow-2xl backdrop-blur-md relative overflow-hidden">
+          <RenderResultOverlay />
           <div className="flex flex-col gap-0.5">
             <span className="text-[9px] font-black tracking-widest text-slate-500 block">トータル戦績</span>
             <div className="flex items-baseline gap-2">
@@ -164,7 +249,8 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
     };
 
     return (
-      <div className="w-full h-full overflow-hidden flex flex-col items-center p-4 box-border animate-fadeIn">
+      <div className="w-full h-full overflow-hidden flex flex-col items-center p-4 box-border animate-fadeIn relative">
+        <RenderResultOverlay />
         <div style={compactStyle} className="flex flex-col items-center gap-5">
           {/* トータルスコア (極限までコンパクト) */}
           <div className="flex items-center gap-4 font-black drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
@@ -183,17 +269,16 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
             {stats.recentMatches.map((m, idx) => {
               const isWin = m.shouhai === "勝ち";
               const glowColor = isWin ? "rgba(239,68,68,0.4)" : "rgba(59,130,246,0.4)";
-              
+
               return (
                 <div key={`compact-v-${idx}`} className="relative flex items-center justify-center gap-3 px-3 py-1.5 rounded-2xl bg-slate-950/20 border border-white/5 group">
                   <div className="absolute inset-0 rounded-2xl blur-xl opacity-20" style={{ backgroundColor: glowColor }}></div>
-                  
+
                   {/* 自分 (左) */}
-                  <div className={`rounded-full flex items-center justify-center transition-all duration-300 z-20 relative ${
-                    isWin 
-                      ? "w-14 h-14 border-2 border-red-500 p-1 shadow-[0_0_20px_rgba(239,68,68,0.6)] bg-slate-950" 
+                  <div className={`rounded-full flex items-center justify-center transition-all duration-300 z-20 relative ${isWin
+                      ? "w-14 h-14 border-2 border-red-500 p-1 shadow-[0_0_20px_rgba(239,68,68,0.6)] bg-slate-950"
                       : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900"
-                  }`}>
+                    }`}>
                     <img src={m.player?.imageUrl} alt="Me" className="w-full h-full object-contain" />
                     {isWin ? (
                       <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-red-600 text-white shadow-lg">勝</div>
@@ -211,11 +296,10 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                   </div>
 
                   {/* 相手 (右) */}
-                  <div className={`rounded-full bg-slate-900 border flex items-center justify-center transition-all duration-300 z-10 relative ${
-                    !isWin 
-                      ? "w-14 h-14 border-2 border-blue-500 p-1 shadow-[0_0_20px_rgba(59,130,246,0.6)] bg-slate-950" 
+                  <div className={`rounded-full bg-slate-900 border flex items-center justify-center transition-all duration-300 z-10 relative ${!isWin
+                      ? "w-14 h-14 border-2 border-blue-500 p-1 shadow-[0_0_20px_rgba(59,130,246,0.6)] bg-slate-950"
                       : "w-9 h-9 border border-white/10 opacity-50 bg-slate-900"
-                  }`}>
+                    }`}>
                     <img src={m.opponentPlayer?.imageUrl} alt="Opponent" className="w-full h-full object-contain" />
                     {!isWin ? (
                       <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full border border-slate-900 flex items-center justify-center text-[10px] font-black z-30 bg-blue-600 text-white shadow-lg">勝</div>
@@ -249,11 +333,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
   return (
     <div className={`w-[800px] h-[600px] bg-transparent overflow-hidden relative flex items-start ${justifyClass} p-6 box-border font-sans select-none animate-fadeIn`}>
       <div className={`${cardBaseClass} p-6 flex flex-col gap-4.5 box-border relative overflow-hidden`} style={cardStyle}>
-        {animationResult && (
-          <div className="absolute inset-0 bg-[#07070d]/85 backdrop-blur-xs flex items-center justify-center animate-fadeIn z-50 rounded-[2rem]">
-            <ResultAnimation result={animationResult} mode="absolute" onComplete={onAnimationComplete} />
-          </div>
-        )}
+        <RenderResultOverlay />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-black tracking-widest text-indigo-400/70">対戦成績</span>
@@ -302,7 +382,7 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                       </div>
                     </div>
                     <div className="flex flex-col items-center ml-2">
-                       <span className="text-[16px] font-bold text-slate-300 drop-shadow-sm">{formatTimeOnly(m.nichiji)}</span>
+                      <span className="text-[16px] font-bold text-slate-300 drop-shadow-sm">{formatTimeOnly(m.nichiji)}</span>
                     </div>
                     <span className={`text-[13px] font-black tracking-widest px-4 py-2 rounded-xl border ${isWin ? "bg-red-500/15 text-red-400 border-red-500/40" : "bg-blue-500/15 text-blue-400 border-blue-500/40"}`}>{isWin ? "勝ち" : "負け"}</span>
                   </div>

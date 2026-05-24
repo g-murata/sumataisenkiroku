@@ -26,6 +26,9 @@ interface ResultProps {
 
   // ★追加: 行がクリックされたことを親に伝える関数
   onRowClick: (index: number) => void;
+
+  animateWin?: boolean;
+  animateLose?: boolean;
 }
 
 export const Result: React.FC<ResultProps> = ({ 
@@ -36,7 +39,9 @@ export const Result: React.FC<ResultProps> = ({
   filterDateRange, setFilterDateRange,
   customStartDate, setCustomStartDate,
   customEndDate, setCustomEndDate,
-  onRowClick
+  onRowClick,
+  animateWin = false,
+  animateLose = false
 }) => {
 
   const [hoverRowIndex, setHoverRowIndex] = useState<number | null>(null);
@@ -83,10 +88,10 @@ export const Result: React.FC<ResultProps> = ({
         <div className="flex justify-between items-center px-1">
           <div className="flex items-baseline gap-2">
             <span className="text-base font-extrabold text-slate-200">
-              <span className="text-red-400 font-black">{filteredWinCount}</span> 
+              <span className={`text-red-400 font-black inline-block transition-all duration-200 ${animateWin ? 'animate-score-pop text-amber-300' : ''}`}>{filteredWinCount}</span> 
               <span className="text-slate-400 text-xs mx-1">W</span>
               <span className="text-slate-500 text-xs">-</span>
-              <span className="text-blue-400 font-black ml-1">{filteredLoseCount}</span> 
+              <span className={`text-blue-400 font-black ml-1 inline-block transition-all duration-200 ${animateLose ? 'animate-score-pop text-sky-300' : ''}`}>{filteredLoseCount}</span> 
               <span className="text-slate-400 text-xs mx-1">L</span>
             </span>
             <span className="text-xs font-bold text-slate-400">({winRate}%)</span>

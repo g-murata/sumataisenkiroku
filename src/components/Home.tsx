@@ -12,6 +12,8 @@ interface HomeProps {
   user: any;
   onFilterHistoryChange?: (filteredHistory: MatchHistory) => void;
   isRemoteUpdate?: boolean;
+  animateWin?: boolean;
+  animateLose?: boolean;
 }
 
 export const Home: React.FC<HomeProps> = ({ 
@@ -21,7 +23,9 @@ export const Home: React.FC<HomeProps> = ({
   onClearResults, 
   user, 
   onFilterHistoryChange,
-  isRemoteUpdate 
+  isRemoteUpdate,
+  animateWin = false,
+  animateLose = false
 }) => {
   // ▼ UI用のState
   const [selectedMyCharacter, setSelectedMyCharacter] = useState<CharacterType | null>(null);
@@ -44,11 +48,7 @@ export const Home: React.FC<HomeProps> = ({
     const syncVal = user?.id || guestSyncKey;
     return `${window.location.origin}${window.location.pathname}?mode=obs&sync=${syncVal}&layout=compact&trans=true&width=full`;
   };
-  const getControllerUrl = () => {
-    const guestSyncKey = localStorage.getItem("guestSyncKey") || "";
-    const syncVal = user?.id || guestSyncKey;
-    return `${window.location.origin}${window.location.pathname}?mode=controller&sync=${syncVal}`;
-  };
+
 
   const STORAGE_KEY = "gameResults";
 
@@ -190,10 +190,7 @@ export const Home: React.FC<HomeProps> = ({
     setTimeout(() => setObsCopied(false), 2000);
   };
 
-  // スマホコントローラーを別ウインドウで開く
-  const handleOpenControllerWindow = () => {
-    window.open(getControllerUrl(), 'mobile_controller', 'width=390,height=844,menubar=no,toolbar=no,location=no,status=no,resizable=yes');
-  };
+
 
   return (
     <>
@@ -281,6 +278,8 @@ export const Home: React.FC<HomeProps> = ({
                 setCustomStartDate={setCustomStartDate}
                 customEndDate={customEndDate}
                 setCustomEndDate={setCustomEndDate}
+                animateWin={animateWin}
+                animateLose={animateLose}
               />
             </div>
           </div>
@@ -305,14 +304,7 @@ export const Home: React.FC<HomeProps> = ({
 
               <div className="flex flex-col gap-2 w-full max-w-[14rem]">
 
-                {/* スマホ用リモコン --- スマホ画面のみ表示 */}
-                {/* <p className="md:hidden text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left">スマホ用リモコン</p>
-                <button
-                  onClick={handleOpenControllerWindow}
-                  className="md:hidden w-full py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border-indigo-400/20"
-                >
-                  <i className="fas fa-mobile-alt"></i> リモコンを開く
-                </button> */}
+
 
                 {/* OBS配信用 --- URLコピー */}
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left mt-1">OBS配信用</p>

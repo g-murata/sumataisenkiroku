@@ -181,7 +181,7 @@ export const Character: React.FC<CharacterProps> = ({
   const accentText = isYou ? "text-red-400" : "text-blue-400";
 
   return (
-    <div className="w-80 md:w-full flex flex-col gap-3">
+    <div className="w-full flex flex-col gap-3">
       {/* --- 現在の選択キャラ表示パネル --- */}
       <div className={`p-3 rounded-xl border border-white/5 glass-panel flex items-center justify-between min-h-[5.5rem] transition-all duration-300`}>
         <div className="flex items-center gap-3">

@@ -8,11 +8,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ user, syncKey }) => {
   const titleText = "スマ対戦記録";
-
-  const controllerUrl = syncKey
-    ? `${window.location.origin}${window.location.pathname}?mode=controller&sync=${syncKey}`
-    : `${window.location.origin}${window.location.pathname}?mode=controller`;
-  
   return (
     <div className="bg-slate-950/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-50 transition-all duration-300">
       {/* absolute を廃止し、フレックスボックスによるシンプルな横並び (justify-between) に変更 */}
@@ -30,15 +25,6 @@ export const Header: React.FC<HeaderProps> = ({ user, syncKey }) => {
             )}
           </h1>
         </div>
-
-        {/* 🎮 スマホ限定: リモコンボタン（中央） */}
-        {/* <a
-          href={controllerUrl}
-          className="md:hidden flex items-center gap-1.5 bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-400/30 px-3 py-1.5 rounded-xl text-[10px] font-black text-white shadow-[0_0_10px_rgba(99,102,241,0.3)] transition-all active:scale-95"
-        >
-          <i className="fas fa-gamepad text-xs"></i>
-          リモコン
-        </a> */}
 
         {/* ログイン・ユーザー情報 (右寄せ・absolute 排除) */}
         <div className="flex items-center flex-shrink-0 z-10">
