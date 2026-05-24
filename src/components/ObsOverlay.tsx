@@ -217,35 +217,33 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
           </div>
         )}
 
-        {/* ヘッダー: 戦績統計 */}
-        <div className="flex flex-col gap-1">
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">STREAM BATTLE RECORD</span>
-            
-            {/* 連勝インジケータ */}
-            {stats.streak >= 2 && (
-              <div className="flex items-center gap-1 bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded-full animate-bounce">
-                <span className="text-[9px] text-amber-400 font-extrabold drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]">
-                  🔥 {stats.streak}連勝中!
-                </span>
-              </div>
-            )}
+        {/* ヘッダー: 戦績統計（コンパクト化） */}
+        <div className="flex items-center justify-between">
+          {/* スコア: 小さくまとめる */}
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400/70">RECORD</span>
+            <div className="flex items-baseline gap-1 font-black">
+              <span className="text-base text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.5)]">{stats.win}</span>
+              <span className="text-[9px] text-slate-500">W</span>
+              <span className="text-slate-600 text-xs mx-0.5">-</span>
+              <span className="text-base text-blue-400 drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]">{stats.lose}</span>
+              <span className="text-[9px] text-slate-500">L</span>
+              <span className="text-[9px] text-slate-500 ml-1">({stats.rate}%)</span>
+            </div>
           </div>
 
-          <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-3xl font-black tracking-tight leading-none">
-              <span className="text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]">{stats.win}</span>
-              <span className="text-slate-500 text-sm font-bold mx-1">W</span>
-              <span className="text-slate-600 text-lg">-</span>
-              <span className="text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] ml-1">{stats.lose}</span>
-              <span className="text-slate-500 text-sm font-bold mx-1">L</span>
-            </span>
-            <span className="text-xs font-bold text-slate-400">({stats.rate}%)</span>
-          </div>
+          {/* 連勝インジケータ */}
+          {stats.streak >= 2 && (
+            <div className="flex items-center gap-1 bg-amber-950/40 border border-amber-500/30 px-2.5 py-1 rounded-full animate-bounce">
+              <span className="text-[11px] text-amber-400 font-extrabold drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">
+                🔥 {stats.streak}連勝中!
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* 光るネオンスプリットプログレスバー */}
-        <div className="w-full h-2 bg-slate-950/60 rounded-full border border-white/5 overflow-hidden flex relative">
+        {/* 光るネオンスプリットプログレスバー（太く） */}
+        <div className="w-full h-3 bg-slate-950/60 rounded-full border border-white/5 overflow-hidden flex relative">
           {stats.total > 0 ? (
             <>
               <div 
@@ -283,48 +281,36 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
                 return (
                   <div 
                     key={`recent-v-${idx}`}
-                    className={`p-2 rounded-xl flex items-center justify-between border ${borderGlow} transition-all`}
-                    style={{ height: '50px' }}
+                    className={`px-4 rounded-2xl flex items-center justify-between border ${borderGlow} transition-all`}
+                    style={{ height: '64px' }}
                   >
-                    {/* 左側: ファイターアバター対面 */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center -space-x-1.5">
-                        {/* 自分アバター (w-8 h-8 にリサイズ) */}
-                        <div className={`w-8 h-8 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 z-10 ${
-                          isWin ? "border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.4)]" : "border-slate-800"
-                        }`}>
-                          <img src={m.player?.imageUrl} alt="My Fighter" className="w-full h-full object-contain" />
-                        </div>
-                        
-                        <span className="text-[7px] text-slate-500 font-extrabold bg-slate-950 border border-white/5 px-0.5 rounded scale-75 z-20">VS</span>
-
-                        {/* 相手アバター (w-8 h-8 にリサイズ) */}
-                        <div className={`w-8 h-8 rounded-full bg-slate-900 border flex items-center justify-center p-0.5 ${
-                          isWin ? "border-slate-800" : "border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.4)]"
-                        }`}>
-                          <img src={m.opponentPlayer?.imageUrl} alt="Opp Fighter" className="w-full h-full object-contain" />
-                        </div>
-                      </div>
-
-                      {/* シンプル表示: 対戦キャラ名 */}
-                      <span className="text-[9px] font-bold text-slate-300">
-                        {m.player?.characterName} vs {m.opponentPlayer?.characterName}
-                      </span>
-                    </div>
-
-                    {/* 右側: 結果バッジと時間 */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[8px] text-slate-500 font-medium">
-                        {formatTimeOnly(m.nichiji)}
-                      </span>
-                      <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${
-                        isWin 
-                          ? "bg-red-500/10 text-red-400 border-red-500/30 drop-shadow-[0_0_4px_rgba(255,51,102,0.4)]" 
-                          : "bg-blue-500/10 text-blue-400 border-blue-500/30 drop-shadow-[0_0_4px_rgba(0,240,255,0.4)]"
+                    {/* 左側: ファイターアバター（さらに巨大化） */}
+                    <div className="flex items-center -space-x-3">
+                      {/* 自分アバター */}
+                      <div className={`w-12 h-12 rounded-full bg-slate-900 border-2 flex items-center justify-center p-0.5 z-10 ${
+                        isWin ? "border-red-500/70 shadow-[0_0_16px_rgba(239,68,68,0.6)]" : "border-slate-700"
                       }`}>
-                        {isWin ? "WIN" : "LOSE"}
-                      </span>
+                        <img src={m.player?.imageUrl} alt="My Fighter" className="w-full h-full object-contain" />
+                      </div>
+                      
+                      <span className="text-[8px] text-slate-500 font-extrabold bg-slate-950 border border-white/10 px-1 py-0.5 rounded z-20">VS</span>
+
+                      {/* 相手アバター */}
+                      <div className={`w-12 h-12 rounded-full bg-slate-900 border-2 flex items-center justify-center p-0.5 ${
+                        isWin ? "border-slate-700" : "border-blue-500/70 shadow-[0_0_16px_rgba(59,130,246,0.6)]"
+                      }`}>
+                        <img src={m.opponentPlayer?.imageUrl} alt="Opp Fighter" className="w-full h-full object-contain" />
+                      </div>
                     </div>
+
+                    {/* 右側: WIN/LOSEバッジ（さらに巨大化） */}
+                    <span className={`text-[13px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border ${
+                      isWin 
+                        ? "bg-red-500/15 text-red-400 border-red-500/40 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+                        : "bg-blue-500/15 text-blue-400 border-blue-500/40 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"
+                    }`}>
+                      {isWin ? "WIN" : "LOSE"}
+                    </span>
                   </div>
                 );
               })}
@@ -333,19 +319,16 @@ export const ObsOverlay: React.FC<ObsOverlayProps> = ({
               {Array.from({ length: Math.max(0, limit - stats.recentMatches.length) }).map((_, idx) => (
                 <div 
                   key={`empty-v-${idx}`}
-                  className="p-2 rounded-xl flex items-center justify-between border border-dashed border-white/5 bg-white/[0.01] opacity-25 select-none transition-all"
-                  style={{ height: '50px' }}
+                  className="px-4 rounded-2xl flex items-center justify-between border border-dashed border-white/5 bg-white/[0.01] opacity-20 select-none transition-all"
+                  style={{ height: '64px' }}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center -space-x-1.5 opacity-20">
-                      <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600">-</div>
-                      <span className="text-[7px] text-slate-700 font-extrabold bg-slate-950 border border-white/5 px-0.5 rounded scale-75 z-20">VS</span>
-                      <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600">-</div>
-                    </div>
-                    <span className="text-[9px] font-bold text-slate-500 tracking-wider">NO MATCH RECORDED</span>
+                  <div className="flex items-center -space-x-3">
+                    <div className="w-12 h-12 rounded-full bg-slate-900 border-2 border-slate-800 flex items-center justify-center font-black text-sm text-slate-600">?</div>
+                    <span className="text-[8px] text-slate-700 font-extrabold bg-slate-950 border border-white/10 px-1 py-0.5 rounded z-20">VS</span>
+                    <div className="w-12 h-12 rounded-full bg-slate-900 border-2 border-slate-800 flex items-center justify-center font-black text-sm text-slate-600">?</div>
                   </div>
-                  <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border border-white/5 text-slate-600">
-                    READY
+                  <span className="text-[13px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-white/5 text-slate-600">
+                    ----
                   </span>
                 </div>
               ))}

@@ -259,22 +259,22 @@ export const Home: React.FC<HomeProps> = ({ history, onAddResult, onRowClick, on
 
               <div className="flex flex-col gap-2 w-full max-w-[14rem]">
 
-                {/* OBS配信用 --- 開くボタンのみ */}
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left">OBS配信用</p>
-                <button
-                  onClick={handleOpenObsWindow}
-                  className="w-full py-2 px-4 rounded-xl text-xxs font-bold border transition-all flex items-center justify-center gap-1.5 bg-slate-800/80 text-slate-200 border-white/10 hover:bg-slate-700 hover:border-white/20 shadow"
-                >
-                  <i className="fas fa-external-link-alt text-indigo-400"></i> 別ウインドウで開く
-                </button>
-
-                {/* スマホ用リモコン --- 開くボタンのみ */}
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left mt-1">スマホ用リモコン</p>
+                {/* スマホ用リモコン --- 開くボタンのみ（メイン） */}
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left">スマホ用リモコン</p>
                 <button
                   onClick={handleOpenControllerWindow}
                   className="w-full py-2.5 px-4 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)] border-indigo-400/20"
                 >
                   <i className="fas fa-mobile-alt"></i> 別ウインドウで開く
+                </button>
+
+                {/* OBS配信用 --- 開くボタンのみ */}
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 text-left mt-1">OBS配信用</p>
+                <button
+                  onClick={handleOpenObsWindow}
+                  className="w-full py-2 px-4 rounded-xl text-xxs font-bold border transition-all flex items-center justify-center gap-1.5 bg-slate-800/80 text-slate-200 border-white/10 hover:bg-slate-700 hover:border-white/20 shadow"
+                >
+                  <i className="fas fa-external-link-alt text-indigo-400"></i> 別ウインドウで開く
                 </button>
 
               </div>
