@@ -17,14 +17,17 @@ import { MobileController } from './components/MobileController';
 const STORAGE_KEY = "gameResults";
 
 export default function App() {
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // ▼ URLパラメータで「OBSモード」または「リモコンモード」かどうか判定
+  // ▼ URLパラメータで「OBSモード」または「リモコンモード」かどうか判定（最初に評価）
   const searchParams = new URLSearchParams(window.location.search);
   const isObsMode = searchParams.get('mode') === 'obs';
   const isControllerMode = searchParams.get('mode') === 'controller';
   const urlSyncKey = searchParams.get('sync');
+
+  const [user, setUser] = useState<any>(null);
+  // コントローラー/OBSモードは認証不要 → 最初からisLoading=false
+  const [isLoading, setIsLoading] = useState(
+    !isControllerMode && !isObsMode
+  );
 
   // ゲスト用の一意な同期キーを管理 (未ログイン時のOBS同期に使用)
   const [guestSyncKey] = useState<string>(() => {
@@ -127,8 +130,10 @@ export default function App() {
   );
 
 
-  // ▼ 初期化
+  // ▼ 初期化（コントローラー・OBSモードは認証不要のためスキップ）
   useEffect(() => {
+    if (isControllerMode || isObsMode) return;
+
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const currentUser = session?.user ?? null;
@@ -297,12 +302,9 @@ export default function App() {
   };
 
 
-  if (isLoading) {
-    return <div className="h-screen w-screen bg-white" />;
-  }
-
   // =========================================================
   // ★★★ スマホコントローラー（リモコン）モード時の表示 ★★★
+  // ★ 認証なしで即レンダリング（制限ブラウザ対策）
   // =========================================================
   if (isControllerMode) {
     return (
@@ -312,6 +314,10 @@ export default function App() {
         user={user}
       />
     );
+  }
+
+  if (isLoading) {
+    return <div className="h-screen w-screen bg-[#07070d]" />;
   }
 
   // =========================================================
